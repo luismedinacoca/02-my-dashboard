@@ -1173,12 +1173,106 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
 export default SidebarMenuItem;
 ```
 
+## 📚 Lecture 043: state management - useState
 
+### 1. Adding style in CounterPage component:
+```tsx
+/* src/app/dashboard/counter/page.tsx */
+export default function CounterPage() {
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <span className="text-9xl">10</span>
+      <div>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+        >
+          +1
+        </button>
+      </div>
+    </div>
+  );
+}
+```
 
+<img src="../img/section04-lecture042-002.png">
 
+### 2. Apply **`useState`** in this page:
+```tsx
+/* src/app/dashboard/counter/page.tsx */
+"use client";  // 👈🏽 ✅ (2)
+import { useState } from "react";  // 👈🏽 ✅ (2)
+export default function CounterPage() {
+  const [count, setCounts] = useState(0);  // 👈🏽 ✅ (1)
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <span className="text-9xl">{count}</span>  // 👈🏽 ✅ (3)
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}  // 👈🏽 ✅ (4)
+          disabled={count === 0}  // 👈🏽 ✅ (4)
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}  // 👈🏽 ✅ (5)
+        >
+          +1
+        </button>
+      </div>
+    </div>
+  );
+}
+```
 
+### 3. Add `metadata` in `Counter` component:
+```tsx
+/*  */
+"use client";
+import { Metadata } from "next/types";  // 👈🏽 ✅ (2)
+import { useState } from "react";
 
+export const metadata: Metadata = {  // 👈🏽 ✅ (1)
+  title: "Counter Page",
+  description: "Simple Counter Page",
+};
+export default function CounterPage() {
+  const [count, setCounts] = useState(0);
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}
+        >
+          +1
+        </button>
+      </div>
+    </div>
+  );
+}
+```
 
+> 🔥 Issue:
+
+<img src="../img/section04-lecture042-003.png">
 
 
 
