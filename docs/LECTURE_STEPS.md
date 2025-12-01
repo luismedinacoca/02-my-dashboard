@@ -3,11 +3,13 @@
 ## Getting Started
 
 First, create a `Next` project
+
 ```bash
 npx create-next-app [project-name]
 ```
 
 Choose:
+
 ```bash
 ✔ Would you like to use the recommended Next.js defaults? › No, customize settings
 ✔ Would you like to use TypeScript? … No / `Yes`
@@ -33,10 +35,10 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-
 ## 📚 Lecture 037: MyDashboard
 
 ### 1. Open **`globals.css`** file:
+
 ```css
 /* src/app/globals.css */
 @import "tailwindcss";
@@ -58,7 +60,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-} */  // 👈🏽 ✅
+} */ // 👈🏽 ✅
 
 body {
   background: var(--background);
@@ -68,6 +70,7 @@ body {
 ```
 
 ### 2. Open **`src/app/page.tsx`** file:
+
 ```tsx
 export default function HomePage() {
   return (
@@ -79,20 +82,22 @@ export default function HomePage() {
 ```
 
 ### 3. Create **`dashboard/counter/page.tsx`** file:
+
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
-export default function CounterPage(){
-  return(
+export default function CounterPage() {
+  return (
     <div>
       <h1>Page Counter</h1>
     </div>
-  )
+  );
 }
 ```
 
 > Go to [counter page](http://localhost:3000/dashboard/counter)
 
 ### 4. Renavigate rom homepage directly to counter page:
+
 ```tsx
 /* src/app/page.tsx */
 import { redirect } from "next/navigation";
@@ -106,9 +111,11 @@ export default function HomePage() {
 ## 📚 Lecture 038: My Dashboard Structure
 
 ### 1. Get the dashboard component code
+
 [Dark dashboard navigation system made using Tailwind CSS](https://www.creative-tim.com/twcomponents/component/dashboard-navigation)
 
 ### 2. Add the **`src/app/dashboard/layout.tsx`** file:
+
 ```tsx
 /* src/app/dashboard/layout.tsx */
 export default function DashboardLayout({
@@ -125,18 +132,28 @@ export default function DashboardLayout({
 ```
 
 ### 3. Add the Dashboard code from the Tailwind URL into this Layout:
+
 ```tsx
 /* src/app/dashboard/layout.tsx */
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-slate-100 overflow-y-scroll w-screen h-screen antialiased text-slate-300 selection:bg-blue-600 selection:text-white">
       <div className="flex flex-col relative w-screen">
-        <div id="menu" className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 fixed left-0 h-screen overflow-y-scroll">
+        <div
+          id="menu"
+          className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 fixed left-0 h-screen overflow-y-scroll"
+        >
           <div id="logo" className="my-4 px-6">
             <h1 className="text-lg md:text-2xl font-bold text-white">
               Dash<span className="text-blue-500">8</span>.
             </h1>
-            <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+            <p className="text-slate-500 text-sm">
+              Manage your actions and activities
+            </p>
           </div>
           <div id="profile" className="px-6 py-10">
             <p className="text-slate-500">Welcome back,</p>
@@ -148,7 +165,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   alt=""
                 />
               </span>
-              <span className="text-sm md:text-base font-bold">Edward Tompson</span>
+              <span className="text-sm md:text-base font-bold">
+                Edward Tompson
+              </span>
             </a>
           </div>
           <div id="nav" className="w-full px-6">
@@ -173,8 +192,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-                <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+                <span className="text-lg font-bold leading-5 text-white">
+                  Dashboard
+                </span>
+                <span className="text-sm text-white/50 hidden md:block">
+                  Data Overview
+                </span>
               </div>
             </a>
             <a
@@ -198,8 +221,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg text-slate-300 font-bold leading-5">Database</span>
-                <span className="text-sm text-slate-500 hidden md:block">Database Manager</span>
+                <span className="text-lg text-slate-300 font-bold leading-5">
+                  Database
+                </span>
+                <span className="text-sm text-slate-500 hidden md:block">
+                  Database Manager
+                </span>
               </div>
             </a>
             <a
@@ -223,8 +250,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg text-slate-300 font-bold leading-5">Cloud Storage</span>
-                <span className="text-sm text-slate-500 hidden md:block">Manage Cloud Storage</span>
+                <span className="text-lg text-slate-300 font-bold leading-5">
+                  Cloud Storage
+                </span>
+                <span className="text-sm text-slate-500 hidden md:block">
+                  Manage Cloud Storage
+                </span>
               </div>
             </a>
             <a
@@ -248,8 +279,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg text-slate-300 font-bold leading-5">Reports</span>
-                <span className="text-sm text-slate-500 hidden md:block">Manage Reports</span>
+                <span className="text-lg text-slate-300 font-bold leading-5">
+                  Reports
+                </span>
+                <span className="text-sm text-slate-500 hidden md:block">
+                  Manage Reports
+                </span>
               </div>
             </a>
             <a
@@ -273,8 +308,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg text-slate-300 font-bold leading-5">Security</span>
-                <span className="text-sm text-slate-500 hidden md:block">Generate Security Keys</span>
+                <span className="text-lg text-slate-300 font-bold leading-5">
+                  Security
+                </span>
+                <span className="text-sm text-slate-500 hidden md:block">
+                  Generate Security Keys
+                </span>
               </div>
             </a>
             <a
@@ -298,8 +337,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg text-slate-300 font-bold leading-5">Extensions</span>
-                <span className="text-sm text-slate-500 hidden md:block">Manage Extensions</span>
+                <span className="text-lg text-slate-300 font-bold leading-5">
+                  Extensions
+                </span>
+                <span className="text-sm text-slate-500 hidden md:block">
+                  Manage Extensions
+                </span>
               </div>
             </a>
             <a
@@ -323,8 +366,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg text-slate-300 font-bold leading-5">Settings</span>
-                <span className="text-sm text-slate-500 hidden md:block">Edit App Settings</span>
+                <span className="text-lg text-slate-300 font-bold leading-5">
+                  Settings
+                </span>
+                <span className="text-sm text-slate-500 hidden md:block">
+                  Edit App Settings
+                </span>
               </div>
             </a>
           </div>
@@ -334,6 +381,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 ```
+
 > Notes:
 
 - Replace all `class` by `className`.
@@ -342,23 +390,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 - Replace each `stroke-linejoin` by `strokeLinejoin`.
 - Replace each `stroke-width` by `strokeWidth`.
 
-
 ## 📚 Lecture 039: Sidebar & main content
 
 ### 1. Add the `{ children }` prop in this `layout.tsx`:
+
 - Replace `<div className="flex flex-col relative w-screen">` by `<div className="flex">`
 - Delete `fixed` in `<div id="menu" className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 fixed left-0 h-screen overflow-y-scroll">`
 - Style `{ children }`
+
 ```tsx
 /* src/app/dashboard/layout.tsx */
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-slate-100 overflow-y-scroll w-screen h-screen antialiased text-slate-300 selection:bg-blue-600 selection:text-white">
-      <div className="flex"> // 👈🏽 ✅
-        <div id="menu" className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 h-screen overflow-y-scroll">
+      <div className="flex">
+        {" "}
+        // 👈🏽 ✅<div
+          id="menu"
+          className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 h-screen overflow-y-scroll"
+        >
           ...
         </div>
-
         {children}
       </div>
     </div>
@@ -369,20 +425,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 ### 2. Creaate **`Sidebar.tsx`** component:
 
 #### 1. From **`Layout.tsx`**, Cut/Remove the content between:
-- `<div className="flex">` and 
+
+- `<div className="flex">` and
 - `<div className="p-2 w-full text-slate-900">`
 
 #### 2. Paste this content in **`Sidebar`** component:
+
 ```tsx
 /* src/app/components/Sidebar.tsx */
 export const Sidebar = () => {
   return (
-    <div id="menu" className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 h-screen overflow-y-scroll">
+    <div
+      id="menu"
+      className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 h-screen overflow-y-scroll"
+    >
       <div id="logo" className="my-4 px-6">
         <h1 className="text-lg md:text-2xl font-bold text-white">
           Dash<span className="text-blue-500">8</span>.
         </h1>
-        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+        <p className="text-slate-500 text-sm">
+          Manage your actions and activities
+        </p>
       </div>
       <div id="profile" className="px-6 py-10">
         <p className="text-slate-500">Welcome back,</p>
@@ -419,8 +482,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-            <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+            <span className="text-lg font-bold leading-5 text-white">
+              Dashboard
+            </span>
+            <span className="text-sm text-white/50 hidden md:block">
+              Data Overview
+            </span>
           </div>
         </a>
         <a
@@ -444,8 +511,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Database</span>
-            <span className="text-sm text-slate-500 hidden md:block">Database Manager</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Database
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Database Manager
+            </span>
           </div>
         </a>
         <a
@@ -469,8 +540,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Cloud Storage</span>
-            <span className="text-sm text-slate-500 hidden md:block">Manage Cloud Storage</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Cloud Storage
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Manage Cloud Storage
+            </span>
           </div>
         </a>
         <a
@@ -494,8 +569,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Reports</span>
-            <span className="text-sm text-slate-500 hidden md:block">Manage Reports</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Reports
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Manage Reports
+            </span>
           </div>
         </a>
         <a
@@ -519,8 +598,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Security</span>
-            <span className="text-sm text-slate-500 hidden md:block">Generate Security Keys</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Security
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Generate Security Keys
+            </span>
           </div>
         </a>
         <a
@@ -544,8 +627,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Extensions</span>
-            <span className="text-sm text-slate-500 hidden md:block">Manage Extensions</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Extensions
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Manage Extensions
+            </span>
           </div>
         </a>
         <a
@@ -569,8 +656,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Settings</span>
-            <span className="text-sm text-slate-500 hidden md:block">Edit App Settings</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Settings
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Edit App Settings
+            </span>
           </div>
         </a>
       </div>
@@ -580,20 +671,26 @@ export const Sidebar = () => {
 ```
 
 #### 3. Create **`index.ts`** file:
+
 ```ts
 /* src/app/components/index.ts */
 export { Sidebar } from "./Sidebar";
 ```
 
 ### 3. Import **`Sidebar`** component in **`Layout`**:
+
 ```tsx
 /* src/app/dashboard/layout.tsx */
-import { Sidebar } from "../components";  // 👈🏽 ✅
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+import { Sidebar } from "../components"; // 👈🏽 ✅
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-slate-100 overflow-y-scroll w-screen h-screen antialiased text-slate-300 selection:bg-blue-600 selection:text-white">
       <div className="flex">
-        <Sidebar />  // 👈🏽 ✅
+        <Sidebar /> // 👈🏽 ✅
         <div className="p-2 w-full text-slate-900">{children}</div>
       </div>
     </div>
@@ -620,7 +717,9 @@ export const Sidebar = () => {
         <h1 className="text-lg md:text-2xl font-bold text-white">
           Dash<span className="text-blue-500">8</span>.
         </h1>
-        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+        <p className="text-slate-500 text-sm">
+          Manage your actions and activities
+        </p>
       </div>
       <div id="profile" className="px-6 py-10">
         <p className="text-slate-500">Welcome back,</p>
@@ -632,7 +731,9 @@ export const Sidebar = () => {
               alt=""
             />
           </span>
-          <span className="text-sm md:text-base font-bold">Luis Medina Coca</span>
+          <span className="text-sm md:text-base font-bold">
+            Luis Medina Coca
+          </span>
         </a>
       </div>
       <div id="nav" className="w-full px-6">
@@ -657,8 +758,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-            <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+            <span className="text-lg font-bold leading-5 text-white">
+              Dashboard
+            </span>
+            <span className="text-sm text-white/50 hidden md:block">
+              Data Overview
+            </span>
           </div>
         </a>
 
@@ -683,8 +788,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Database</span>
-            <span className="text-sm text-slate-500 hidden md:block">Database Manager</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Database
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Database Manager
+            </span>
           </div>
         </a>
       </div>
@@ -693,12 +802,12 @@ export const Sidebar = () => {
 };
 ```
 
-
 ## 📚 Lecture 040: Next/Image
 
 Check it out this URL: [Components | Image Componnt | Next.js](https://nextjs.org/docs/app/api-reference/components/image)
 
 ### 1. Import `Image` from next/image`
+
 ```tsx
 /* src/app/components/Sidebar.tsx */
 import Image from "next/image";
@@ -714,21 +823,25 @@ export const Sidebar = () => {
         <h1 className="text-lg md:text-2xl font-bold text-white">
           Dash<span className="text-blue-500">8</span>.
         </h1>
-        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+        <p className="text-slate-500 text-sm">
+          Manage your actions and activities
+        </p>
       </div>
       <div id="profile" className="px-6 py-10">
         <p className="text-slate-500">Welcome back,</p>
         <a href="#" className="inline-flex space-x-2 items-center">
           <span>
-            <Image  // 👈🏽 ✅
+            <Image // 👈🏽 ✅
               className="rounded-full w-8 h-8"
               src="https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80"
-              alt="User avatar"  // 👈🏽 ✅
-              width={50}  // 👈🏽 ✅
-              height={50}  // 👈🏽 ✅
+              alt="User avatar" // 👈🏽 ✅
+              width={50} // 👈🏽 ✅
+              height={50} // 👈🏽 ✅
             />
           </span>
-          <span className="text-sm md:text-base font-bold">Luis Medina Coca</span>
+          <span className="text-sm md:text-base font-bold">
+            Luis Medina Coca
+          </span>
         </a>
       </div>
       <div id="nav" className="w-full px-6">
@@ -753,8 +866,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-            <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+            <span className="text-lg font-bold leading-5 text-white">
+              Dashboard
+            </span>
+            <span className="text-sm text-white/50 hidden md:block">
+              Data Overview
+            </span>
           </div>
         </a>
 
@@ -779,8 +896,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Database</span>
-            <span className="text-sm text-slate-500 hidden md:block">Database Manager</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Database
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Database Manager
+            </span>
           </div>
         </a>
       </div>
@@ -789,11 +910,12 @@ export const Sidebar = () => {
 };
 ```
 
-
 > 🔥 Issue:
+
 - Hostname not allowed.
 
 ### 2. Open **`next.config.ts`**
+
 ```ts
 /* next.config.ts */
 import type { NextConfig } from "next";
@@ -801,7 +923,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",  // 👈🏽 ✅ <Image src="https://... />
+        protocol: "https", // 👈🏽 ✅ <Image src="https://... />
         hostname: "images.unsplash.com", // 👈🏽 ✅ <Image src="...images.unsplash.com/..." />
       },
     ],
@@ -810,10 +932,10 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-
 ## 📚 Lecture 041: Icons and active route
 
 ### 1. Install [React-icons](https://react-icons.github.io/react-icons/):
+
 ```bash
 npm install react-icons --save
 ```
@@ -821,10 +943,11 @@ npm install react-icons --save
 > reference Link [Ionicons: Premium Open Source Icon Pack for Ionic Framework](https://ionic.io/ionicons/)
 
 ### 2. Import `IoLogoReact` in logo section:
+
 ```tsx
 /* src/app/components/Sidebar.tsx */
 import Image from "next/image";
-import { IoLogoReact } from "react-icons/io5";  // 👈🏽 ✅ (2)
+import { IoLogoReact } from "react-icons/io5"; // 👈🏽 ✅ (2)
 export const Sidebar = () => {
   return (
     <div
@@ -834,11 +957,13 @@ export const Sidebar = () => {
     >
       <div id="logo" className="my-4 px-6">
         <h1 className="flex items-center text-lg md:text-2xl font-bold text-white">
-          <IoLogoReact className="mr-2" />  // 👈🏽 ✅ (1)
+          <IoLogoReact className="mr-2" /> // 👈🏽 ✅ (1)
           <span>Dash-67</span>
           <span className="text-blue-500">8</span>.
         </h1>
-        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+        <p className="text-slate-500 text-sm">
+          Manage your actions and activities
+        </p>
       </div>
       <div id="profile" className="px-6 py-10">
         <p className="text-slate-500">Welcome back,</p>
@@ -867,18 +992,21 @@ export const Sidebar = () => {
 ```
 
 ### 3. Create `SidebarMenuItem.tsx` file:
+
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
 import { JSX } from "react";
 
-interface Props {  //👈🏽 ✅
+interface Props {
+  //👈🏽 ✅
   path: string;
   icon: JSX.Element;
   title: string;
   subTitle: string;
 }
 
-const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {  //👈🏽 ✅
+const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
+  //👈🏽 ✅
   return (
     <a
       href="#"
@@ -901,8 +1029,12 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {  //👈�
         </svg>
       </div>
       <div className="flex flex-col">
-        <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-        <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+        <span className="text-lg font-bold leading-5 text-white">
+          Dashboard
+        </span>
+        <span className="text-sm text-white/50 hidden md:block">
+          Data Overview
+        </span>
       </div>
     </a>
   );
@@ -912,11 +1044,12 @@ export default SidebarMenuItem;
 ```
 
 ### 4. Import `SidebarMenuItem` from `Sidebar.tsx`:
+
 ```tsx
 /* src/app/components/Sidebar.tsx */
 import Image from "next/image";
 import { IoLogoReact } from "react-icons/io5";
-import SidebarMenuItem from "./SidebarMenuItem";  // 👈🏽 ✅
+import SidebarMenuItem from "./SidebarMenuItem"; // 👈🏽 ✅
 
 export const Sidebar = () => {
   return (
@@ -931,7 +1064,9 @@ export const Sidebar = () => {
           <span>Dash-67</span>
           <span className="text-blue-500">8</span>.
         </h1>
-        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+        <p className="text-slate-500 text-sm">
+          Manage your actions and activities
+        </p>
       </div>
       <div id="profile" className="px-6 py-10">
         <p className="text-slate-500">Welcome back,</p>
@@ -945,11 +1080,14 @@ export const Sidebar = () => {
               height={50}
             />
           </span>
-          <span className="text-sm md:text-base font-bold">Luis Medina Coca</span>
+          <span className="text-sm md:text-base font-bold">
+            Luis Medina Coca
+          </span>
         </a>
       </div>
       <div id="nav" className="w-full px-6">
-        <SidebarMenuItem path={""} icon={undefined} title={""} subTitle={""} />  // 👈🏽 ✅
+        <SidebarMenuItem path={""} icon={undefined} title={""} subTitle={""} />{" "}
+        // 👈🏽 ✅
         <a
           href="#"
           className="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150"
@@ -971,8 +1109,12 @@ export const Sidebar = () => {
             </svg>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg text-slate-300 font-bold leading-5">Database</span>
-            <span className="text-sm text-slate-500 hidden md:block">Database Manager</span>
+            <span className="text-lg text-slate-300 font-bold leading-5">
+              Database
+            </span>
+            <span className="text-sm text-slate-500 hidden md:block">
+              Database Manager
+            </span>
           </div>
         </a>
       </div>
@@ -981,14 +1123,16 @@ export const Sidebar = () => {
 };
 ```
 
-#### 4.1 Add the  `menuItems` array:
+#### 4.1 Add the `menuItems` array:
+
 ```tsx
 /* src/app/components/Sidebar.tsx */
 import Image from "next/image";
 import { IoBrowsersOutline, IoCalculator, IoLogoReact } from "react-icons/io5";
 import SidebarMenuItem from "./SidebarMenuItem";
 
-const menuItems = [  // 👈🏽 ✅ (1)
+const menuItems = [
+  // 👈🏽 ✅ (1)
   {
     path: "/dashboard/main",
     icon: <IoBrowsersOutline size={40} />,
@@ -1016,7 +1160,9 @@ export const Sidebar = () => {
           <span>Dash-67</span>
           <span className="text-blue-500">8</span>.
         </h1>
-        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+        <p className="text-slate-500 text-sm">
+          Manage your actions and activities
+        </p>
       </div>
       <div id="profile" className="px-6 py-10">
         <p className="text-slate-500">Welcome back,</p>
@@ -1030,12 +1176,14 @@ export const Sidebar = () => {
               height={50}
             />
           </span>
-          <span className="text-sm md:text-base font-bold">Luis Medina Coca</span>
+          <span className="text-sm md:text-base font-bold">
+            Luis Medina Coca
+          </span>
         </a>
       </div>
       <div id="nav" className="w-full px-6">
         {menuItems.map((item) => (
-          <SidebarMenuItem key={item.path} {...item} />  // 👈🏽 ✅ (2)
+          <SidebarMenuItem key={item.path} {...item} /> // 👈🏽 ✅ (2)
         ))}
       </div>
     </div>
@@ -1046,9 +1194,10 @@ export const Sidebar = () => {
 ## 📚 Lecture 042 Task solution
 
 ### 1. Apply `usePathname()` hook:
+
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
-import { usePathname } from "next/navigation";  // 👈🏽 ✅
+import { usePathname } from "next/navigation"; // 👈🏽 ✅
 import { JSX } from "react";
 interface Props {
   path: string;
@@ -1057,7 +1206,7 @@ interface Props {
   subTitle: string;
 }
 const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
-  const currentPath = usePathname();  // 👈🏽 ✅
+  const currentPath = usePathname(); // 👈🏽 ✅
   return (
     <a
       href="#"
@@ -1080,8 +1229,12 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
         </svg>
       </div>
       <div className="flex flex-col">
-        <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-        <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+        <span className="text-lg font-bold leading-5 text-white">
+          Dashboard
+        </span>
+        <span className="text-sm text-white/50 hidden md:block">
+          Data Overview
+        </span>
       </div>
     </a>
   );
@@ -1092,9 +1245,10 @@ export default SidebarMenuItem;
 <img src="../img/section04-lecture042-001.png">
 
 #### Fixing:
+
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
-"use client";  // 👈🏽 ✅
+"use client"; // 👈🏽 ✅
 import { usePathname } from "next/navigation";
 import { JSX } from "react";
 
@@ -1129,8 +1283,12 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
         </svg>
       </div>
       <div className="flex flex-col">
-        <span className="text-lg font-bold leading-5 text-white">Dashboard</span>
-        <span className="text-sm text-white/50 hidden md:block">Data Overview</span>
+        <span className="text-lg font-bold leading-5 text-white">
+          Dashboard
+        </span>
+        <span className="text-sm text-white/50 hidden md:block">
+          Data Overview
+        </span>
       </div>
     </a>
   );
@@ -1139,10 +1297,11 @@ export default SidebarMenuItem;
 ```
 
 ### 2. Update `SidebarMenuItem.tsx`:
+
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
 "use client";
-import Link from "next/link";  // 👈🏽 ✅ (2)
+import Link from "next/link"; // 👈🏽 ✅ (2)
 import { usePathname } from "next/navigation";
 import { JSX } from "react";
 
@@ -1156,16 +1315,19 @@ interface Props {
 const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
   const currentPath = usePathname();
   return (
-    <Link  // 👈🏽 ✅ (1)
-      href={path}  // 👈🏽 ✅ (3)
+    <Link // 👈🏽 ✅ (1)
+      href={path} // 👈🏽 ✅ (3)
       className={`w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150 ${
         currentPath === path ? "bg-blue-800" : ""
-      }`}  // 👈🏽 ✅ (4)
+      }`} // 👈🏽 ✅ (4)
     >
-      <div>{icon}</div>  // 👈🏽 ✅ (5)
+      <div>{icon}</div> // 👈🏽 ✅ (5)
       <div className="flex flex-col">
-        <span className="text-lg font-bold leading-5 text-white">{title}</span>  // 👈🏽 ✅ (6)
-        <span className="text-sm text-white/50 hidden md:block">{subTitle}</span>  // 👈🏽 ✅ (7)
+        <span className="text-lg font-bold leading-5 text-white">{title}</span>{" "}
+        // 👈🏽 ✅ (6)
+        <span className="text-sm text-white/50 hidden md:block">
+          {subTitle}
+        </span> // 👈🏽 ✅ (7)
       </div>
     </Link>
   );
@@ -1176,6 +1338,7 @@ export default SidebarMenuItem;
 ## 📚 Lecture 043: state management - useState
 
 ### 1. Adding style in CounterPage component:
+
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
 export default function CounterPage() {
@@ -1184,14 +1347,10 @@ export default function CounterPage() {
       <span>Products in shopping cart</span>
       <span className="text-9xl">10</span>
       <div>
-        <button
-          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
-        >
+        <button className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2">
           -1
         </button>
-        <button
-          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
-        >
+        <button className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2">
           +1
         </button>
       </div>
@@ -1203,27 +1362,28 @@ export default function CounterPage() {
 <img src="../img/section04-lecture042-002.png">
 
 ### 2. Apply **`useState`** in this page:
+
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
-"use client";  // 👈🏽 ✅ (2)
-import { useState } from "react";  // 👈🏽 ✅ (2)
+"use client"; // 👈🏽 ✅ (2)
+import { useState } from "react"; // 👈🏽 ✅ (2)
 export default function CounterPage() {
-  const [count, setCounts] = useState(0);  // 👈🏽 ✅ (1)
+  const [count, setCounts] = useState(0); // 👈🏽 ✅ (1)
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
       <span>Products in shopping cart</span>
-      <span className="text-9xl">{count}</span>  // 👈🏽 ✅ (3)
+      <span className="text-9xl">{count}</span> // 👈🏽 ✅ (3)
       <div className="flex">
         <button
           className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
-          onClick={() => setCounts(count - 1)}  // 👈🏽 ✅ (4)
-          disabled={count === 0}  // 👈🏽 ✅ (4)
+          onClick={() => setCounts(count - 1)} // 👈🏽 ✅ (4)
+          disabled={count === 0} // 👈🏽 ✅ (4)
         >
           -1
         </button>
         <button
           className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
-          onClick={() => setCounts(count + 1)}  // 👈🏽 ✅ (5)
+          onClick={() => setCounts(count + 1)} // 👈🏽 ✅ (5)
         >
           +1
         </button>
@@ -1234,13 +1394,15 @@ export default function CounterPage() {
 ```
 
 ### 3. Add `metadata` in `Counter` component:
+
 ```tsx
 /*  */
 "use client";
-import { Metadata } from "next/types";  // 👈🏽 ✅ (2)
+import { Metadata } from "next/types"; // 👈🏽 ✅ (2)
 import { useState } from "react";
 
-export const metadata: Metadata = {  // 👈🏽 ✅ (1)
+export const metadata: Metadata = {
+  // 👈🏽 ✅ (1)
   title: "Counter Page",
   description: "Simple Counter Page",
 };
@@ -1274,6 +1436,195 @@ export default function CounterPage() {
 
 <img src="../img/section04-lecture042-003.png">
 
+## 📚 Lecture 044: Let's think in terms of folders and small components
+
+### 1. Create **`shopping-cart/components/CartCounter.jsx`**:
+
+```
+02-my-dashboard
+├── docs
+│   └── LECTURE_STEPS.md
+├── img/
+├── public/
+├── src
+│   ├── app
+│   │   ├── components
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── SidebarMenuItem.tsx
+│   │   │   └── index.ts
+│   │   ├── dashboard
+│   │   │   ├── counter
+│   │   │   │   └── page.tsx
+│   │   │   ├── main
+│   │   │   │   └── page.tsx
+│   │   │   └── layout.tsx
+│   │   ├── shopping-cart             # 👈🏽 ✅
+│   │   │   ├── components            # 👈🏽 ✅
+│   │   │   │   └── CartCounter.jsx   # 👈🏽 ✅
+│   │   │   └── index.ts
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   └── test.txt
+├── eslint.config.mjs
+```
+
+### 2. Update **`src/app/dashboard/counter/page.tsx`**:
+```tsx
+/* src/app/dashboard/counter/page.tsx */
+//"use-client"
+import { Metadata } from "next/types";
+//import { useState } from "react";
+import { CartCounter } from "../../shopping-cart";
+
+export const metadata: Metadata = {
+  title: "𝌰 Shopping Cart",
+  description: "Simple Counter Page",
+};
+
+export default function CounterPage() {
+  //const [count, setCounts] = useState(0);
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <CartCounter />
+      {/*
+        <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}
+        >
+          +1
+        </button>
+      </div>
+      */}
+    </div>
+  );
+}
+```
+
+### 3. Update **`src/app/shopping-cart/components/CartCounter.jsx`** file:
+```tsx
+/* src/app/shopping-cart/components/CartCounter.jsx */
+'use client';
+import { useState } from "react";
+
+const CartCounter = () => {
+  const [count, setCounts] = useState(0);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  )
+}
+
+export default CartCounter;
+```
+
+#### Update **`src/app/shopping-cart/index.ts`** file as barril:
+```tsx
+export { default as CartCounter } from './components/CartCounter';
+```
+
+With more than one component:
+
+export in barril file:
+```js
+export { default as CartCounter } from './components/CartCounter';
+export { default as CartItem }    from './components/CartItem';
+export { default as CartGrid }    from './components/CartGrid';
+```
+
+Import:
+```tsx
+import { CartCounter, CartItem, CartGrid } from '../../shopping-cart';
+```
+
+### 4. Server side vs client side:
+
+#### 1 Sever side from **`src/app/dashboard/counter/page.tsx`**:
+```tsx
+import { CartCounter } from "../../shopping-cart";
+import { Metadata } from "next/types";
+
+export const metadata: Metadata = {
+  title: "𝌰 Shopping Cart",
+  description: "Simple Counter Page",
+};
+
+// i.e a value generated from the server or reading from an API or any other server.  // 👈🏽 ✅
+const value = 20;  // 👈🏽 ✅||||||
+
+export default function CounterPage() {
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <CartCounter value={value} />
+    </div>
+  );
+}
+```
+
+#### 2. Client side **`src/app/shopping-cart/components/CartCounter.tsx`**:
+```tsx
+"use client";
+import { useState } from "react";
+
+//Interface for Props:
+interface Props {  // 👈🏽 ✅
+  value?: number;
+}
+
+const CartCounter = ({ value = 10 }: Props) => {  // 👈🏽 ✅
+  const [count, setCounts] = useState(value);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+
+export default CartCounter;
+```
 
 
 
@@ -1304,14 +1655,23 @@ export default function CounterPage() {
 
 
 
-🔥 🔥 🔥
+
+
+
+
+
+
+
+
+
+
 ---
+## 🔥 🔥 🔥
 
 ## 📚 Lecture 0
 
-### 1. 
+### 1.
+
 ```tsx
 /*  */
-
 ```
-
