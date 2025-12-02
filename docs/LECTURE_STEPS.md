@@ -2389,12 +2389,98 @@ export default async function PokemonsPage() {
 ![Pokemons list display in string](../img/section05-lecture051-001.png)
 
 
+## 📚 Lecture 052: Assign data type and displays images
 
+### 1. Go to Postman and copy pokemon response:
 
+![Pokemon response button](..//img/section05-lecture052-001.png)
 
+### 2. Create **`src/app/dashboard/pokemons/interfaces/pokemon-response.ts`** file:
+1. Open `Visual Studio Code`
+2. Open pokemon-response.ts file
+3. Click on `View` then select on `Command Palette`.
+4. Write `>Paste JSON as Code`
+5. enter `PokemonsResponse` then hit enter.
 
+```ts
+/* src/app/dashboard/pokemons/interfaces/pokemon-response.ts */
+export interface PokemonsResponse {
+  count:    number;
+  next:     string;
+  previous: null;
+  results:  Result[];
+}
 
+export interface Result {
+  name: string;
+  url:  string;
+}
+```
 
+### 3. Create/Add `simple-pokemon` file:
+```ts
+/* src/app/dashboard/pokemons/interfaces/simple-pokemon.ts */
+export interface SimplePokemon {
+  id: string;
+  name: string;
+}
+```
+
+### 4. Go back to **`src/app/dashboard/pokemons/page.tsx`** and update it:
+```tsx
+/* src/app/dashboard/pokemons/page.tsx */
+import Image from "next/image";
+import { PokemonsResponse } from "./interfaces/pokemon-response";  // 👈🏽 ✅
+import { SimplePokemon } from "./interfaces/simple-pokemon";  // 👈🏽 ✅
+const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`)  // 👈🏽 ✅
+  .then(
+    (res) => res.json()
+  );
+  const pokemons = data.results.map((pokemon) => ({  // 👈🏽 ✅
+    id: pokemon.url.split("/").at(-2)!,
+    name: pokemon.name,
+  }));
+  return pokemons;
+};
+export default async function PokemonsPage() {
+  const pokemons = await getPokemons(151);  // 👈🏽 ✅
+  return (
+    <div className="flex flex-col">  // 👈🏽 ✅
+      {/*<h1>{JSON.stringify(pokemons)}</h1>*/}
+      <div className="flex flex-wrap gap-10 items-center justify-center">
+        <Image
+          src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/10.svg`}
+          width={100}
+          height={100}
+          alt="name"
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+### 5. Update `next.config.ts` file:
+```ts
+/* next.config.ts */
+import type { NextConfig } from "next";
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",  // 👈🏽 ✅
+        hostname: "raw.githubusercontent.com",  // 👈🏽 ✅
+      },
+    ],
+  },
+};
+export default nextConfig;
+```
 
 
 
