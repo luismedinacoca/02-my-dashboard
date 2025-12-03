@@ -19,13 +19,28 @@ export default async function PokemonsPage() {
   return (
     <div className="flex flex-col">
       {/*<h1>{JSON.stringify(pokemons)}</h1>*/}
-      <div className="flex flex-wrap gap-10 items-center justify-center">
+      {/* <div className="flex flex-wrap gap-10 items-center justify-center">
         <Image
           src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/10.svg`}
           width={100}
           height={100}
           alt="name"
         />
+      </div> */}
+      <div className="flex flex-wrap gap-10 items-center justify-center">
+        {pokemons.map((pokemon) => (
+          <Image
+            key={pokemon.id}
+            src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.id}.svg`}
+            width={100}
+            height={100}
+            alt={pokemon.name}
+            // style={{
+            //   width: "150px",
+            //   height: "auto",
+            // }}
+          />
+        ))}
       </div>
     </div>
   );
