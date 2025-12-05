@@ -1,6 +1,7 @@
-import Image from "next/image";
+//import Image from "next/image";
 import { PokemonsResponse } from "./interfaces/pokemon-response";
 import { SimplePokemon } from "./interfaces/simple-pokemon";
+import PokemonGrid from "./components/PokemonGrid";
 
 const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
   const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`).then(
@@ -18,30 +19,11 @@ export default async function PokemonsPage() {
   const pokemons = await getPokemons(151);
   return (
     <div className="flex flex-col">
-      {/*<h1>{JSON.stringify(pokemons)}</h1>*/}
-      {/* <div className="flex flex-wrap gap-10 items-center justify-center">
-        <Image
-          src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/10.svg`}
-          width={100}
-          height={100}
-          alt="name"
-        />
-      </div> */}
-      <div className="flex flex-wrap gap-10 items-center justify-center">
-        {pokemons.map((pokemon) => (
-          <Image
-            key={pokemon.id}
-            src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.id}.svg`}
-            width={100}
-            height={100}
-            alt={pokemon.name}
-            // style={{
-            //   width: "150px",
-            //   height: "auto",
-            // }}
-          />
-        ))}
-      </div>
+      <span className="text-5xl my-2 text-center">
+        Pokémons List & <span>Static</span>
+      </span>
+
+      <PokemonGrid pokemons={pokemons} />
     </div>
   );
 }

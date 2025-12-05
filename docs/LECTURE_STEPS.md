@@ -2531,19 +2531,352 @@ export default async function PokemonsPage() {
 
 
 
+## 📚 Lecture 054: Let's think in small components
+
+### 1. Add Pokemon List title:
+```tsx
+/* src/app/dashboard/pokemons/page.tsx */
+import Image from "next/image";
+import { PokemonsResponse } from "./interfaces/pokemon-response";
+import { SimplePokemon } from "./interfaces/simple-pokemon";
+const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`).then(
+    (res) => res.json()
+  );
+  const pokemons = data.results.map((pokemon) => ({
+    id: pokemon.url.split("/").at(-2)!,
+    name: pokemon.name,
+  }));
+  return pokemons;
+};
+export default async function PokemonsPage() {
+  const pokemons = await getPokemons(151);
+  return (
+    <div className="flex flex-col">
+
+      <span className="text-5xl my-2 text-center">
+        Pokémons List & <span>Static</span>  // 👈🏽 ✅
+      </span>
+
+      <div className="flex flex-wrap gap-10 items-center justify-center">
+        {pokemons.map((pokemon) => (
+          <Image
+            key={pokemon.id}
+            src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.id}.svg`}
+            width={100}
+            height={100}
+            alt={pokemon.name}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+```
 
 
+### 2. Create **`components/PokemonGrid.tsx`** file and cut/paste  pokeemons.map section in here:
 
+#### 2.1 Comment in **`src/app/dashboard/pokemons/page.tsx`** the pokemon.maps(...) code:
+```tsx
+/* src/app/dashboard/pokemons/page.tsx */
+import Image from "next/image";
+import { PokemonsResponse } from "./interfaces/pokemon-response";
+import { SimplePokemon } from "./interfaces/simple-pokemon";
+const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`).then(
+    (res) => res.json()
+  );
+  const pokemons = data.results.map((pokemon) => ({
+    id: pokemon.url.split("/").at(-2)!,
+    name: pokemon.name,
+  }));
+  return pokemons;
+};
+export default async function PokemonsPage() {
+  const pokemons = await getPokemons(151);
+  return (
+    <div className="flex flex-col">
+      <span className="text-5xl my-2 text-center">
+        Pokémons List & <span>Static</span>
+      </span>
 
+      {/* <div className="flex flex-wrap gap-10 items-center justify-center">
+        {pokemons.map((pokemon) => (
+          <Image
+            key={pokemon.id}
+            src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.id}.svg`}
+            width={100}
+            height={100}
+            alt={pokemon.name}
+          />
+        ))}
+      </div> */}
 
+    </div>
+  );
+}
+```
 
+#### 2.2 Move this commented code into `PokemonGrid` file:
+```tsx
+/* src/app/dashboard/pokemons/components/PokemonGrid.tsx */
+import { SimplePokemon } from "../interfaces/simple-pokemon";  // 👈🏽 ✅ (2)
 
+interface Props {  // 👈🏽 ✅ (1)
+  pokemons: SimplePokemon[];
+}
 
+const PokemonGrid = ({ pokemons }: Props) => {  // 👈🏽 ✅ (1)
+  return (
+    <div className="flex flex-wrap gap-10 items-center justify-center">
+      {pokemons.map((pokemon) => (
+        // <Image
+        //   key={pokemon.id}
+        //   src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${pokemon.id}.svg`}
+        //   width={100}
+        //   height={100}
+        //   alt={pokemon.name}
+        // />  // 👈🏽 ✅ (3)
+        <span key={pokemon.id}>abcdefghijkl</span>  // 👈🏽 ✅ (4)
+      ))}
+    </div>
+  );
+};
 
+export default PokemonGrid;
+```
 
+[Tailwind CSS User card](https://www.creative-tim.com/twcomponents/component/user-card-7)
 
+#### 2.3 Complete/Update the barrell `index` file with `PokemonGrid`:
+```ts
+/* src/app/dashboard/pokemons/index.ts */
+export type { PokemonsResponse } from "./interfaces/pokemon-response";
+export type { SimplePokemon } from "./interfaces/simple-pokemon";
 
+export { default as PokemonGrid } from "./components/PokemonGrid";  // 👈🏽 ✅
+```
 
+#### 2.3 Import `PokemonGrid` into `Pokemons`:
+```tsx
+/* src/app/dashboard/pokemons/page.tsx */
+//import Image from "next/image";
+import { PokemonsResponse } from "./interfaces/pokemon-response";
+import { SimplePokemon } from "./interfaces/simple-pokemon";
+import PokemonGrid from "./components/PokemonGrid";
+const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`).then(
+    (res) => res.json()
+  );
+  const pokemons = data.results.map((pokemon) => ({
+    id: pokemon.url.split("/").at(-2)!,
+    name: pokemon.name,
+  }));
+  return pokemons;
+};
+export default async function PokemonsPage() {
+  const pokemons = await getPokemons(151);
+  return (
+    <div className="flex flex-col">
+      <span className="text-5xl my-2 text-center">
+        Pokémons List & <span>Static</span>
+      </span>
+
+      <PokemonGrid pokemons={pokemons} />  // 👈🏽 ✅
+
+    </div>
+  );
+}
+```
+
+#### 2.4 Update `PokemonCard` with card code from [Tailwind CSS User card](https://www.creative-tim.com/twcomponents/component/user-card-7):
+```tsx
+/* src/app/dashboard/pokemons/components/PokemonCard.tsx */
+import Link from "next/link";
+const PokemonCard = () => {
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="bg-white rounded overflow-hidden shadow-lg">
+        <div className="text-center p-6 bg-gray-800 border-b">
+          <svg
+            aria-hidden="true"
+            role="img"
+            className="h-24 w-24 text-white rounded-full mx-auto"
+            width="32"
+            height="32"
+            preserveAspectRatio="xMidYMid meet"
+            viewBox="0 0 256 256"
+          >
+            <path
+              fill="currentColor"
+              d="M172 120a44 44 0 1 1-44-44a44 44 0 0 1 44 44Zm60 8A104 104 0 1 1 128 24a104.2 104.2 0 0 1 104 104Zm-16 0a88 88 0 1 0-153.8 58.4a81.3 81.3 0 0 1 24.5-23a59.7 59.7 0 0 0 82.6 0a81.3 81.3 0 0 1 24.5 23A87.6 87.6 0 0 0 216 128Z"
+            ></path>
+          </svg>
+          <p className="pt-2 text-lg font-semibold text-gray-50">John Doe</p>
+          <p className="text-sm text-gray-100">John@Doe.com</p>
+          <div className="mt-5">
+            <a className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100">Manage your Account</a>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex"> {/* 👈🏽 ✅ 🤔 */}
+            <div className="text-green-600">
+              <svg
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1"
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+              >
+                <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">Campaigns</p>
+              <p className="text-xs text-gray-500">View your campaigns</p>
+            </div>
+          </Link>
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex"> {/* 👈🏽 ✅ 🤔 */}
+            <div className="text-gray-800">
+              <svg
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1"
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+              >
+                <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">Donations</p>
+              <p className="text-xs text-gray-500">View your last donations</p>
+            </div>
+          </Link>
+        </div>
+
+        <div className="">
+          <a href="#" className="w-full px-4 py-2 pb-4 hover:bg-gray-100 flex">
+            <p className="text-sm font-medium text-gray-800 leading-none">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                role="img"
+                className="h-4 w-4 text-gray-800 fill-current animate-spin"
+                width="32"
+                height="32"
+                preserveAspectRatio="xMidYMid meet"
+                viewBox="0 0 1024 1024"
+              >
+                <path
+                  fill="currentColor"
+                  d="M988 548c-19.9 0-36-16.1-36-36c0-59.4-11.6-117-34.6-171.3a440.45 440.45 0 0 0-94.3-139.9a437.71 437.71 0 0 0-139.9-94.3C629 83.6 571.4 72 512 72c-19.9 0-36-16.1-36-36s16.1-36 36-36c69.1 0 136.2 13.5 199.3 40.3C772.3 66 827 103 874 150c47 47 83.9 101.8 109.7 162.7c26.7 63.1 40.2 130.2 40.2 199.3c.1 19.9-16 36-35.9 36z"
+                ></path>
+              </svg>{" "}
+              Logout
+            </p>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PokemonCard;
+```
+
+From now and on
+```tsx
+<Link>
+  <a className="...">something...</a>
+</Link>
+```
+is not allowed. 🚀
+
+So you must change:
+```tsx
+<Link className="...">
+  something..
+</Link>
+```
+
+### 3. Working on `PokemonGrid`:
+```tsx
+/* src/app/dashboard/pokemons/components/PokemonGrid.tsx */
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import PokemonCard from "./PokemonCard";
+
+interface Props {
+  pokemons: SimplePokemon[];
+}
+
+const PokemonGrid = ({ pokemons }: Props) => {
+  return (
+    <div className="flex flex-wrap gap-10 items-center justify-center">
+      {pokemons.map((pokemon) => (
+        <PokemonCard key={pokemon.id} pokemon={pokemon} /> {/* 👈🏽 ✅ */}
+      ))}
+    </div>
+  );
+};
+
+export default PokemonGrid;
+```
+
+### 4. Update `PokemonCard` component:
+```tsx
+/*  */
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeartOutline } from "react-icons/io5";
+
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+
+  if (!id) return null;
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemon/${id}`}
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">
+              <IoHeartOutline size={20} />
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">It&apos;s not favourite</p>
+              <p className="text-xs text-gray-500">View your campaigns</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default PokemonCard;
+```
 
 
 ---
