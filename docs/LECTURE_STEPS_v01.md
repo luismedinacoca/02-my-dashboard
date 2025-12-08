@@ -1,22 +1,5 @@
 # 👨🏾‍💻 Section 04: Server Side + Client side rendenring
 
-## 📑 Table of Contents
-
-- [⚙️ Section: Server Side + Client side rendenring](#️-section-server-side--client-side-rendenring)
-  - [📑 Table of Contents](#-table-of-contents)
-  - [🔧 Lesson 037](#-lesson-037)
-  - [🔧 Lesson 038](#-lesson-038)
-  - [🔧 Lesson 039](#-lesson-039)
-  - [🔧 Lesson 040](#-lesson-040)
-  - [🔧 Lesson 041](#-lesson-041)
-  - [🔧 Lesson 042](#-lesson-042)
-  - [🔧 Lesson 043](#-lesson-043)
-  - [🔧 Lesson 044](#-lesson-044)
-  - [📎 Related Files](#-related-files)
-  - [🔗 References](#-references)
-
----
-
 ## Getting Started
 
 First, create a `Next` project
@@ -52,10 +35,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🔧 1. Lesson 037 — *MyDashboard*
-
-### 🧠 1.1 Context  
-_This lesson covers the initial setup of the MyDashboard project. It establishes the basic Next.js project structure by configuring global styles with Tailwind CSS, creating the main page and the first dashboard page (counter). It also implements a redirect from the homepage to the counter page to facilitate access during development._
+## 📚 Lecture 037: MyDashboard
 
 ### 1. Open **`globals.css`** file:
 
@@ -128,10 +108,7 @@ export default function HomePage() {
 
 > Go to [Home page](http://localhost:3000)
 
-## 🔧 2. Lesson 038 — *My Dashboard Structure*
-
-### 🧠 2.1 Context  
-_This lesson establishes the visual structure of the dashboard. It obtains a dark navigation component from Tailwind CSS and integrates it into the dashboard layout. The `layout.tsx` file is created for the dashboard, including a sidebar navigation with logo, user profile, and navigation menu with multiple options (Dashboard, Database, Cloud Storage, Reports, Security, Extensions, Settings). HTML code is adapted to React by converting attributes like `class` to `className` and adjusting SVG elements._
+## 📚 Lecture 038: My Dashboard Structure
 
 ### 1. Get the dashboard component code
 
@@ -408,15 +385,12 @@ export default function DashboardLayout({
 > Notes:
 
 - Replace all `class` by `className`.
-- Selft-close the `<img>` tag: `<img ... />`
+- Selft-close the <img> tag: `<img ... />`
 - Replace each `stroke-linecap` by `strokeLinecap`.
 - Replace each `stroke-linejoin` by `strokeLinejoin`.
 - Replace each `stroke-width` by `strokeWidth`.
 
-## 🔧 3. Lesson 039 — *Sidebar & main content*
-
-### 🧠 3.1 Context  
-_This lesson focuses on separation of concerns and code organization. The dashboard layout is refactored to separate the sidebar into an independent component (`Sidebar.tsx`). The layout is adjusted to properly display the sidebar alongside the main content using the `children` prop. The `fixed` positioning is removed from the sidebar and a flexible layout is configured that allows the main content to display next to the sidebar. A barrel file (`index.ts`) is also created to facilitate imports._
+## 📚 Lecture 039: Sidebar & main content
 
 ### 1. Add the `{ children }` prop in this `layout.tsx`:
 
@@ -828,15 +802,7 @@ export const Sidebar = () => {
 };
 ```
 
-## 🔧 4. Lesson 040 — *Next/Image*
-
-### 🧠 4.1 Context  
-_This lesson introduces the use of Next.js optimized `Image` component to replace traditional HTML `<img>` tags. It is implemented in the Sidebar component to display the user avatar. The Next.js Image component provides automatic image optimization, lazy loading, and better performance. It requires configuring allowed domains in `next.config.ts` through `remotePatterns` to load images from external sources like Unsplash._
-
-### ⚡ 4.2 Incidents Found  
-| Issue | Status | Log/Error |
-|---|---|---|
-| Hostname not allowed | Fixed | Added remotePatterns in next.config.ts |
+## 📚 Lecture 040: Next/Image
 
 Check it out this URL: [Components | Image Componnt | Next.js](https://nextjs.org/docs/app/api-reference/components/image)
 
@@ -966,10 +932,7 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-## 🔧 5. Lesson 041 — *Icons and active route*
-
-### 🧠 5.1 Context  
-_This lesson enhances the sidebar interface by adding icons using the `react-icons` library and creating a reusable `SidebarMenuItem` component for menu items. react-icons is installed and a React icon is added to the dashboard logo. A SidebarMenuItem component is created that accepts props like path, icon, title, and subTitle, allowing for a more maintainable and scalable structure. It sets the groundwork for implementing active navigation that will be completed in the next lesson._
+## 📚 Lecture 041: Icons and active route
 
 ### 1. Install [React-icons](https://react-icons.github.io/react-icons/):
 
@@ -1228,15 +1191,7 @@ export const Sidebar = () => {
 };
 ```
 
-## 🔧 6. Lesson 042 — *Task solution*
-
-### 🧠 6.1 Context  
-_This lesson completes the implementation of active navigation in the sidebar. The `usePathname()` hook from Next.js is used to detect the current route and apply visual styles to the corresponding menu item. `<a>` links are replaced with Next.js `Link` component for more efficient navigation. A `menuItems` array is implemented containing the configuration for each menu item, allowing for a more maintainable structure. An error related to using client hooks in server components is resolved by adding the "use client" directive._
-
-### ⚡ 6.2 Incidents Found  
-| Issue | Status | Log/Error |
-|---|---|---|
-| usePathname hook error | Fixed | Added "use client" directive |
+## 📚 Lecture 042 Task solution
 
 ### 1. Apply `usePathname()` hook:
 
@@ -1287,7 +1242,7 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
 export default SidebarMenuItem;
 ```
 
-![SidebarMenuItem usePathname implementation](../img/section04-lecture042-001.png)
+<img src="../img/section04-lecture042-001.png">
 
 #### Fixing:
 
@@ -1380,15 +1335,7 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
 export default SidebarMenuItem;
 ```
 
-## 🔧 7. Lesson 043 — *state management - useState*
-
-### 🧠 7.1 Context  
-_This lesson introduces React state management using the `useState` hook. A counter component is created in the CounterPage that allows users to increment and decrement a value. The component demonstrates client-side interactivity by using the "use client" directive, which is necessary for using React hooks. The lesson also highlights an important limitation: metadata cannot be exported from client components, requiring a separation between server and client components in Next.js._
-
-### ⚡ 7.2 Incidents Found  
-| Issue | Status | Log/Error |
-|---|---|---|
-| Metadata cannot be used with "use client" | Fixed | Separated client and server components |
+## 📚 Lecture 043: state management - useState
 
 ### 1. Adding style in CounterPage component:
 
@@ -1412,7 +1359,7 @@ export default function CounterPage() {
 }
 ```
 
-![CounterPage styled component](../img/section04-lecture042-002.png)
+<img src="../img/section04-lecture042-002.png">
 
 ### 2. Apply **`useState`** in this page:
 
@@ -1487,12 +1434,9 @@ export default function CounterPage() {
 
 > 🔥 Issue:
 
-![Metadata cannot be used with use client error](../img/section04-lecture042-003.png)
+<img src="../img/section04-lecture042-003.png">
 
-## 🔧 8. Lesson 044 — *Let's think in terms of folders and small components*
-
-### 🧠 8.1 Context  
-_This lesson emphasizes component organization and the separation between server-side and client-side components in Next.js. The counter logic is extracted from the page component into a separate `CartCounter` component within a `shopping-cart` folder structure. This demonstrates best practices for organizing code by feature/domain. The lesson also introduces barrel exports (`index.ts`) for cleaner imports and explains how to pass server-side data (like initial values) to client components as props, illustrating the interaction between server and client components in Next.js App Router._
+## 📚 Lecture 044: Let's think in terms of folders and small components
 
 ### 1. Create **`shopping-cart/components/CartCounter.jsx`**:
 
@@ -1684,40 +1628,9 @@ export default CartCounter;
 
 ---
 
-## 📎 Related Files
-- `src/app/components/Sidebar.tsx`
-- `src/app/components/SidebarMenuItem.tsx`
-- `src/app/dashboard/counter/page.tsx`
-- `src/app/shopping-cart/components/CartCounter.tsx`
-
-## 🔗 References
-- [Next.js Documentation](https://nextjs.org/docs)
-- [React Icons](https://react-icons.github.io/react-icons/)
-- [Tailwind CSS](https://tailwindcss.com/)
-
----
-
 # 👨🏾‍💻 Section 05: Dynamic Generation – SSR
 
-## 📑 Table of Contents
-
-- [⚙️ Section: Dynamic Generation – SSR](#️-section-dynamic-generation--ssr)
-  - [📑 Table of Contents](#-table-of-contents-1)
-  - [🔧 Lesson 050](#-lesson-050)
-  - [🔧 Lesson 051](#-lesson-051)
-  - [🔧 Lesson 052](#-lesson-052)
-  - [🔧 Lesson 053](#-lesson-053)
-  - [🔧 Lesson 054](#-lesson-054)
-  - [🔧 Lesson 055](#-lesson-055)
-  - [📎 Related Files](#-related-files-1)
-  - [🔗 References](#-references-1)
-
----
-
-## 🔧 1. Lesson 050 — *Following with the section*
-
-### 🧠 1.1 Context  
-_This lesson introduces the Pokemons section of the dashboard, marking the beginning of the Dynamic Generation section. A new page route is created at `src/app/dashboard/pokemons/page.tsx` with a basic structure. The Pokemons menu item is added to the sidebar navigation with an appropriate icon and subtitle indicating "Static Generation". This sets up the foundation for implementing server-side rendering and data fetching in subsequent lessons._
+## 📚 Lecture 050: Following with the section
 
 ### 1. Create **`src/app/dashboard/pokemons/page.tsx`** file:
 ```
@@ -1833,19 +1746,7 @@ export const Sidebar = () => {
 ![Pokemons page in sidebar](../img/section05-lecture050-001.png)
 
 
-## 🔧 2. Lesson 051 — *Data Fetching - Next13+*
-
-### 🧠 2.1 Context  
-_This lesson demonstrates server-side data fetching in Next.js 13+ using async/await in server components. The PokeAPI is used as the data source to fetch a list of 151 Pokemon. A `getPokemons` function is created that makes an HTTP request to the PokeAPI endpoint and returns the JSON response. The function is called directly in the page component, which runs on the server, showcasing Next.js App Router's ability to fetch data at request time without client-side JavaScript._
-
-### 🔍 2.2 Testing (Postman)  
-- Method: GET
-- Endpoint: `http://pokeapi.co/api/v2/pokemon?limit=151&offset=0`
-- Environment:
-- Auth:
-- Script tests:
-- Pre-request scripts:
-- Assertions:
+## 📚 Lecture 051: Data Fetching - Next13+
 
 ### 1. Test in POSTMAN:
 #### **GET /**  
@@ -2488,23 +2389,11 @@ export default async function PokemonsPage() {
 ![Pokemons list display in string](../img/section05-lecture051-001.png)
 
 
-## 🔧 3. Lesson 052 — *Assign data type and displays images*
-
-### 🧠 3.1 Context  
-_This lesson focuses on TypeScript type safety and displaying Pokemon images. TypeScript interfaces are created for the API response (`PokemonsResponse`) and a simplified Pokemon model (`SimplePokemon`). The API response is transformed to extract Pokemon IDs from URLs and create a cleaner data structure. Next.js Image component is introduced to display Pokemon sprites from GitHub, requiring configuration of `remotePatterns` in `next.config.ts` to allow loading images from external domains. This demonstrates proper type handling and image optimization in Next.js._
-
-### 🔍 3.2 Testing (Postman)  
-- Method: GET
-- Endpoint: `http://pokeapi.co/api/v2/pokemon?limit=151&offset=0`
-- Environment:
-- Auth:
-- Script tests:
-- Pre-request scripts:
-- Assertions:
+## 📚 Lecture 052: Assign data type and displays images
 
 ### 1. Go to Postman and copy pokemon response:
 
-![Pokemon response button](../img/section05-lecture052-001.png)
+![Pokemon response button](..//img/section05-lecture052-001.png)
 
 ### 2. Create **`src/app/dashboard/pokemons/interfaces/pokemon-response.ts`** file:
 1. Open `Visual Studio Code`
@@ -2594,10 +2483,7 @@ export default nextConfig;
 ```
 
 
-## 🔧 4. Lesson 053 — *Task Solution*
-
-### 🧠 4.1 Context  
-_This lesson completes the Pokemon list display by mapping through the fetched Pokemon data and rendering each Pokemon's image using the Next.js Image component. The `map` method is used to iterate over the `pokemons` array and create an Image component for each Pokemon, using the Pokemon ID to construct the sprite URL. This demonstrates rendering dynamic lists in React/Next.js and showcases the server-side rendering capabilities where all 151 Pokemon images are fetched and rendered on the server before being sent to the client._
+## 📚 Lecture 053: Task Solution:
 
 ### 1. Apply the `map` method in `pokemons` array:
 
@@ -2645,10 +2531,7 @@ export default async function PokemonsPage() {
 
 
 
-## 🔧 5. Lesson 054 — *Let's think in small components*
-
-### 🧠 5.1 Context  
-_This lesson emphasizes component decomposition and reusability by breaking down the Pokemon display into smaller, focused components. A `PokemonGrid` component is created to handle the grid layout and mapping logic, while a `PokemonCard` component is designed to display individual Pokemon information in a card format. The lesson demonstrates best practices for component organization, creating a barrel export pattern for cleaner imports, and shows how to structure components for maintainability. Some performance considerations are noted, such as image size consistency and the need for optimization when loading many images._
+## 📚 Lecture 054: Let's think in small components
 
 ### 1. Add Pokemon List title:
 ```tsx
@@ -2766,7 +2649,7 @@ export default PokemonGrid;
 
 [Tailwind CSS User card](https://www.creative-tim.com/twcomponents/component/user-card-7)
 
-#### 2.4 Complete/Update the barrell `index` file with `PokemonGrid`:
+#### 2.3 Complete/Update the barrell `index` file with `PokemonGrid`:
 ```ts
 /* src/app/dashboard/pokemons/index.ts */
 export type { PokemonsResponse } from "./interfaces/pokemon-response";
@@ -2775,7 +2658,7 @@ export type { SimplePokemon } from "./interfaces/simple-pokemon";
 export { default as PokemonGrid } from "./components/PokemonGrid";  // 👈🏽 ✅
 ```
 
-#### 2.4 Import `PokemonGrid` into `Pokemons`:
+#### 2.3 Import `PokemonGrid` into `Pokemons`:
 ```tsx
 /* src/app/dashboard/pokemons/page.tsx */
 //import Image from "next/image";
@@ -2807,7 +2690,7 @@ export default async function PokemonsPage() {
 }
 ```
 
-#### 2.5 Update `PokemonCard` with card code from [Tailwind CSS User card](https://www.creative-tim.com/twcomponents/component/user-card-7):
+#### 2.4 Update `PokemonCard` with card code from [Tailwind CSS User card](https://www.creative-tim.com/twcomponents/component/user-card-7):
 ```tsx
 /* src/app/dashboard/pokemons/components/PokemonCard.tsx */
 import Link from "next/link";
@@ -3001,148 +2884,58 @@ export default PokemonCard;
 - 🐞 each 151 loaded imagesß
 
 ---
+## 🔥 🔥 🔥
 
-## 📎 Related Files
-- `src/app/dashboard/pokemons/page.tsx`
-- `src/app/dashboard/pokemons/components/PokemonGrid.tsx`
-- `src/app/dashboard/pokemons/components/PokemonCard.tsx`
-- `src/app/dashboard/pokemons/interfaces/pokemon-response.ts`
-- `src/app/dashboard/pokemons/interfaces/simple-pokemon.ts`
-- `next.config.ts`
+---
+# ⚙️ Section #01: `{{SECTION_NAME}}`
 
-## 🔗 References
-- [PokeAPI](https://pokeapi.co/)
-- [Next.js Image Component](https://nextjs.org/docs/app/api-reference/components/image)
-- [Tailwind CSS Components](https://www.creative-tim.com/twcomponents)
-
-### ⚡ 5.2 Incidents Found  
-| Issue | Status | Log/Error |
-|---|---|---|
-| Different image size | Pending | Images have inconsistent dimensions |
-| Each 151 loaded images | Pending | Performance issue with loading all images |
-
-### 🧱 5.3 Pending Fixes (TODO)
-```md
-- [ ] Fix image size consistency
-- [ ] Optimize image loading (lazy load or pagination)
-```
-
-
-## 🔧 6. Lesson 055 — *Image Priority - Loading Priority*
-
-### 🧠 6.1 Context  
-
-In Next.js, the `Image` component provides a `priority` prop that controls how images are loaded and prioritized. By default, Next.js uses lazy loading for images, which means images are only loaded when they're about to enter the viewport. However, for images that are critical to the initial page load (like hero images or above-the-fold content), you can set `priority={true}` to preload them.
-
-When `priority={true}`:
-- The image is preloaded and given high priority during page load
-- It helps improve Largest Contentful Paint (LCP) scores
-- The image is loaded immediately, even if it's not yet visible in the viewport
-- This is particularly useful for images that are "above the fold" or critical to the user experience
-
-When `priority={false}` (default):
-- Images are lazy-loaded as the user scrolls
-- They only load when they're about to enter the viewport
-- This reduces initial page load time and bandwidth usage
-- Ideal for images below the fold or in grids/lists where not all images are immediately visible
-
-In our Pokemon card grid scenario, since we're displaying multiple Pokemon cards and users need to scroll to see them all, setting `priority={false}` ensures that only the images visible in the viewport (and those about to enter it) are loaded, optimizing performance and reducing unnecessary network requests.
-
-### 6.2 Updating and modifying the code:
-
-#### 1 Adding `Priority` as property in `Image` in order to load images on demand:
-```tsx
-/*  */
-import Link from "next/link";
-import Image from "next/image";
-import { SimplePokemon } from "../interfaces/simple-pokemon";
-import { IoHeartOutline } from "react-icons/io5";
-
-interface Props {
-  pokemon: SimplePokemon;
-}
-const PokemonCard = ({ pokemon }: Props) => {
-  const { id, name } = pokemon;
-
-  if (!id) return null;
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
-
-  return (
-    <div className="mx-auto right-0 mt-2 w-60">
-      <div className="flex flex-col bg-white rounded overflow-hidden shadow-lg">
-        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
-          <Image 
-            key={id} 
-            src={imageUrl} 
-            width={100} 
-            height={100} 
-            alt={name} 
-            priority={false}  // 👈🏽 ✅
-          />
-          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
-          <div className="mt-5">
-            <Link
-              href={`/dashboard/pokemon/${id}`}
-              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
-            >
-              More Info
-            </Link>
-          </div>
-        </div>
-        <div className="border-b">
-          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
-            <div className="text-red-600">
-              <IoHeartOutline size={20} />
-            </div>
-            <div className="pl-3">
-              <p className="text-sm font-medium text-gray-800 leading-none">It&apos;s not favourite</p>
-              <p className="text-xs text-gray-500">View your campaigns</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
-export default PokemonCard;
-```
-
-
-#### 2. Testing the `Priority` property:
-*Steps*:
-- Go to Network tab and clear it all
-- Click on `Reaload` button and select `Empty cache and hard reload`.
-- Slowly scrolling the page.
-
-*Expected Results*:
-- slowly loading for image.
-
-#### 3. References:
-  > [Components - Images Components | Nextjsß](https://nextjs.org/docs/app/api-reference/components/image#priority)
-
-
-### ⚡ 6.3 Incidents Found  
-| Issue | Status | Log/Error |
-|---|---|---|
-| Different image size | Pending | Images have inconsistent dimensions |
-| Each 151 images page details| Pending | Loading each 151 image detail pages |
-
-### 🧱 6.4 Pending Fixes (TODO)
-```md
-- [ ] Fix image size consistency
-- [ ] Image detail pagesß
-```
-
-
-
-
-
-
-
+> Short description of what this module covers and its purpose inside the project.
 
 ---
 
-## 🔥 🔥 🔥
+## 📑 Table of Contents
+> _Autogenerated by GitHub based on headings_
+
+- [⚙️ Section: {{SECTION_NAME}}](#️-section-sectionname)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [🔧 Lesson 01](#-lesson-01)
+    - [🧠 Context](#-context)
+    - [🔍 Testing (Postman)](#-testing-postman)
+    - [⚡ Incidents Found](#-incidents-found)
+    - [🧱 Pending Fixes (TODO)](#-pending-fixes-todo)
+  - [🔧 Lesson 02](#-lesson-02)
+  - [📎 Related Files](#-related-files)
+  - [🔗 References](#-references)
+
+---
+
+## 🔧 1. Lesson 01 — *{{LESSON_NAME}}*
+
+### 🧠 1.1 Context  
+_Describe what this lesson is about. State the scenario, API endpoint, user story, etc._
+
+### 🔍 1.2 Testing (Postman)  
+- Method:
+- Endpoint:
+- Environment:
+- Auth:
+- Script tests:
+- Pre-request scripts:
+- Assertions:
+
+### ⚡ 1.3 Incidents Found  
+| Issue | Status | Log/Error |
+|---|---|---|
+| Error 401 | Pending | Invalid token |
+| Missing field | Fixed | field `X` |
+
+### 🧱 1.4 Pending Fixes (TODO)
+```md
+- [ ] Validate response structure
+- [ ] Add auth header
+- [ ] Save environment variables
+```
+
 
 ---
 
