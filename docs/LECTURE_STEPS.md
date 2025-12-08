@@ -3581,7 +3581,179 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 - [ ] Add accessibility improvements to the error page (ARIA labels, keyboard navigation)
 ```
 
+## 🔧 8. Lesson 057 — *Dynamic Routes - URL arguments*
 
+### 🧠 8.1 Context:   
+
+In Next.js App Router, dynamic routes allow us to create pages that handle multiple paths based on URL parameters. This lesson focuses on implementing a dynamic route for individual Pokémon detail pages using the `[id]` folder structure.
+
+**Key Concepts:**
+- Dynamic segments are created using square brackets `[id]` in the folder name
+- In Next.js 15+, route parameters (`params`) are now asynchronous and must be awaited
+- The `params` prop contains a Promise that resolves to an object with the dynamic segment values
+- This enables creating individual detail pages for each Pokémon (e.g., `/dashboard/pokemon/1`, `/dashboard/pokemon/25`, etc.)
+
+**Use Case:**
+When a user clicks on a Pokémon card from the list page (`/dashboard/pokemons`), they should be navigated to a detail page showing specific information about that Pokémon. The ID from the URL is used to fetch and display the corresponding Pokémon data.
+
+**Implementation Steps:**
+1. Create a dynamic route folder structure: `pokemon/[id]/page.tsx`
+2. Define proper TypeScript interfaces for the route parameters
+3. Extract the `id` parameter from the URL
+4. Use the `id` to fetch and display Pokémon-specific data (to be implemented in future lessons)
+
+### ⚙️ 8.2 Updating code according the context:
+
+#### 1. Refactor the project structure:
+```
+02-my-dashboard/
+│
+├── 📄 package.json                    # Dependencies and scripts configuration
+├── 📄 package-lock.json               # Dependencies lock file
+├── 📄 tsconfig.json                   # TypeScript configuration
+├── 📄 next.config.ts                  # Next.js configuration
+├── 📄 next-env.d.ts                   # Next.js types
+├── 📄 eslint.config.mjs               # ESLint configuration
+├── 📄 postcss.config.mjs              # PostCSS configuration
+├── 📄 README.md                       # Project documentation
+│
+├── 📁 docs/                           # Course documentation
+│   ├── LECTURE_STEPS.md
+│   └── LECTURE_STEPS_v01.md
+│
+├── 📁 img/                            # Course reference images
+│   └── ...
+│
+├── 📁 public/                         # Public static files
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+│
+├── 📁 node_modules/                   # Installed dependencies (ignored)
+│
+└── 📁 src/                            # Main source code
+    │
+    ├── 📁 app/                        # Next.js App Router
+    │   ├── 📄 layout.tsx             # Main application layout
+    │   ├── 📄 page.tsx               # Home page
+    │   ├── 📄 globals.css            # Global styles
+    │   ├── 📄 favicon.ico            # Favicon
+    │   │
+    │   └── 📁 dashboard/             # Dashboard section
+    │       ├── 📄 layout.tsx        # Dashboard layout (with Sidebar)
+    │       │
+    │       ├── 📁 main/             # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/          # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       └── 📁 pokemons/         # Pokémons page
+    │           ├── 📄 page.tsx      # Pokémons list
+    │           └── 📄 error.tsx     # Error component
+    │
+    ├── 📁 components/                # Shared components
+    │   ├── 📄 index.ts              # Barrel export
+    │   ├── 📄 Sidebar.tsx           # Sidebar component
+    │   └── 📄 SidebarMenuItem.tsx   # Sidebar menu item
+    │
+    ├── 📁 pokemons/                  # Pokémons module
+    │   ├── 📄 index.ts              # Barrel export
+    │   │
+    │   ├── 📁 components/           # Pokémons-specific components
+    │   │   ├── 📄 PokemonCard.tsx   # Individual Pokémon card
+    │   │   └── 📄 PokemonGrid.tsx   # Pokémons grid
+    │   │
+    │   └── 📁 interfaces/           # TypeScript interfaces
+    │       ├── 📄 pokemon-response.ts    # API response
+    │       └── 📄 simple-pokemon.ts      # Simplified Pokémon
+    │
+    └── 📁 shopping-cart/             # Shopping cart module
+        ├── 📄 index.ts              # Barrel export
+        │
+        └── 📁 components/           # Cart components
+            └── 📄 CartCounter.tsx   # Cart counter
+```
+
+#### 2. Create `/pokemon/[id]/page.tsx` file:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+export default function PokemonPage() {
+  return (
+    <div>
+      <h1>Hello Pokemon [ID] Page</h1>
+    </div>
+  );
+}
+```
+
+#### 3. Adding the `props` in order to know how the `id` format is comming:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+export default function PokemonPage(props: any) {
+  console.log(props);  // 👈🏽 ✅
+  return (
+    <div>
+      <h1>Hello Pokemon [ID] Page</h1>
+    </div>
+  );
+}
+```
+![Getting the params for ID](../img/section05-lecture057-001.png)
+
+
+#### 4. Adding `Props` interface:
+```tsx
+/*  */
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}  // 👈🏽 ✅
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;  // 👈🏽 ✅
+  console.log("ID:", id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+    </div>
+  );
+}
+```
+
+![From terminal](../img/section05-lecture057-002.png)
+
+![From App](../img/section05-lecture057-003.png)
+
+
+### ⚡ 8.3 Incidents Found
+
+No critical incidents were found during the initial implementation. The dynamic route structure is correctly set up and the `id` parameter is successfully extracted from the URL. The following areas require attention but are not blocking issues:
+
+| Issue | Status | Notes |
+|---|---|---|
+| Missing metadata | Pending | Page metadata (title, description) not yet configured |
+| No data fetching | Pending | Pokémon data fetching logic not yet implemented |
+| No error handling | Pending | Invalid ID handling not yet implemented |
+| No loading state | Pending | Loading state for data fetching not yet implemented |
+
+### 🧱 8.4 Pending Fixes (TODO)
+```md
+- [ ] Add metadata export for SEO and page title (using generateMetadata function)
+- [ ] Implement data fetching function to retrieve Pokémon details by ID from PokeAPI
+- [ ] Add error handling for invalid Pokémon IDs (404 not found)
+- [ ] Create TypeScript interfaces for Pokémon detail data structure
+- [ ] Implement loading state while fetching Pokémon data
+- [ ] Add proper error boundary or not-found page for invalid routes
+- [ ] Create UI components to display Pokémon details (image, stats, abilities, etc.)
+- [ ] Add navigation back to Pokémon list page
+- [ ] Implement proper URL validation for the ID parameter
+- [ ] Add metadata generation function that uses the Pokémon name for dynamic page titles
+```
 ---
 
 ## 🔥 🔥 🔥

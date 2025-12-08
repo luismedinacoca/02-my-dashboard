@@ -1,4 +1,4 @@
-import { CartCounter } from "../../shopping-cart";
+import { CartCounter } from "../../../shopping-cart";
 import { Metadata } from "next/types";
 
 export const metadata: Metadata = {
