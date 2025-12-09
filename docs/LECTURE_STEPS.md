@@ -1703,12 +1703,15 @@ export default CartCounter;
 
 - [⚙️ Section: Dynamic Generation – SSR](#️-section-dynamic-generation--ssr)
   - [📑 Table of Contents](#-table-of-contents-1)
-  - [🔧 Lesson 050](#-lesson-050)
-  - [🔧 Lesson 051](#-lesson-051)
-  - [🔧 Lesson 052](#-lesson-052)
-  - [🔧 Lesson 053](#-lesson-053)
-  - [🔧 Lesson 054](#-lesson-054)
-  - [🔧 Lesson 055](#-lesson-055)
+  - [🔧 Lesson 050 — *Following with the section*](#-1-lesson-050--following-with-the-section)
+  - [🔧 Lesson 051 — *Data Fetching - Next13+*](#-2-lesson-051--data-fetching---next13)
+  - [🔧 Lesson 052 — *Assign data type and displays images*](#-3-lesson-052--assign-data-type-and-displays-images)
+  - [🔧 Lesson 053 — *Task Solution*](#-4-lesson-053--task-solution)
+  - [🔧 Lesson 054 — *Let's think in small components*](#-5-lesson-054--lets-think-in-small-components)
+  - [🔧 Lesson 055 — *Image Priority - Loading Priority*](#-6-lesson-055--image-priority---loading-priority)
+  - [🔧 Lesson 056 — *Next - Error Page*](#-7-lesson-056--next---error-page)
+  - [🔧 Lesson 057 — *Dynamic Routes - URL arguments*](#-8-lesson-057--dynamic-routes---url-arguments)
+  - [🔧 Lesson 058 — *Loading Pokemon information by ID*](#-8-lesson-058--loading-pokemon-information-by-id)
   - [📎 Related Files](#-related-files-1)
   - [🔗 References](#-references-1)
 
@@ -3585,7 +3588,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
 ## 🔧 8. Lesson 057 — *Dynamic Routes - URL arguments*
 
-### 🧠 8.1 Context:   
+### 🧠 8.1 Context:
 
 In Next.js App Router, dynamic routes allow us to create pages that handle multiple paths based on URL parameters. This lesson focuses on implementing a dynamic route for individual Pokémon detail pages using the `[id]` folder structure.
 
@@ -3759,9 +3762,9 @@ No critical incidents were found during the initial implementation. The dynamic 
 
 
 
-## 🔧 8. Lesson 058 — *Loading Pokemon information by ID*
+## 🔧 9. Lesson 058 — *Loading Pokemon information by ID*
 
-### 🧠 8.1 Context:   
+### 🧠 9.1 Context:   
 
 Building on the dynamic route implementation from Lesson 057, this lesson focuses on fetching and displaying Pokémon data from the PokeAPI. The dynamic route structure (`pokemon/[id]/page.tsx`) is now ready to retrieve individual Pokémon details based on the ID parameter extracted from the URL.
 
@@ -3786,7 +3789,7 @@ Building on the dynamic route implementation from Lesson 057, this lesson focuse
 
 
 
-### ⚙️ 8.2 Updating code according the context:
+### ⚙️ 9.2 Updating code according the context:
 
 #### 1. Create `getPokemon` function in `pokemon/[id]/page.tsx` file:
 ```tsx
@@ -4103,7 +4106,7 @@ export default async function PokemonPage({ params }: Props) {
 ![Client side - Web - All Pokemon info ](../img/section05-lecture058-003.png)
 
 
-### 🧱 8.3 Pending Fixes (TODO)
+### 🧱 9.3 Pending Fixes (TODO)
 ```md
 - [ ] Add Pokemon info inside the metadata using generateMetadata function
 - [ ] Replace JSON.stringify display with proper UI components for Pokemon details
@@ -4117,6 +4120,195 @@ export default async function PokemonPage({ params }: Props) {
 - [ ] Add TypeScript error handling for API response validation
 - [ ] Implement proper image optimization using Next.js Image component for Pokemon sprites
 - [ ] Add metadata generation that dynamically uses the Pokemon name for SEO-friendly page titles
+```
+
+
+## 🔧 10. Lesson 059 — *Dynamic Metadata*
+
+### 🧠 10.1 Context:
+
+In Next.js, static metadata exports (`export const metadata`) work perfectly for static pages, but they cannot be used for dynamic routes that require runtime data. When building a Pokemon detail page with dynamic routes like `/pokemon/[id]`, we need to generate metadata dynamically based on the Pokemon ID.
+
+The `generateMetadata` function is a special Next.js function that allows us to:
+- Generate metadata asynchronously based on route parameters
+- Access the same `params` object as the page component
+- Return a `Metadata` object that will be used for SEO (title, description, Open Graph tags, etc.)
+- Improve SEO by creating unique, descriptive page titles and descriptions for each Pokemon
+
+This function runs on the server side before rendering the page, ensuring that search engines and social media platforms receive proper metadata for each Pokemon page. However, since both `generateMetadata` and the page component need Pokemon data, we must be careful to avoid duplicate API calls.
+
+### ⚙️ 10.2 Updating code according the context:
+
+#### 1. Impossible to have this `metadata` format for dynamic pages:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export const metadata = {  // 👈🏽 ✅
+  title: "SEO Title",
+  description: "SEO Description",
+};
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+
+  console.log("🐼 Pokemon name:", pokemon.name);
+
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {JSON.stringify(pokemon, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+#### 2. Create a new function: **`generateMetadata()`**
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+//export const metadata = {
+//  title: "SEO Title",
+//  description: "SEO Description",
+//};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {  // 👈🏽 ✅
+  console.log("hello");
+  return {
+    title: "Hello",
+    description: "Hello world",
+  };
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+
+  console.log("🐼 Pokemon name:", pokemon.name);
+
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {pokemon.name}</pre>  // 👈🏽 ✅
+    </div>
+  );
+}
+```
+
+![](../img/section05-lecture059-001.png)
+
+
+#### 3. Update this `generateMetadata` function:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+/*
+export const metadata = {
+  title: "SEO Title",
+  description: "SEO Description",
+};
+*/
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);               // 👈🏽 ✅
+  return {
+    title: `Pokemon #${id} - ${pokemon.name}`,        // 👈🏽 ✅
+    description: `${pokemon.name} page`,              // 👈🏽 ✅
+  };
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+
+  console.log("🐼 Pokemon name:", pokemon.name);
+
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {pokemon.name}</pre>
+    </div>
+  );
+}
+```
+
+![generateMetadata function result from Client side](../img/section05-lecture059-002.png)
+![generateMetadata function result from Server side](../img/section05-lecture059-003.png)
+
+
+### 🐞 10.3 Issues:
+- **Duplicate HTTP requests**: The `getPokemon` function is called twice - once in `generateMetadata` and once in the page component, resulting in unnecessary API calls and slower page loads.
+- **No error handling**: If the Pokemon API fails or returns an invalid response, both `generateMetadata` and the page component will crash without proper error boundaries.
+- **No validation**: The Pokemon ID parameter is not validated before making API calls, which could lead to unnecessary requests for invalid IDs.
+- **Cache inefficiency**: While Next.js may deduplicate requests in some cases, explicitly handling this would be more reliable and performant.
+- **Missing fallback metadata**: If the Pokemon fetch fails in `generateMetadata`, there's no fallback metadata, which could result in broken SEO tags.
+
+### 🧱 10.4 Pending Fixes (TODO)
+
+```md
+- [ ] Optimize duplicate API calls by implementing request deduplication or caching strategy
+- [ ] Add try-catch error handling in `generateMetadata` function to handle API failures gracefully
+- [ ] Implement fallback metadata when Pokemon fetch fails in `generateMetadata`
+- [ ] Add error handling in the page component with proper error boundaries
+- [ ] Validate Pokemon ID parameter before making API calls (check for valid format, range, etc.)
+- [ ] Create a not-found page or error page for invalid Pokemon IDs (404 scenarios)
+- [ ] Consider implementing static metadata generation for all Pokemon pages at build time (using `generateStaticParams` with `generateMetadata`)
+- [ ] Add TypeScript error handling for API response validation
+- [ ] Implement proper error messages and user feedback when Pokemon data cannot be loaded
+- [ ] Add Open Graph and Twitter Card metadata for better social media sharing
+- [ ] Consider adding Pokemon image to metadata for richer social media previews
+- [ ] Implement request deduplication using React cache or a custom caching solution
 ```
 
 
