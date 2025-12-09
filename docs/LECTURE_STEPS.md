@@ -2947,7 +2947,7 @@ export default PokemonGrid;
 
 ### 4. Update `PokemonCard` component:
 ```tsx
-/*  */
+/* src/app/dashboard/pokemons/components/PokemonCard.tsx */
 import Link from "next/link";
 import Image from "next/image";
 import { SimplePokemon } from "../interfaces/simple-pokemon";
@@ -3052,7 +3052,7 @@ In our Pokemon card grid scenario, since we're displaying multiple Pokemon cards
 
 #### 1 Adding `Priority` as property in `Image` in order to load images on demand:
 ```tsx
-/*  */
+/* src/app/dashboard/pokemons/components/PokemonCard.tsx */
 import Link from "next/link";
 import Image from "next/image";
 import { SimplePokemon } from "../interfaces/simple-pokemon";
@@ -3168,7 +3168,7 @@ const getPokemons = async (limit = 20, offset = 0): Promise<SimplePokemon[]> => 
     id: pokemon.url.split("/").at(-2)!,
     name: pokemon.name,
   }));
-  throw new Error("This error must not happen 💣 🔥");  // 👈🏽 ✅
+  throw new Error("This error must not happen 💣 🔥");  // 👈🏽 ✅ server side error 🔥
 
   return pokemons;
 };
@@ -3187,6 +3187,7 @@ export default async function PokemonsPage() {
 }
 ```
 
+[Error Handling](https://nextjs.org/docs/app/getting-started/error-handling)
 ![Simulating an error from Server Side](../img/section05-lecture056-001.png)
 
 #### 2. Create `error.tsx` page:
@@ -3203,7 +3204,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   return (
     <div>
       <h2>Something went wrong!</h2>
-      <span>{error.message}</span>
+      <span>{error.message}</span>  // 👈🏽 ✅
       <button
         onClick={
           // Attempt to recover by trying to re-render the segment
@@ -3216,6 +3217,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   );
 }
 ```
+
 ![Handling with the error page](../img/section05-lecture056-002.png)
 
 #### 3. Copy & Paste the 500-error page from [Tailwind CSS 500 Server Error | Illustration - pages](https://www.creative-tim.com/twcomponents/component/tailwind-css-500-server-error-illustration) code in `error.tsx` component:
@@ -3393,11 +3395,11 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 }
 ```
 
-![](../img/section05-lecture056-003.png)
+![500 Error page template](../img/section05-lecture056-003.png)
 
 #### 4. Updating Strokes' errors:
 ```tsx
-/*  */
+/* src/app/dashboard/pokemons/error.tsx */
 "use client"; // Error boundaries must be Client Components
 
 import { useEffect } from "react";
@@ -3608,73 +3610,73 @@ When a user clicks on a Pokémon card from the list page (`/dashboard/pokemons`)
 ```
 02-my-dashboard/
 │
-├── 📄 package.json                    # Dependencies and scripts configuration
-├── 📄 package-lock.json               # Dependencies lock file
-├── 📄 tsconfig.json                   # TypeScript configuration
-├── 📄 next.config.ts                  # Next.js configuration
-├── 📄 next-env.d.ts                   # Next.js types
-├── 📄 eslint.config.mjs               # ESLint configuration
-├── 📄 postcss.config.mjs              # PostCSS configuration
-├── 📄 README.md                       # Project documentation
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
 │
-├── 📁 docs/                           # Course documentation
+├── 📁 docs/                              # Course documentation
 │   ├── LECTURE_STEPS.md
 │   └── LECTURE_STEPS_v01.md
 │
-├── 📁 img/                            # Course reference images
+├── 📁 img/                               # Course reference images
 │   └── ...
 │
-├── 📁 public/                         # Public static files
+├── 📁 public/                            # Public static files
 │   ├── file.svg
 │   ├── globe.svg
 │   ├── next.svg
 │   ├── vercel.svg
 │   └── window.svg
 │
-├── 📁 node_modules/                   # Installed dependencies (ignored)
+├── 📁 node_modules/                      # Installed dependencies (ignored)
 │
-└── 📁 src/                            # Main source code
+└── 📁 src/                               # Main source code
     │
-    ├── 📁 app/                        # Next.js App Router
-    │   ├── 📄 layout.tsx             # Main application layout
-    │   ├── 📄 page.tsx               # Home page
-    │   ├── 📄 globals.css            # Global styles
-    │   ├── 📄 favicon.ico            # Favicon
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Main application layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Favicon
     │   │
-    │   └── 📁 dashboard/             # Dashboard section
-    │       ├── 📄 layout.tsx        # Dashboard layout (with Sidebar)
+    │   └── 📁 dashboard/                 # Dashboard section
+    │       ├── 📄 layout.tsx             # Dashboard layout (with Sidebar)
     │       │
-    │       ├── 📁 main/             # Main dashboard page
+    │       ├── 📁 main/                  # Main dashboard page
     │       │   └── 📄 page.tsx
     │       │
-    │       ├── 📁 counter/          # Counter page
+    │       ├── 📁 counter/               # Counter page
     │       │   └── 📄 page.tsx
     │       │
-    │       └── 📁 pokemons/         # Pokémons page
-    │           ├── 📄 page.tsx      # Pokémons list
-    │           └── 📄 error.tsx     # Error component
+    │       └── 📁 pokemons/              # Pokémons page
+    │           ├── 📄 page.tsx           # Pokémons list
+    │           └── 📄 error.tsx          # Error component
     │
-    ├── 📁 components/                # Shared components
-    │   ├── 📄 index.ts              # Barrel export
-    │   ├── 📄 Sidebar.tsx           # Sidebar component
-    │   └── 📄 SidebarMenuItem.tsx   # Sidebar menu item
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Barrel export
+    │   ├── 📄 Sidebar.tsx                # Sidebar component
+    │   └── 📄 SidebarMenuItem.tsx        # Sidebar menu item
     │
-    ├── 📁 pokemons/                  # Pokémons module
-    │   ├── 📄 index.ts              # Barrel export
+    ├── 📁 pokemons/                      # Pokémons module
+    │   ├── 📄 index.ts                   # Barrel export
     │   │
-    │   ├── 📁 components/           # Pokémons-specific components
-    │   │   ├── 📄 PokemonCard.tsx   # Individual Pokémon card
-    │   │   └── 📄 PokemonGrid.tsx   # Pokémons grid
+    │   ├── 📁 components/                # Pokémons-specific components
+    │   │   ├── 📄 PokemonCard.tsx        # Individual Pokémon card
+    │   │   └── 📄 PokemonGrid.tsx        # Pokémons grid
     │   │
-    │   └── 📁 interfaces/           # TypeScript interfaces
+    │   └── 📁 interfaces/                # TypeScript interfaces
     │       ├── 📄 pokemon-response.ts    # API response
     │       └── 📄 simple-pokemon.ts      # Simplified Pokémon
     │
-    └── 📁 shopping-cart/             # Shopping cart module
-        ├── 📄 index.ts              # Barrel export
+    └── 📁 shopping-cart/                 # Shopping cart module
+        ├── 📄 index.ts                   # Barrel export
         │
-        └── 📁 components/           # Cart components
-            └── 📄 CartCounter.tsx   # Cart counter
+        └── 📁 components/                # Cart components
+            └── 📄 CartCounter.tsx        # Cart counter
 ```
 
 #### 2. Create `/pokemon/[id]/page.tsx` file:
@@ -3693,7 +3695,7 @@ export default function PokemonPage() {
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 export default function PokemonPage(props: any) {
-  console.log(props);  // 👈🏽 ✅
+  console.log(props);  // 👈🏽 ✅ - server side
   return (
     <div>
       <h1>Hello Pokemon [ID] Page</h1>
@@ -3706,10 +3708,10 @@ export default function PokemonPage(props: any) {
 
 #### 4. Adding `Props` interface:
 ```tsx
-/*  */
+/* src/app/dashboard/pokemon/[id]/page.tsx */
 interface Props {
   params: Promise<{
-    id: string;
+    id: string; // usually those params are always 'string'.
   }>;
 }  // 👈🏽 ✅
 
@@ -3754,6 +3756,370 @@ No critical incidents were found during the initial implementation. The dynamic 
 - [ ] Implement proper URL validation for the ID parameter
 - [ ] Add metadata generation function that uses the Pokémon name for dynamic page titles
 ```
+
+
+
+## 🔧 8. Lesson 058 — *Loading Pokemon information by ID*
+
+### 🧠 8.1 Context:   
+
+Building on the dynamic route implementation from Lesson 057, this lesson focuses on fetching and displaying Pokémon data from the PokeAPI. The dynamic route structure (`pokemon/[id]/page.tsx`) is now ready to retrieve individual Pokémon details based on the ID parameter extracted from the URL.
+
+**Key Concepts:**
+- Server-side data fetching in Next.js App Router using async Server Components
+- Fetching data from external APIs (PokeAPI) using the native `fetch` API
+- TypeScript type safety by creating comprehensive interfaces for API responses
+- Caching strategies using Next.js fetch options (`force-cache` for static data)
+
+**Implementation Steps:**
+1. Create an async `getPokemon` function to fetch Pokémon data from PokeAPI by ID
+2. Define TypeScript interfaces for the complete Pokémon API response structure
+3. Import and use the `Pokemon` interface to type the fetched data
+4. Display the fetched Pokémon information in the page component
+5. Export the new `Pokemon` interface through the barrel export pattern for reusability
+
+**Technical Details:**
+- The `getPokemon` function uses `fetch` with `cache: "force-cache"` for static generation
+- The function is marked as `async` and returns a `Promise<Pokemon>`
+- Server-side console logs help debug the data fetching process
+- The Pokémon data is displayed using JSON.stringify for initial development (to be replaced with proper UI components in future lessons)
+
+
+
+### ⚙️ 8.2 Updating code according the context:
+
+#### 1. Create `getPokemon` function in `pokemon/[id]/page.tsx` file:
+```tsx
+/*  */
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+const getPokemon = async (id: string) => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then( resp => resp.json());
+
+  console.log(pokemon.name); // from server side terminal
+
+  return pokemon;
+};  // 👈🏽 ✅
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);  // 👈🏽 ✅
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {pokemon.name}</pre>
+    </div>
+  );
+}
+```
+
+![Server side - Terminal](../img/section05-lecture058-001.png)
+![Client side - Web](../img/section05-lecture058-002.png)
+
+#### 2. Create Pokemon response Interface:
+1. Go to Postman and make a request to this URL: `https://pokeapi.co/api/v2/pokemon/1`.
+2. Copy the response.
+3. Open **`VS Code`**
+4. create `src/pokemons/interfaces/pokemon.ts` file
+5. CMD/Ctrl + P
+6. Write `> Paste JSON as Code`
+7. Enter `Pokemon`
+8. Pokemon Response Interface:
+    ```ts
+    /* src/pokemons/interfaces/pokemon.ts */
+    export interface Pokemon {
+      abilities:                Ability[];
+      base_experience:          number;
+      cries:                    Cries;
+      forms:                    Species[];
+      game_indices:             GameIndex[];
+      height:                   number;
+      held_items:               any[];
+      id:                       number;
+      is_default:               boolean;
+      location_area_encounters: string;
+      moves:                    Move[];
+      name:                     string;
+      order:                    number;
+      past_abilities:           PastAbility[];
+      past_types:               any[];
+      species:                  Species;
+      sprites:                  Sprites;
+      stats:                    Stat[];
+      types:                    Type[];
+      weight:                   number;
+    }
+
+    export interface Ability {
+      ability:   Species | null;
+      is_hidden: boolean;
+      slot:      number;
+    }
+
+    export interface Species {
+      name: string;
+      url:  string;
+    }
+
+    export interface Cries {
+      latest: string;
+      legacy: string;
+    }
+
+    export interface GameIndex {
+      game_index: number;
+      version:    Species;
+    }
+
+    export interface Move {
+      move:                  Species;
+      version_group_details: VersionGroupDetail[];
+    }
+
+    export interface VersionGroupDetail {
+      level_learned_at:  number;
+      move_learn_method: Species;
+      order:             number | null;
+      version_group:     Species;
+    }
+
+    export interface PastAbility {
+      abilities:  Ability[];
+      generation: Species;
+    }
+
+    export interface GenerationV {
+      "black-white": Sprites;
+    }
+
+    export interface GenerationIv {
+      "diamond-pearl":        Sprites;
+      "heartgold-soulsilver": Sprites;
+      platinum:               Sprites;
+    }
+
+    export interface Versions {
+      "generation-i":    GenerationI;
+      "generation-ii":   GenerationIi;
+      "generation-iii":  GenerationIii;
+      "generation-iv":   GenerationIv;
+      "generation-v":    GenerationV;
+      "generation-vi":   { [key: string]: Home };
+      "generation-vii":  GenerationVii;
+      "generation-viii": GenerationViii;
+    }
+
+    export interface Other {
+      dream_world:        DreamWorld;
+      home:               Home;
+      "official-artwork": OfficialArtwork;
+      showdown:           Sprites;
+    }
+
+    export interface Sprites {
+      back_default:       string;
+      back_female:        null;
+      back_shiny:         string;
+      back_shiny_female:  null;
+      front_default:      string;
+      front_female:       null;
+      front_shiny:        string;
+      front_shiny_female: null;
+      other?:             Other;
+      versions?:          Versions;
+      animated?:          Sprites;
+    }
+
+    export interface GenerationI {
+      "red-blue": RedBlue;
+      yellow:     RedBlue;
+    }
+
+    export interface RedBlue {
+      back_default:      string;
+      back_gray:         string;
+      back_transparent:  string;
+      front_default:     string;
+      front_gray:        string;
+      front_transparent: string;
+    }
+
+    export interface GenerationIi {
+      crystal: Crystal;
+      gold:    Gold;
+      silver:  Gold;
+    }
+
+    export interface Crystal {
+      back_default:            string;
+      back_shiny:              string;
+      back_shiny_transparent:  string;
+      back_transparent:        string;
+      front_default:           string;
+      front_shiny:             string;
+      front_shiny_transparent: string;
+      front_transparent:       string;
+    }
+
+    export interface Gold {
+      back_default:       string;
+      back_shiny:         string;
+      front_default:      string;
+      front_shiny:        string;
+      front_transparent?: string;
+    }
+
+    export interface GenerationIii {
+      emerald:             OfficialArtwork;
+      "firered-leafgreen": Gold;
+      "ruby-sapphire":     Gold;
+    }
+
+    export interface OfficialArtwork {
+      front_default: string;
+      front_shiny:   string;
+    }
+
+    export interface Home {
+      front_default:      string;
+      front_female:       null;
+      front_shiny:        string;
+      front_shiny_female: null;
+    }
+
+    export interface GenerationVii {
+      icons:                  DreamWorld;
+      "ultra-sun-ultra-moon": Home;
+    }
+
+    export interface DreamWorld {
+      front_default: string;
+      front_female:  null;
+    }
+
+    export interface GenerationViii {
+      icons: DreamWorld;
+    }
+
+    export interface Stat {
+      base_stat: number;
+      effort:    number;
+      stat:      Species;
+    }
+
+    export interface Type {
+      slot: number;
+      type: Species;
+    }
+    ```
+
+#### 3. Add the new `Pokemon` response interface into `index` barrel file:
+```ts
+/* src/pokemons/index.ts */
+export type { PokemonsResponse } from "./interfaces/pokemon-response";
+export type { SimplePokemon } from "./interfaces/simple-pokemon";
+export type { Pokemon } from "./interfaces/pokemon";  // 👈🏽 ✅
+
+export { default as PokemonGrid } from "./components/PokemonGrid";
+```
+
+#### 4. Import new `Pokemon` response interface into `pokemon/[id]/page.tsx` file:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";  // 👈🏽 ✅ (Real API Pokemon Response Interface)
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {  // 👈🏽 ✅
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+
+  console.log("🐼 Pokemon name:", pokemon.name);
+
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {pokemon.name}</pre>
+    </div>
+  );
+}
+```
+
+#### 5. Display all Pokemon information:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+
+  console.log("🐼 Pokemon name:", pokemon.name);
+
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {JSON.stringify(pokemon, null, 2)}</pre>
+    </div>
+  );
+}
+```
+![Client side - Web - All Pokemon info ](../img/section05-lecture058-003.png)
+
+
+### 🧱 8.3 Pending Fixes (TODO)
+```md
+- [ ] Add Pokemon info inside the metadata using generateMetadata function
+- [ ] Replace JSON.stringify display with proper UI components for Pokemon details
+- [ ] Implement error handling for invalid Pokemon IDs (404 not found scenarios)
+- [ ] Add loading state management for data fetching
+- [ ] Create proper error boundary or not-found page for invalid routes
+- [ ] Implement proper URL validation for the ID parameter
+- [ ] Add navigation back to Pokemon list page
+- [ ] Create reusable components to display Pokemon details (image, stats, abilities, types, etc.)
+- [ ] Optimize cache strategy (consider revalidation or ISR for better data freshness)
+- [ ] Add TypeScript error handling for API response validation
+- [ ] Implement proper image optimization using Next.js Image component for Pokemon sprites
+- [ ] Add metadata generation that dynamically uses the Pokemon name for SEO-friendly page titles
+```
+
+
 ---
 
 ## 🔥 🔥 🔥
