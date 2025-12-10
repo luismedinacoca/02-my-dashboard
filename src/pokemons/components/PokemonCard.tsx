@@ -14,7 +14,7 @@ const PokemonCard = ({ pokemon }: Props) => {
 
   return (
     <div className="mx-auto right-0 mt-2 w-60">
-      <div className="flex flex-col bg-white rounded overflow-hidden shadow-lg">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
         <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
           <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
           <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>

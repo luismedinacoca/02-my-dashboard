@@ -4312,6 +4312,220 @@ export default async function PokemonPage({ params }: Props) {
 ```
 
 
+
+## 🔧 11. Lesson 060 — *Pokemon screen*
+
+### 🧠 11.1 Context:
+
+In this lesson, we create a detailed Pokemon information page that displays comprehensive information about a specific Pokemon. The page is designed as a profile card using Tailwind CSS, inspired by Horizon UI's Profile Information Card component.
+
+The page displays:
+- **Pokemon identification**: ID number and name
+- **Main image**: Dream world sprite (high-quality artwork)
+- **Moves**: All available moves for the Pokemon
+- **Types**: Pokemon type(s) (e.g., Fire, Water, Grass)
+- **Weight**: Pokemon weight value
+- **Regular Sprites**: Front and back default sprites
+- **Shiny Sprites**: Front and back shiny variant sprites
+
+The implementation uses Next.js Server Components with async data fetching from the PokeAPI. The page also includes dynamic metadata generation using `generateMetadata` to improve SEO and provide proper page titles.
+
+Additionally, we need to configure Next.js to allow loading images from external domains (like `raw.githubusercontent.com`) by updating the `next.config.ts` file with the appropriate `remotePatterns` configuration.
+
+
+### ⚙️ 11.2 Updating code according the context:
+
+#### 11.2.1 Replace the `gyst` link content in `src/app/dashboard/pokemon/[id]/page.tsx` file:
+
+- Link: [Tailwind CSS Profile Information Card - Horizon UI Tailwind | Cards](https://www.creative-tim.com/twcomponents/component/profile-information-card-horizon-ui-tailwind)
+- gist: [Pokemon screen](https://gist.github.com/Klerith/67e34298b2eb6e680514e8d16b44b328)
+
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+  return {
+    title: `Pokemon #${id} - ${pokemon.name}`,
+    description: `${pokemon.name} page`,
+  };
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+  console.log("🐼 Pokemon name:", pokemon.name);
+  return pokemon;
+};
+
+/*
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  console.log("ID:", id);
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div>
+      <h1>Hello Pokemon with ID: {id} - Page</h1>
+      <pre>🔥 {pokemon.name}</pre>
+    </div>
+  );
+}
+*/
+
+export default async function PokemonPage({ params }: Props) {. // 👈🏽 ✅
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div className="flex mt-5 flex-col items-center text-slate-800">
+      <div className="relative flex flex-col items-center rounded-[20px] w-[700px] mx-auto bg-white bg-clip-border  shadow-lg  p-3">
+        <div className="mt-2 mb-8 w-full">
+          <h1 className="px-2 text-xl font-bold text-slate-700 capitalize">
+            #{pokemon.id} {pokemon.name}
+          </h1>
+          <div className="flex flex-col justify-center items-center">
+            <Image
+              src={pokemon.sprites.other?.dream_world.front_default ?? ""}
+              width={150}
+              height={150}
+              alt={`Imagen del pokemon ${pokemon.name}`}
+              className="w-auto h-auto mb-5"
+              priority={true}
+            />
+
+            <div className="flex flex-wrap">
+              {pokemon.moves.map((move) => (
+                <p key={move.move.name} className="mr-2 capitalize">
+                  {move.move.name}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 px-2 w-full">
+          <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg ">
+            <p className="text-sm text-gray-600">Types</p>
+            <div className="text-base font-medium text-navy-700 flex">
+              {pokemon.types.map((type) => (
+                <p key={type.slot} className="mr-2 capitalize">
+                  {type.type.name}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg ">
+            <p className="text-sm text-gray-600">Peso</p>
+            <span className="text-base font-medium text-navy-700 flex">{pokemon.weight}</span>
+          </div>
+
+          <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg">
+            <p className="text-sm text-gray-600">Regular Sprites</p>
+            <div className="flex justify-center">
+              <Image src={pokemon.sprites.front_default} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+
+              <Image src={pokemon.sprites.back_default} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg">
+            <p className="text-sm text-gray-600">Shiny Sprites</p>
+            <div className="flex justify-center">
+              <Image src={pokemon.sprites.front_shiny} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+
+              <Image src={pokemon.sprites.back_shiny} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+#### 11.2.2 Issue related to image hostname:
+```ts
+/* next.config.ts */
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",                        // 👈🏽 ✅
+        hostname: "raw.githubusercontent.com",    // 👈🏽 ✅
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+```
+
+![](../img/section05-lecture060-001.png)
+
+
+
+### 🐞 11.3 Issues:
+
+- **No error handling for invalid Pokemon IDs**: When a user enters an invalid ID (non-numeric string like "abc" or a number outside the valid range like "1700"), the API call will fail but there's no error boundary or try-catch to handle this gracefully. The page will crash or display an error without user-friendly feedback.
+
+- **No validation of Pokemon ID parameter**: The `id` parameter from the URL is not validated before making the API request. This could lead to unnecessary API calls for obviously invalid IDs.
+
+- **Potential image loading failures**: If the Pokemon's dream world sprite doesn't exist (some Pokemon don't have this sprite), the fallback to an empty string (`?? ""`) will result in a broken image. There's no proper fallback image or error handling for missing sprites.
+
+- **No loading state**: Since this is a Server Component, there's no loading state shown to users while the Pokemon data is being fetched, which could lead to a blank page during slow network conditions.
+
+- **Unlimited moves display**: All Pokemon moves are displayed without any limit or pagination. Some Pokemon have 50+ moves, which could make the UI cluttered and hard to read.
+
+- **Weight display without units**: The weight value is displayed as a raw number without indicating the unit (likely hectograms or kilograms), making it unclear to users what the value represents.
+
+- **No error handling in `generateMetadata`**: If the Pokemon fetch fails in `generateMetadata`, the entire metadata generation will fail, potentially causing SEO issues or broken page titles.
+
+- **Cache strategy may not be optimal**: Using `force-cache` means the Pokemon data will be cached indefinitely, which might not be ideal if Pokemon data changes or if we want to show updated information.
+
+![Enter `abc` as pokemon ID](../img/section05-lecture060-002.png)
+![Enter non existent Pokemon ID](../img/section05-lecture060-003.png)
+
+### 🧱 11.4 Pending Fixes (TODO)
+
+```md
+- [ ] Add error handling for invalid Pokemon IDs (non-numeric strings like "abc" or IDs outside valid range like "1700")
+- [ ] Implement validation for Pokemon ID parameter before making API requests
+- [ ] Add proper fallback image handling when dream world sprite doesn't exist
+- [ ] Implement error boundary or try-catch blocks in both `generateMetadata` and page component
+- [ ] Add fallback metadata when Pokemon fetch fails in `generateMetadata`
+- [ ] Limit or paginate Pokemon moves display (some Pokemon have 50+ moves)
+- [ ] Add units to weight display (convert from hectograms to kilograms with proper formatting)
+- [ ] Consider implementing a loading.tsx file for better loading state management
+- [ ] Review and optimize cache strategy (consider using `revalidate` instead of `force-cache` for better data freshness)
+```
+
+
+
+
+
+
 ---
 
 ## 🔥 🔥 🔥
