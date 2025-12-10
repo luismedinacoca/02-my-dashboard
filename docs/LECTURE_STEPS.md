@@ -4312,7 +4312,6 @@ export default async function PokemonPage({ params }: Props) {
 ```
 
 
-
 ## 🔧 11. Lesson 060 — *Pokemon screen*
 
 ### 🧠 11.1 Context:
@@ -4482,9 +4481,7 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-![](../img/section05-lecture060-001.png)
-
-
+![Pokémon screen](../img/section05-lecture060-001.png)
 
 ### 🐞 11.3 Issues:
 
@@ -4523,19 +4520,195 @@ export default nextConfig;
 
 
 
+## 🔧 12. Lesson 061 — *Debugging code - Breakpoints*
+
+### 🧠 12.1 Context:
+
+Debugging is an essential skill for developers, and breakpoints are one of the most powerful tools for understanding code execution flow and identifying bugs. In this lesson, we learn how to set up and use breakpoints in VS Code (or Cursor) to debug Next.js applications.
+
+**What are Breakpoints?**
+Breakpoints are markers placed in your code that pause execution when reached, allowing you to:
+- Inspect variable values at that point in execution
+- Step through code line by line
+- Evaluate expressions in the current context
+- Understand the call stack and execution flow
+- Identify where bugs occur or unexpected behavior happens
+
+**Debugging in Next.js:**
+Next.js applications can be debugged using VS Code's built-in debugger. The debugger works with both:
+- **Server Components**: Code that runs on the server (like `getPokemon` function)
+- **Client Components**: Code that runs in the browser (marked with `"use client"`)
+
+**How it Works:**
+1. Set a breakpoint by clicking in the gutter (left of line numbers) or pressing `F9` on a line
+2. Start the debugger using the Debug panel or keyboard shortcuts
+3. When execution reaches the breakpoint, the debugger pauses
+4. You can inspect variables, step over/into functions, and continue execution
+
+**Debugging Server-Side Code:**
+For Next.js Server Components and API routes, the debugger attaches to the Node.js process running the Next.js dev server. This allows you to debug server-side code execution, inspect async operations, and trace data fetching logic.
+
+**Benefits:**
+- Faster bug identification compared to console.log statements
+- Visual inspection of variable states
+- Step-by-step code execution analysis
+- Better understanding of async/await flow
+- Ability to modify variable values on the fly for testing
 
 
+### ⚙️ 12.2 Updating code according the context:
 
----
+Add a breaking point at `console.log("🐼 Pokemon name:", pokemon.name);` line in `getPokemon()` method.
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
 
-## 🔥 🔥 🔥
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
----
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+  return {
+    title: `Pokemon #${id} - ${pokemon.name}`,
+    description: `${pokemon.name} page`,
+  };
+}
 
-## 📚 Lecture 0
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
 
-### 1.
+  🔴 console.log("🐼 Pokemon name:", pokemon.name);
 
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div className="flex mt-5 flex-col items-center text-slate-800">
+      <div className="relative flex flex-col items-center rounded-[20px] w-[700px] mx-auto bg-white bg-clip-border  shadow-lg  p-3">
+        ...
+      </div>
+    </div>
+  );
+}
+
+```
+#### 12.2.1 Go to `package.json` file:
+1. Click on `Debug` button:
+
+![Debug button in `package.json` file](../img/section05-lecture061-001.png)
+
+2. Select `dev next dev`:
+
+![dev option for debugging](../img/section05-lecture061-002.png)
+
+3. Expected Result:
+
+![Expected result from IDE](../img/section05-lecture061-003.png)
+
+#### 12.2.2 Fastest mode:
+1. `CMD/Ctrl + P`:
+2. Write `> Debug`
+3. Click on `Debug: Debug npm Script`
+
+![Fastest - using keyboard](../img/section05-lecture061-004.png)
 ```tsx
 /*  */
+
+```
+
+### 🐞 12.3 Issues:
+
+- **Breakpoints may not hit in Server Components without proper configuration**: If the debugger isn't properly configured or if source maps aren't generated correctly, breakpoints in Server Components might not pause execution, making debugging difficult.
+
+- **Debugging async functions can be confusing**: When debugging async functions like `getPokemon`, stepping through code can jump between different execution contexts, making it harder to follow the flow, especially with `.then()` chains vs async/await.
+
+- **No error handling in debugged code**: The `getPokemon` function doesn't have try-catch blocks, so if the API call fails during debugging, the error might not be caught gracefully, potentially crashing the debug session.
+
+- **Breakpoints in `generateMetadata` might not work as expected**: Since `generateMetadata` runs during build time and request time, breakpoints might only hit during certain phases, making it harder to debug metadata generation issues.
+
+- **Console.log statements left in production code**: The `console.log("🐼 Pokemon name:", pokemon.name);` statement is left in the code, which should be removed or replaced with proper logging in production builds.
+
+- **No conditional breakpoints demonstrated**: The lesson only shows simple breakpoints, but conditional breakpoints (e.g., break only when `pokemon.id === 25`) can be more powerful for debugging specific scenarios.
+
+- **Debugging might not work if Next.js dev server isn't started via debugger**: If you start the dev server manually (`npm run dev`) instead of through the debugger, breakpoints won't work because the debugger isn't attached to the process.
+
+- **Source map issues with TypeScript**: If TypeScript source maps aren't configured correctly, breakpoints might hit at incorrect lines or show transpiled JavaScript instead of the original TypeScript code.
+
+- **No debugging configuration file (launch.json)**: The lesson relies on VS Code's automatic detection, but a proper `launch.json` configuration file would provide more control and better debugging experience.
+
+- **Breakpoints in multiple files simultaneously**: When debugging, you might need to set breakpoints in multiple files (e.g., both `page.tsx` and utility functions), but the lesson only demonstrates breakpoints in a single file.
+
+### 🧱 12.4 Pending Fixes (TODO)
+
+```md
+- [ ] Create a proper `.vscode/launch.json` configuration file for Next.js debugging with explicit settings
+- [ ] Add error handling (try-catch) to `getPokemon` function to make debugging errors more graceful
+- [ ] Remove or replace `console.log` statements with proper logging solution (e.g., using a logger utility)
+- [ ] Document how to set conditional breakpoints for debugging specific scenarios (e.g., break when pokemon.id === 25)
+- [ ] Add instructions for debugging Client Components separately from Server Components
+- [ ] Configure TypeScript source maps properly in `tsconfig.json` to ensure accurate breakpoint locations
+- [ ] Document how to debug API routes and middleware in Next.js
+- [ ] Add instructions for debugging production builds (requires source maps in production)
+- [ ] Create a debugging guide for common Next.js debugging scenarios (data fetching, routing, etc.)
+- [ ] Add breakpoints in multiple files to demonstrate debugging across component boundaries
+- [ ] Document how to use VS Code's debug console to evaluate expressions during debugging
+- [ ] Add instructions for using watch expressions to monitor variable values during debugging
+- [ ] Document how to debug async/await vs Promise chains for better understanding of execution flow
+- [ ] Add instructions for debugging `generateMetadata` function specifically (build-time vs runtime)
+- [ ] Create a checklist for debugging setup to ensure breakpoints work correctly
+```
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+🔥 🔥 🔥 
+
+## 🔧 XX. Lesson YYY — *Pokemon screen*
+
+### 🧠 XX.1 Context:
+
+
+### ⚙️ XX.2 Updating code according the context:
+
+#### XX.2.1
+```tsx
+/*  */
+
+```
+
+#### XX.2.2
+```tsx
+/*  */
+
+```
+
+### 🐞 XX.3 Issues:
+- **first issue**: something..
+
+### 🧱 XX.4 Pending Fixes (TODO)
+
+```md
+- [ ]
 ```
