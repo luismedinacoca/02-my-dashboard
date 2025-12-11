@@ -11,13 +11,13 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const pokemon = await getPokemon(id);
   try {
+    const pokemon = await getPokemon(id); // 👈🏽 ✅ (1) - Moved inside try block
     return {
       title: `Pokemon #${id} - ${pokemon.name}`,
       description: `${pokemon.name} page`,
     };
-  } catch (error) {
+  } catch {
     return {
       title: "Pokemon page not found",
       description: "Pokemon page not found",
@@ -34,7 +34,7 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
     notFound(); // Esto activará not-found.tsx
   }
 
-  const pokemon = resp.json();
+  const pokemon = await resp.json(); // 👈🏽 ✅ (1) - Fixed: Added await
   console.log("🐼 Pokemon name:", pokemon);
   return pokemon;
 };
