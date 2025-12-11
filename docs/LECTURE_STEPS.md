@@ -4623,10 +4623,7 @@ export default async function PokemonPage({ params }: Props) {
 3. Click on `Debug: Debug npm Script`
 
 ![Fastest - using keyboard](../img/section05-lecture061-004.png)
-```tsx
-/*  */
 
-```
 
 ### 🐞 12.3 Issues:
 
@@ -4672,6 +4669,253 @@ export default async function PokemonPage({ params }: Props) {
 
 
 
+## 🔧 13. Lesson 062 — *Not found Page - 404*
+
+### 🧠 13.1 Context:
+
+In Next.js 13+ with the App Router, handling 404 errors is done through special `not-found.tsx` files. Next.js provides a built-in mechanism to display custom 404 pages when a route is not found or when `notFound()` function is called programmatically.
+
+This lesson focuses on implementing custom 404 pages at two levels:
+1. **Global level** (`src/app/not-found.tsx`): Handles 404 errors for routes that don't exist anywhere in the application
+2. **Route-specific level** (`src/app/dashboard/pokemon/[id]/not-found.tsx`): Handles 404 errors specifically for non-existent Pokemon IDs
+
+When a user tries to access a Pokemon page with an invalid ID (e.g., `/dashboard/pokemon/99999`), the `getPokemon` function detects the error and calls `notFound()`, which triggers the route-specific `not-found.tsx` page. This provides a better user experience than showing a generic error or blank page.
+
+The implementation includes:
+- Error handling in the `getPokemon` function using `notFound()` from Next.js navigation
+- Try-catch blocks in `generateMetadata` to handle metadata generation errors gracefully
+- Styled 404 pages with consistent design matching the dashboard layout
+- Navigation links to help users return to valid pages
+
+### ⚙️ 13.2 Updating code according the context:
+
+- Enter a URL searching for non-existent pokemon page.
+- Return a basic 404 page.
+![basic page for 404](../img/section05-lecture062-001.png)
+
+#### 13.2.1 Create `not-found.tsx` file a global level:
+```tsx
+/* src/app/not-found.tsx */
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <div>
+      <h2>Not Found</h2>
+      <p>Could not find requested resource</p>
+      <Link href="/dashboard/counter">Go to Counter Page</Link>  // 👈🏽 ✅
+    </div>
+  );
+}
+```
+![Using the not-found file](../img/section05-lecture062-002.png)
+
+#### 13.2.2 Add style to `not-found.tsx` file:
+- using some code from `dashboard/layout.tsx`
+```tsx
+/* src/app/dashboard/layout.tsx */
+<div className="bg-slate-100 overflow-y-scroll w-screen h-screen antialiased text-slate-300 selection:bg-blue-600 selection:text-white">
+      <div className="flex">
+        <Sidebar />
+        <div className="p-2 w-full text-slate-900">
+          {.... from "https://www.creative-tim.com/twcomponents/component/404-page-not-found" }
+        </div>
+      </div>
+    </div>
+```
+
+[404 Page Not Found | Pages, Widget](https://www.creative-tim.com/twcomponents/component/404-page-not-found)
+
+
+#### 13.2.3 Finally `not-found` page looks like:
+```tsx
+/* src/app/not-found.tsx */
+import { Sidebar } from "@/components/Sidebar";
+import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <div className="bg-slate-100 overflow-y-scroll w-screen h-screen antialiased text-slate-300 selection:bg-blue-600 selection:text-white">
+      <div className="flex">
+        <Sidebar />
+        <div className="p-2 w-full text-slate-900">
+          <main className="h-screen w-full flex flex-col justify-center items-center bg-[#1A2238]">
+            <h1 className="text-9xl font-extrabold text-white tracking-widest">404</h1>
+            <div className="bg-[#FF6A3D] px-2 text-sm rounded rotate-12 absolute">Page Not Found</div>
+            <button className="mt-5">
+              <a className="relative inline-block text-sm font-medium text-[#FF6A3D] group active:text-orange-500 focus:outline-none focus:ring">
+                <span className="absolute inset-0 transition-transform translate-x-0.5 translate-y-0.5 bg-[#FF6A3D] group-hover:translate-y-0 group-hover:translate-x-0"></span>
+                <span className="relative block px-8 py-3 bg-[#1A2238] border border-current">
+                  <Link href="/dashboard/main">Go Dashboard</Link>
+                </span>
+              </a>
+            </button>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+![Not found page with final style](../img/section05-lecture062-003.png)
+
+
+#### 13.2.4 Adding `try-catch` in metadata pokemon ID page:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+  try {  // 👈🏽 ✅
+    return {
+      title: `Pokemon #${id} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch (error) {  // 👈🏽 ✅
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const pokemon = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  }).then((resp) => resp.json());
+
+  console.log("🐼 Pokemon name:", pokemon.name);
+
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (
+    <div className="flex mt-5 flex-col items-center text-slate-800">
+      <div className="relative flex flex-col items-center rounded-[20px] w-[700px] mx-auto bg-white bg-clip-border shadow-lg p-3">
+        <div className="mt-2 mb-8 w-full">
+          <h1 className="px-2 text-xl font-bold text-slate-700 capitalize">
+            #{pokemon.id} {pokemon.name}
+          </h1>
+          <div className="flex flex-col justify-center items-center">
+            <Image
+              src={pokemon.sprites.other?.dream_world.front_default ?? ""}
+              width={150}
+              height={150}
+              alt={`Imagen del pokemon ${pokemon.name}`}
+              className="w-auto h-auto mb-5"
+              priority={true}
+            />
+
+            <div className="flex flex-wrap">
+              {pokemon.moves.map((move) => (
+                <p key={move.move.name} className="mr-2 capitalize">
+                  {move.move.name}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 px-2 w-full">
+          <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg ">
+            <p className="text-sm text-gray-600">Types</p>
+            <div className="text-base font-medium text-navy-700 flex">
+              {pokemon.types.map((type) => (
+                <p key={type.slot} className="mr-2 capitalize">
+                  {type.type.name}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg ">
+            <p className="text-sm text-gray-600">Peso</p>
+            <span className="text-base font-medium text-navy-700 flex">{pokemon.weight}</span>
+          </div>
+
+          <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg">
+            <p className="text-sm text-gray-600">Regular Sprites</p>
+            <div className="flex justify-center">
+              <Image src={pokemon.sprites.front_default} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+
+              <Image src={pokemon.sprites.back_default} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center rounded-2xl bg-white bg-clip-border px-3 py-4  drop-shadow-lg">
+            <p className="text-sm text-gray-600">Shiny Sprites</p>
+            <div className="flex justify-center">
+              <Image src={pokemon.sprites.front_shiny} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+
+              <Image src={pokemon.sprites.back_shiny} width={100} height={100} alt={`sprite ${pokemon.name}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+#### 13.2.5 Copy/Paste the `not-found.tsx` file into `src/app/dashboard/pokemon/[id]` folder and update changes:
+```tsx
+/*  */
+import Link from "next/link";
+export default function NotFound() {
+  return (
+    <main className="h-screen w-full flex flex-col justify-center items-center bg-[#1A2238]">
+      <h1 className="text-9xl font-extrabold text-white tracking-widest">404</h1>
+      <div className="bg-[#FF6A3D] px-2 text-sm rounded rotate-12 absolute">Pokémon Not Found</div>
+      <button className="mt-5">
+        <a className="relative inline-block text-sm font-medium text-[#FF6A3D] group active:text-orange-500 focus:outline-none focus:ring">
+          <span className="absolute inset-0 transition-transform translate-x-0.5 translate-y-0.5 bg-[#FF6A3D] group-hover:translate-y-0 group-hover:translate-x-0"></span>
+          <span className="relative block px-8 py-3 bg-[#1A2238] border border-current">
+            <Link href="/dashboard/pokemons">Go Pokemon Dashboard</Link>
+          </span>
+        </a>
+      </button>
+    </main>
+  );
+}
+```
+![Pokemon not found page](../img/section05-lecture062-004.png)
+
+### 🐞 13.3 Issues:
+
+- **Issue 1: Try-catch in generateMetadata doesn't properly handle notFound()**: The `generateMetadata` function wraps `getPokemon` in a try-catch block, but `getPokemon` calls `notFound()` which throws a special Next.js error that should not be caught. When `notFound()` is called, it should propagate up to trigger the `not-found.tsx` page, but the try-catch might interfere with this behavior.
+
+- **Issue 2: Inconsistent layout between global and pokemon-specific not-found pages**: The global `not-found.tsx` includes the Sidebar component and matches the dashboard layout, while the pokemon-specific `not-found.tsx` only renders the main content without the Sidebar. This creates an inconsistent user experience.
+
+- **Issue 3: Missing await in getPokemon function**: In the actual implementation, there's a potential issue where `resp.json()` might not be awaited properly, which could cause race conditions or incorrect error handling.
+
+- **Issue 4: Padding inconsistency**: The global `not-found.tsx` has padding (`p-2`) in the wrapper div, but the pokemon-specific `not-found.tsx` doesn't have any padding, causing layout inconsistencies. Additionally, the pokemon-specific page doesn't inherit the dashboard layout structure.
+
+- **Issue 5: Error handling in generateMetadata**: The try-catch in `generateMetadata` catches errors but doesn't call `notFound()`, which means if `getPokemon` fails, it will return default metadata instead of triggering the 404 page. This could lead to incorrect metadata being generated for non-existent Pokemon.
+
+### 🧱 13.4 Pending Fixes (TODO)
+
+```md
+- [ ] Fix padding inconsistency in 404 Pokemon Not Found page (add proper padding or wrap with dashboard layout)
+- [ ] Fix padding inconsistency in 404 not found general page (ensure consistent padding with dashboard layout)
+- [ ] Refactor generateMetadata to properly handle notFound() calls without try-catch interference
+- [ ] Ensure pokemon-specific not-found.tsx inherits dashboard layout structure (add Sidebar and consistent styling)
+- [ ] Add proper error handling in getPokemon function to ensure notFound() is called correctly
+- [ ] Verify that await is properly used in getPokemon function for resp.json() call
+- [ ] Consider extracting not-found page styles into a reusable component to maintain consistency
+- [ ] Add proper TypeScript types for error handling in generateMetadata function
+```
 
 
 
@@ -4685,7 +4929,7 @@ export default async function PokemonPage({ params }: Props) {
 
 🔥 🔥 🔥 
 
-## 🔧 XX. Lesson YYY — *Pokemon screen*
+## 🔧 XX. Lesson YYY — *{{TITLE_NAME}}*
 
 ### 🧠 XX.1 Context:
 
