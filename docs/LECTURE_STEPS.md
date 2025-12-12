@@ -5307,6 +5307,308 @@ export default async function PokemonPage({ params }: Props) {
 ```
 
 
+## 📚 2. Lesson 072 - *Task solution*
+
+### 🧠 2.1 Context:
+
+**Static Site Generation (SSG) with Dynamic Routes Using Names**
+
+In Next.js, `generateStaticParams()` is a powerful function that allows pre-generating static pages for dynamic routes at build time. This lesson focuses on implementing static generation for Pokemon pages using **names** instead of **IDs** as route parameters.
+
+**When and Why It's Used:**
+
+1. **Build-Time Pre-rendering**: When you want to generate static HTML pages for all possible route parameters during the build process, rather than on-demand at request time.
+
+2. **Performance Optimization**: Pre-generated pages are served instantly from the CDN, providing better performance and SEO benefits compared to server-side rendering or client-side rendering.
+
+3. **API Data Fetching**: Unlike the previous lesson (071) where we generated IDs numerically (1-151), this lesson demonstrates fetching actual Pokemon names from the PokeAPI and using them as route parameters.
+
+**How It Works in This Project:**
+
+The implementation in ```14:19:src/app/dashboard/pokemons/[name]/page.tsx``` shows:
+
+1. **Fetching Pokemon Names**: The `generateStaticParams()` function fetches the first 151 Pokemon from the PokeAPI endpoint (`http://pokeapi.co/api/v2/pokemon?limit=151`).
+
+2. **Mapping to Route Parameters**: Each Pokemon's name is extracted from the API response and mapped to the route parameter format `{ name: pokemon.name }`.
+
+3. **Static Generation**: Next.js uses these parameters to pre-generate 151 static pages at build time, one for each Pokemon name.
+
+4. **URL Structure**: Pages are accessible via URLs like `/dashboard/pokemons/bulbasaur`, `/dashboard/pokemons/charmander`, etc.
+
+**Advantages:**
+
+- ✅ **Better SEO**: Static pages are fully crawlable by search engines
+- ✅ **Faster Load Times**: Pre-rendered HTML is served immediately without server computation
+- ✅ **Lower Server Costs**: Static files can be served from CDN without server processing
+- ✅ **User-Friendly URLs**: Names are more readable and memorable than numeric IDs (e.g., `/pokemons/bulbasaur` vs `/pokemon/1`)
+- ✅ **Consistent Data**: All 151 Pokemon pages are generated with the same data snapshot at build time
+
+**Disadvantages:**
+
+- ⚠️ **Case Sensitivity**: Pokemon API is case-sensitive. URLs must match exactly (e.g., `bulbasaur` works, but `Bulbasaur` may fail)
+- ⚠️ **Build Time**: Generating 151 pages increases build time compared to on-demand rendering
+- ⚠️ **Data Freshness**: Static pages contain data from build time. Requires revalidation or rebuild to update content
+- ⚠️ **API Dependency**: Build process depends on external API availability. If PokeAPI is down during build, generation fails
+
+**When to Consider Alternatives:**
+
+- **Incremental Static Regeneration (ISR)**: Use `revalidate` option (as implemented in ```41:43:src/app/dashboard/pokemons/[name]/page.tsx```) when you need periodic updates without full rebuilds
+- **On-Demand Rendering**: For routes with frequently changing or user-specific content
+- **Server-Side Rendering (SSR)**: When you need real-time data on every request
+- **Client-Side Rendering**: For highly interactive pages that don't need SEO
+
+**Key Differences from ID-Based Approach:**
+
+| Aspect | ID-Based (`/pokemon/[id]`) | Name-Based (`/pokemons/[name]`) |
+|--------|---------------------------|--------------------------------|
+| Parameter Source | Generated numerically (1-151) | Fetched from API response |
+| URL Example | `/pokemon/1` | `/pokemons/bulbasaur` |
+| Readability | Less intuitive | More user-friendly |
+| Case Sensitivity | Not applicable | Must match API exactly |
+| Build Dependency | No external API call needed | Requires API call during build |
+
+**Connection to Practical Implementation:**
+
+This lesson demonstrates a real-world pattern where route parameters come from external API data rather than being programmatically generated. The implementation shows how to:
+- Fetch data during build time
+- Transform API responses into route parameters
+- Handle async operations in `generateStaticParams()`
+- Maintain consistency with existing ID-based routes while providing a more user-friendly alternative
+
+
+### ⚙️ 2.2 Updating code according the context:
+
+Generate the `pokemons/[name]` page so that it behaves very similarly to the existing `pokemon/[id]` page.
+
+#### 2.2.1 Create `/pokemons/[name]/page.tsx`  & `/pokemons/[name]/not-found.tsx`files:
+```tsx
+/* /pokemons/[name]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+
+interface Props {
+  params: Promise<{
+    name: string;  // 👈🏽 ✅
+  }>;
+}
+//TODO: Need to update
+export async function generateStaticParams() {
+  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
+  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+
+  return static151Pokemons.map((id) => ({
+    id: id,
+  }));
+}
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;  // 👈🏽 ✅
+  try {
+    const pokemon = await getPokemon(name);  // 👈🏽 ✅
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+const getPokemon = async (name: string): Promise<Pokemon> => {  // 👈🏽 ✅
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {  // 👈🏽 ✅
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {  // 👈🏽 ✅
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
+  });
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;  // 👈🏽 ✅
+  const pokemon = await getPokemon(name);  // 👈🏽 ✅
+  return (
+    // ....more code
+  );
+}
+```
+
+Testing:
+- [search bulbasaur](localhost:3000/api/v2/pokemons/bulbasaur) ✅
+- [search charmeleon](localhost:3000/api/v2/pokemons/charmeleon) ✅
+- [search Charmeleon](localhost:3000/api/v2/pokemons/Charmeleon) 🔥 
+
+#### 2.2.2 Update `PokemonCard` href in Link:
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeartOutline } from "react-icons/io5";
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+  if (!id) return null;
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}  // 👈🏽 ✅
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">
+              <IoHeartOutline size={20} />
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">It&apos;s not favourite</p>
+              <p className="text-xs text-gray-500">View your campaigns</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PokemonCard;
+```
+
+Testing:
+* Go to Dashboard
+* Click on `Pokemons` in sidebar.
+* Click on any `More Info` button
+* Verify URL: [Bulbasaur](http://loclahost:3000/dashboard/pokemon/bulbasaur)
+
+#### 2.2.3 Update `generateStaticParams()` function in `7dashboard/pokemons/[name]/page.jsx`
+```tsx
+/* src/app/dashboard/pokemons/[name]/page.tsx */
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+
+interface Props {
+  params: Promise<{
+    name: string;
+  }>;
+}
+
+//! Preload in Build time
+/*
+Following from `src/app/dashboard/pokemons/page.tsx` in `getPokemons()` method
+*/
+export async function generateStaticParams() {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`)  // 👈🏽 ✅
+    .then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));  // 👈🏽 ✅
+  
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);  // 👈🏽 ✅
+
+  return static151Pokemons.map(({ name }) => ({ name: name }));  // 👈🏽 ✅
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  try {
+    const pokemon = await getPokemon(name);
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
+  });
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
+
+  return (
+    // .... more code hidden
+  );
+}
+```
+
+Notes:
+* In `generateStaticParams()` method, the _return_ could be `return static151Pokemons;` only.
+* The `console.log("🤔 Static 151 Pokemons:", static151Pokemons);` is showing this static151Pokemons as an array with `{name: name}`.
+
+![useless second static151Pokemon mapping](../img/section06-lecture072-001.png)
+
+
+#### 2.2.4 Generate the build and the start:
+```bash
+npm run build
+```
+![IDs and NAMEs building](../img/section06-lecture072-002.png)
+
+```bash
+npm run start
+```
+
+
+
+
+### 🐞 2.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Redundant mapping in generateStaticParams** | ⚠️ Identified | In ```14:19:src/app/dashboard/pokemons/[name]/page.tsx```, there's a double mapping operation. Line 16 creates `static151Pokemons` with `{name: pokemon.name}`, and line 19 maps again to `{name: pokemon.name}`. This is unnecessary and can be simplified to `return static151Pokemons;` directly. |
+| **Case sensitivity in Pokemon names** | ⚠️ Identified | The PokeAPI is case-sensitive. Testing shows that `charmeleon` works but `Charmeleon` fails (line 5383). URLs must match the exact lowercase format returned by the API. This can cause 404 errors if users type names with capital letters. |
+| **Incorrect metadata title format** | ⚠️ Identified | In ```27:27:src/app/dashboard/pokemons/[name]/page.tsx```, the metadata title uses `Pokemon #${name}` which displays the name parameter instead of the Pokemon's ID number. Should be `Pokemon #${pokemon.id} - ${pokemon.name}` for consistency with the ID-based route. |
+| **Missing URL normalization** | ⚠️ Identified | No normalization of Pokemon names to lowercase in URLs. The `PokemonCard` component (```23:23:src/pokemons/components/PokemonCard.tsx```) uses the raw `name` from the API, which should be lowercase, but there's no explicit normalization to prevent case-related issues. |
+| **Inconsistent cache strategy** | ℹ️ Low Priority | The `getPokemon` function uses `revalidate: 60 * 60 * 24 * 7` (7 days) instead of `cache: "force-cache"` like the ID-based route. While ISR is valid, the inconsistency between routes may cause confusion. The commented TODO suggests this was intentional for future steps. |
+
+### 🧱 2.4 Pending Fixes (TODO)
+
+```md
+- [ ] Remove redundant mapping in `generateStaticParams()` function at ```14:19:src/app/dashboard/pokemons/[name]/page.tsx``` - simplify to `return static151Pokemons;` instead of double mapping
+- [ ] Add URL normalization to ensure Pokemon names are always lowercase in routes - implement `.toLowerCase()` when generating links in `PokemonCard` component (```23:23:src/pokemons/components/PokemonCard.tsx```)
+- [ ] Fix metadata title format in `generateMetadata()` function (```27:27:src/app/dashboard/pokemons/[name]/page.tsx```) - change from `Pokemon #${name}` to `Pokemon #${pokemon.id} - ${pokemon.name}` for consistency
+- [ ] Add input validation/normalization in `getPokemon()` function to handle case-insensitive Pokemon name lookups or provide clear error messages for case mismatches
+- [ ] Consider adding a redirect or normalization middleware to handle capitalized Pokemon names (e.g., `/pokemons/Charmeleon` → `/pokemons/charmeleon`)
+- [ ] Document the case sensitivity requirement in the component or add TypeScript types to enforce lowercase Pokemon names
+- [ ] Review and align cache strategy between `/pokemon/[id]` and `/pokemons/[name]` routes for consistency (currently using different approaches: `force-cache` vs `revalidate`)
+```
 
 
 
@@ -5316,26 +5618,34 @@ export default async function PokemonPage({ params }: Props) {
 
 ---
 
-## 📚 Lecture 0
+[TEMPLATE]
 
-### 1.
-
-### 🧠 1.1 Context:
+## 📚 X. Lesson YYY - *{{TITLE_NAME}}*
 
 
-### ⚙️ 1.2 Updating code according the context:
+### 🧠 X.1 Context:
 
 
-#### 4.2.2
+### ⚙️ X.2 Updating code according the context:
+
+
+#### X.2.1
 ```tsx
 /*  */
 
 ```
 
-### 🐞 4.3 Issues:
+#### X.2.2
+```tsx
+/*  */
+
+```
+
+### 🐞 X.3 Issues:
 - **first issue**: something..
 
-### 🧱 4.4 Pending Fixes (TODO)
+
+### 🧱 X.4 Pending Fixes (TODO)
 
 ```md
 - [ ]
