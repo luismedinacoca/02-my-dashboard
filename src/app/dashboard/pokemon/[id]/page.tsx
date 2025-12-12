@@ -9,10 +9,20 @@ interface Props {
   }>;
 }
 
+//! Preload in Build time
+export async function generateStaticParams() {
+  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
+  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+
+  return static151Pokemons.map((id) => ({
+    id: id,
+  }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   try {
-    const pokemon = await getPokemon(id); // 👈🏽 ✅ (1) - Moved inside try block
+    const pokemon = await getPokemon(id);
     return {
       title: `Pokemon #${id} - ${pokemon.name}`,
       description: `${pokemon.name} page`,
@@ -34,7 +44,8 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
     notFound(); // Esto activará not-found.tsx
   }
 
-  const pokemon = await resp.json(); // 👈🏽 ✅ (1) - Fixed: Added await
+  const pokemon = await resp.json();
+
   console.log("🐼 Pokemon name:", pokemon);
   return pokemon;
 };

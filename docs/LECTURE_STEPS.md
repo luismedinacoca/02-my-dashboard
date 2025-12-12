@@ -5051,36 +5051,291 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 ```
 
 
+---
+
+
+# 👨🏾‍💻 Section 06: Incremental and Static Generation
+
+## 📑 Table of Contents
+
+- [⚙️ Section: Dynamic Generation – SSR](#️-section-dynamic-generation--ssr)
+  - [📑 Table of Contents](#-table-of-contents-1)
+  - [🔧 Lesson 069 — *Static generation and revalidation*](#-1-lesson-069--Static-generation-and-revalidation-)
+
+
+
+## 🔧 1. Lesson 069 — *Static generation and revalidation*
+
+### 🧠 1.1 Context:
+
+**Static Site Generation (SSG)** is a Next.js rendering strategy where pages are pre-rendered at build time into static HTML files. This approach provides optimal performance, SEO benefits, and reduces server load by serving pre-generated content.
+
+**When Static Generation Occurs:**
+- During the build process (`npm run build`)
+- Pages are generated once and served as static files
+- No server-side computation needed at request time
+- Content is determined at build time, not request time
+
+**`generateStaticParams()` Function:**
+This function allows you to specify which dynamic route parameters should be pre-rendered at build time. In this lesson, we use it to pre-generate pages for the first 151 Pokemon (IDs 1-151) instead of rendering them on-demand.
+
+**How It Works in This Project:**
+- The `generateStaticParams()` function returns an array of objects with route parameters
+- Each object represents a route that will be statically generated
+- For Pokemon pages: `[{ id: "1" }, { id: "2" }, ...]` generates `/pokemon/1`, `/pokemon/2`, etc.
+- Next.js pre-renders these pages during build time
+- Pages not in the list are still accessible but rendered on-demand (ISR fallback)
+
+**Revalidation:**
+Revalidation is the process of regenerating static pages after they've been built. While this lesson focuses on static generation, revalidation strategies (ISR - Incremental Static Regeneration) allow pages to be updated periodically without rebuilding the entire site.
+
+**Advantages:**
+- **Performance**: Fastest possible page load times (served as static files)
+- **SEO**: Search engines can easily crawl pre-rendered HTML
+- **Cost**: Reduced server costs (no server computation per request)
+- **Scalability**: Static files can be cached at CDN level
+- **Reliability**: No server failures affect static pages
+
+**Disadvantages:**
+- **Build Time**: All pages must be generated during build (can slow down builds)
+- **Stale Data**: Content is frozen at build time (unless using revalidation)
+- **Dynamic Content**: Not suitable for user-specific or real-time content
+- **Storage**: Requires storage for all generated static files
+
+**When to Consider Alternatives:**
+- **Server-Side Rendering (SSR)**: When content changes frequently or is user-specific
+- **Client-Side Rendering**: When content is highly dynamic and user-interactive
+- **ISR (Incremental Static Regeneration)**: When you need static performance but with periodic updates
+- **On-Demand Revalidation**: When you need to update specific pages after data changes
+
+**Project Implementation:**
+In this lesson, we implement static generation for Pokemon detail pages by:
+1. Using `Array.from({ length: 151 })` to create an array of 151 elements
+2. Mapping the array to generate Pokemon IDs from 1 to 151
+3. Returning these IDs in `generateStaticParams()` to pre-generate 151 Pokemon pages
+4. Using `cache: "force-cache"` to ensure data is cached during build time
+5. Pages are pre-built during `npm run build` and stored in `.next/server/app/dashboard/pokemon/`
+
+**Build Output Analysis:**
+After implementing `generateStaticParams()`, running `npm run build` shows:
+- The `/dashboard/pokemon/[id]` route changes from dynamic (ƒ) to static (○) for the 151 pre-generated pages
+- Additional Pokemon pages (beyond 151) are still rendered on-demand
+- Build time increases as 151 pages are generated, but runtime performance improves significantly
+
+### ⚙️ 1.2 Updating code according the context:
+
+#### 1.2.1 Remember - create an array:
+```tsx
+Array.from({ length: 151 })
+```
+> Expected Result:
+
++ An array with 151 elements and each element is `undefined`.
+
+```tsx
+Array.from({ length: 151 }).map( (value, index) => index + 1);
+```
+
+> Expected Result:
+
++ An array with 151 elements and each element is `index + 1`.
+
+![Create an array from length](../img/section06-lecture069-001.png)
+
+
+#### 1.2.2 Add the `generateStaticParams()` method with some static values:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export async function generateStaticParams() { // 👈🏽 ✅ 
+  return [
+    { id: "1" }, 
+    { id: "2" }, 
+    { id: "3" }, 
+    { id: "4" }
+  ];
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const pokemon = await getPokemon(id);
+    return {
+      title: `Pokemon #${id} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  });
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); 
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (....);
+}
+```
+
+#### 1.2.3 Go to the terminal and run:
+```bash
+npm run build
+```
+
+![4 pokemon pages prebuilt](../img/section06-lecture069-003.png)
+
+
+```bash
+npm run start
+```
+
+- Then go to `.next/server/app/dashboard/pokemon`
+- There are only 4 preloaded Pokémon pages
+
+![Only 4 pokemon pages are preloaded](../img/section06-lecture069-002.png)
+
+* In case user scrolls down, all data will be built and loaded on demand!
+
+![Pokemon page loaded on demand](../img/section06-lecture069-004.png)
+
+#### 1.2.4 Adding the algorithm to generate the 151 pokemons element in an array:
+```ts
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export async function generateStaticParams() {
+  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
+  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+
+  return static151Pokemons.map((id) => ({ // 👈🏽 ✅ 
+    id: id,
+  }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const pokemon = await getPokemon(id);
+    return {
+      title: `Pokemon #${id} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  });
+  if (!resp.ok) {
+    notFound(); 
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (....);
+}
+```
+
+
+### 🐞 1.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Missing revalidation strategy** | ⚠️ Identified | No revalidation configured in `getPokemon()` function. Using `cache: "force-cache"` means Pokemon data will never update after build time. If Pokemon data changes in the API, pages will show stale content until next build. Location: `src/app/dashboard/pokemon/[id]/page.tsx:39-40` |
+| **Console.log in production code** | ⚠️ Identified | `console.log("🐼 Pokemon name:", pokemon)` statement should be removed or replaced with proper logging solution for production. Location: `src/app/dashboard/pokemon/[id]/page.tsx:49` |
+| **Hardcoded Pokemon count** | ℹ️ Low Priority | The number 151 is hardcoded in `generateStaticParams()`. Consider making it configurable or extracting to a constant. Location: `src/app/dashboard/pokemon/[id]/page.tsx:14` |
+| **No error handling in generateStaticParams** | ⚠️ Identified | If the API fails during build time for any Pokemon ID, the entire build could fail. Consider adding error handling or try-catch blocks. Location: `src/app/dashboard/pokemon/[id]/page.tsx:13-20` |
+| **Typo in documentation** | ✅ Fixed | Documentation shows `generateStaticPatams()` instead of `generateStaticParams()` in section 1.2.2. This is a typo in the docs, not in the actual code. |
+| **Missing ISR configuration** | ℹ️ Low Priority | No Incremental Static Regeneration (ISR) strategy implemented. If Pokemon data needs periodic updates, consider adding `revalidate` option to fetch or page configuration. |
+| **Build performance concern** | ℹ️ Low Priority | Generating 151 pages at build time increases build duration. For larger datasets, consider implementing ISR or on-demand generation for less popular Pokemon. |
+
+### 🧱 1.4 Pending Fixes (TODO)
+
+```md
+- [ ] Add revalidation strategy to `getPokemon()` function - consider using `revalidate` option in fetch or implementing ISR with `revalidate` export
+- [ ] Remove or replace `console.log("🐼 Pokemon name:", pokemon)` with proper logging solution (e.g., using a logging library or environment-based logging)
+- [ ] Extract hardcoded Pokemon count (151) to a configuration constant or environment variable for easier maintenance
+- [ ] Add error handling in `generateStaticParams()` to gracefully handle API failures during build time (e.g., try-catch or filtering out failed Pokemon IDs)
+- [ ] Consider implementing ISR (Incremental Static Regeneration) by adding `export const revalidate = 3600` to enable periodic page regeneration
+- [ ] Add on-demand revalidation endpoint for updating specific Pokemon pages when data changes in the API
+- [ ] Monitor build times and consider optimizing `generateStaticParams()` if build duration becomes problematic
+- [ ] Add TypeScript type safety for Pokemon ID range (1-151) to prevent invalid IDs
+- [ ] Consider implementing a fallback strategy for Pokemon IDs beyond 151 (currently handled on-demand, but could be optimized)
+- [ ] Document the static generation strategy and revalidation approach for future developers
+```
+
+
 
 
 
 ---
 
-🔥 🔥 🔥 
+## 🔥 🔥 🔥
 
-## 🔧 XX. Lesson YYY — *{{TITLE_NAME}}*
+---
 
-### 🧠 XX.1 Context:
+## 📚 Lecture 0
+
+### 1.
+
+### 🧠 1.1 Context:
 
 
-### ⚙️ XX.2 Updating code according the context:
+### ⚙️ 1.2 Updating code according the context:
 
-#### XX.2.1
+
+#### 4.2.2
 ```tsx
 /*  */
 
 ```
 
-#### XX.2.2
-```tsx
-/*  */
-
-```
-
-### 🐞 XX.3 Issues:
+### 🐞 4.3 Issues:
 - **first issue**: something..
 
-### 🧱 XX.4 Pending Fixes (TODO)
+### 🧱 4.4 Pending Fixes (TODO)
 
 ```md
 - [ ]
