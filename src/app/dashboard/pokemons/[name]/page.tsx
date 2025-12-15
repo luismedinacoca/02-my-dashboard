@@ -3,6 +3,7 @@ import { Pokemon } from "@/pokemons";
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { metadata } from "../page";
 
 interface Props {
   params: Promise<{
@@ -34,6 +35,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 }
+
+export const metadata = {
+  title: "151 Pokémons",
+  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
 
 const getPokemon = async (name: string): Promise<Pokemon> => {
   const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {

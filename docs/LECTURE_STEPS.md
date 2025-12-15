@@ -5611,6 +5611,276 @@ npm run start
 ```
 
 
+## 📚 07. Lesson 073 - *Revalidation - no Fetch API*
+
+
+### 🧠 07.1 Context:
+
+**Time-based Revalidation in Next.js:**
+
+Time-based revalidation (also known as Incremental Static Regeneration or ISR) is a caching strategy in Next.js that allows you to automatically regenerate static pages at specified time intervals. Unlike `force-cache` which caches data indefinitely until the next build, time-based revalidation ensures that cached data is refreshed periodically without requiring a full rebuild of the application.
+
+**How It Works:**
+
+When you use `next: { revalidate: seconds }` in a fetch request, Next.js:
+1. Caches the response in the Data Cache during the initial request
+2. Serves the cached response for all subsequent requests within the revalidation period
+3. Automatically triggers a background revalidation after the specified time expires
+4. Updates the cache with fresh data while still serving the stale data to users (stale-while-revalidate pattern)
+5. Subsequent requests receive the newly cached data
+
+**When It Occurs:**
+
+- **During Build Time**: If `generateStaticParams()` is used, pages are pre-rendered with cached data
+- **On First Request**: After build, the first request to a page fetches and caches the data
+- **After Revalidation Period**: Once the revalidation time expires, Next.js fetches fresh data in the background
+- **On Subsequent Requests**: Users receive cached data immediately while revalidation happens in the background
+
+**Project Implementation:**
+
+In this lesson, we implement time-based revalidation for Pokemon data:
+
+```44:49:src/app/dashboard/pokemons/[name]/page.tsx
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
+  });
+```
+
+The `revalidate: 60 * 60 * 24 * 7` configuration means:
+- Cache lifetime: 7 days (604,800 seconds)
+- After 7 days, Next.js will automatically fetch fresh data from the PokeAPI
+- Users continue to see cached data during revalidation (no loading delays)
+
+**Key Difference from `force-cache`:**
+
+| Strategy | Cache Duration | Data Freshness | Use Case |
+|----------|---------------|----------------|----------|
+| `cache: "force-cache"` | Until next build | Frozen at build time | Static content that rarely changes |
+| `next: { revalidate: seconds }` | Specified time interval | Updated periodically | Content that changes occasionally |
+
+**Advantages:**
+
+- ✅ **Automatic Updates**: Data refreshes automatically without manual intervention or rebuilds
+- ✅ **Performance**: Users get instant responses from cache while revalidation happens in background
+- ✅ **Freshness Balance**: Ensures data doesn't become too stale while maintaining fast load times
+- ✅ **Cost Effective**: Reduces API calls compared to fetching on every request
+- ✅ **Scalability**: Works well with CDN caching strategies
+- ✅ **User Experience**: No loading delays for users during revalidation
+
+**Disadvantages:**
+
+- ⚠️ **Stale Data Window**: Users may see slightly outdated data during the revalidation period
+- ⚠️ **Time Configuration**: Requires careful consideration of the revalidation interval (too short = more API calls, too long = stale data)
+- ⚠️ **Not Real-time**: Not suitable for data that requires immediate updates (e.g., live chat, real-time scores)
+- ⚠️ **Build vs Runtime**: Different behavior during build time vs runtime can be confusing
+- ⚠️ **API Rate Limits**: Frequent revalidations might hit API rate limits if not configured properly
+
+**When to Consider Alternatives:**
+
+- **On-Demand Revalidation**: Use `revalidatePath()` or `revalidateTag()` when you need immediate updates after data changes (e.g., CMS content updates, user-generated content)
+- **Server-Side Rendering (SSR)**: When data must be fresh on every request (e.g., user-specific content, real-time data)
+- **Client-Side Fetching**: For highly dynamic, user-interactive content that doesn't need SEO
+- **`force-cache`**: For truly static content that never changes (e.g., historical data, documentation)
+- **`no-store`**: When you need to bypass caching entirely and always fetch fresh data
+
+**Connection to Lesson Implementation:**
+
+This lesson demonstrates moving from `force-cache` (which caches indefinitely) to time-based revalidation, providing a balance between performance and data freshness. The 7-day revalidation period is appropriate for Pokemon data, which changes infrequently but may have occasional updates (e.g., new sprites, corrected information).
+
+
+### ⚙️ 07.2 Updating code according the context:
+
+
+#### 07.2.1 Update the metadata:
+```tsx
+/*  */
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { metadata } from "../page";
+
+interface Props {
+  params: Promise<{
+    name: string;
+  }>;
+}
+
+//! Preload in Build time 🤔
+export async function generateStaticParams() {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
+
+  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  try {
+    const pokemon = await getPokemon(name);
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+export const metadata = {  // 👈🏽 ✅
+  title: "151 Pokémons",
+  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+
+  const pokemon = await resp.json();
+
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
+
+  return (....);
+}
+```
+
+#### 07.2.2 Apply the `Revalidation`:
+```tsx
+/*  */
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { metadata } from "../page";
+
+interface Props {
+  params: Promise<{
+    name: string;
+  }>;
+}
+
+//! Preload in Build time
+export async function generateStaticParams() {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
+
+  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  try {
+    const pokemon = await getPokemon(name);
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+export const metadata = {
+  title: "151 Pokémons",
+  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days 👈🏽 ✅
+    },
+  });
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+
+  const pokemon = await resp.json();
+
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
+
+  return (....);
+}
+```
+
+> [Data Fetching: Fetching, Caching, and Revalidating | Next.js](https://nextjs.org/docs/14/app/building-your-application/data-fetching/fetching-caching-and-revalidating)
+
+`Revalidating Data`:
+
+Revalidation is the process of purging the Data Cache and re-fetching the latest data. This is useful when your data changes and you want to ensure you show the latest information.
+
+
+Cached data can be revalidated in two ways:
+
+- Time-based revalidation: Automatically revalidate data after a certain amount of time has passed. This is useful for data that changes infrequently and freshness is not as critical.
+- On-demand revalidation: Manually revalidate data based on an event (e.g. form submission). On-demand revalidation can use a tag-based or path-based approach to revalidate groups of data at once. This is useful when you want to ensure the latest data is shown as soon as possible (e.g. when content from your headless CMS is updated).
+
+`Time-based Revalidation`:
+
+To revalidate data at a timed interval, you can use the next.revalidate option of fetch to set the cache lifetime of a resource (in seconds).
+
+```tsx
+fetch('https://...', { next: { revalidate: 3600 } })
+```
+
+### 🐞 07.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Inconsistent cache strategy between routes** | ⚠️ Identified | The `/pokemon/[id]` route uses `cache: "force-cache"` (```39:41:src/app/dashboard/pokemon/[id]/page.tsx```) while `/pokemons/[name]` uses `next: { revalidate: 60 * 60 * 24 * 7 }` (```45:49:src/app/dashboard/pokemons/[name]/page.tsx```). This inconsistency may lead to different caching behaviors and data freshness between similar routes. |
+| **Hardcoded revalidation time calculation** | ℹ️ Low Priority | The revalidation time is calculated inline as `60 * 60 * 24 * 7` which is less readable than a named constant. Consider extracting to a constant like `const REVALIDATION_TIME_7_DAYS = 60 * 60 * 24 * 7`. Location: ```48:48:src/app/dashboard/pokemons/[name]/page.tsx``` |
+| **No revalidation strategy in generateStaticParams** | ⚠️ Identified | The `generateStaticParams()` function (```15:21:src/app/dashboard/pokemons/[name]/page.tsx```) fetches Pokemon list without any revalidation configuration. This means the list of 151 Pokemon is cached indefinitely until the next build, even though individual Pokemon data is revalidated every 7 days. |
+| **Commented TODO in code** | ℹ️ Low Priority | There's a commented TODO `//cache: "force-cache", // TODO: change this in future steps` (```46:46:src/app/dashboard/pokemons/[name]/page.tsx```) that should be removed since the change has been implemented. |
+| **Missing error handling for revalidation failures** | ⚠️ Identified | If the API fails during background revalidation, there's no error handling mechanism. The stale cache will continue to be served, but there's no logging or fallback strategy. This could lead to serving outdated data indefinitely if the API is consistently failing. |
+| **Revalidation time may not match Pokemon data update frequency** | ℹ️ Low Priority | The 7-day revalidation period is arbitrary and may not align with actual Pokemon data update frequency. Consider making this configurable via environment variables to allow different revalidation periods for different environments (e.g., shorter for development, longer for production). |
+
+
+### 🧱 07.4 Pending Fixes (TODO)
+
+```md
+- [ ] Align cache strategy between `/pokemon/[id]` and `/pokemons/[name]` routes - consider using the same revalidation approach (`next: { revalidate }`) for consistency. Update ```39:41:src/app/dashboard/pokemon/[id]/page.tsx``` to match the strategy in ```45:49:src/app/dashboard/pokemons/[name]/page.tsx```
+- [ ] Extract revalidation time to a named constant - create `const REVALIDATION_TIME_7_DAYS = 60 * 60 * 24 * 7` or similar constant for better readability and maintainability. Location: ```48:48:src/app/dashboard/pokemons/[name]/page.tsx```
+- [ ] Add revalidation configuration to `generateStaticParams()` fetch call - apply `next: { revalidate }` option to the Pokemon list fetch in ```16:16:src/app/dashboard/pokemons/[name]/page.tsx``` to ensure the list of Pokemon is also periodically refreshed
+- [ ] Remove commented TODO and old cache configuration - clean up the commented `//cache: "force-cache", // TODO: change this in future steps` line in ```46:46:src/app/dashboard/pokemons/[name]/page.tsx``` since the change has been implemented
+- [ ] Add error handling and logging for revalidation failures - implement try-catch or error monitoring for background revalidation failures to ensure stale data doesn't persist indefinitely if API fails
+- [ ] Make revalidation time configurable via environment variables - create `NEXT_PUBLIC_REVALIDATION_TIME` or `REVALIDATION_TIME_SECONDS` environment variable to allow different revalidation periods for different environments (development vs production)
+- [ ] Document revalidation strategy decision - add comments explaining why 7 days was chosen as the revalidation period and when it should be adjusted
+- [ ] Consider implementing on-demand revalidation endpoint - create an API route using `revalidatePath()` or `revalidateTag()` for manual cache invalidation when Pokemon data is known to have changed
+- [ ] Add monitoring/logging for revalidation events - implement logging to track when revalidations occur and if they succeed or fail, to help diagnose caching issues
+- [ ] Review and optimize revalidation time based on Pokemon API update frequency - research PokeAPI update patterns and adjust revalidation period accordingly to balance freshness and API call frequency
+```
+
+
 
 ---
 
