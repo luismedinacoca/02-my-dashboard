@@ -5051,36 +5051,871 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 ```
 
 
+---
+
+
+# 👨🏾‍💻 Section 06: Incremental and Static Generation
+
+## 📑 Table of Contents
+
+- [⚙️ Section: Dynamic Generation – SSR](#️-section-dynamic-generation--ssr)
+  - [📑 Table of Contents](#-table-of-contents-1)
+  - [🔧 Lesson 069 — *Static generation and revalidation*](#-1-lesson-069--Static-generation-and-revalidation-)
+
+
+
+## 🔧 1. Lesson 069 — *Static generation and revalidation*
+
+### 🧠 1.1 Context:
+
+**Static Site Generation (SSG)** is a Next.js rendering strategy where pages are pre-rendered at build time into static HTML files. This approach provides optimal performance, SEO benefits, and reduces server load by serving pre-generated content.
+
+**When Static Generation Occurs:**
+- During the build process (`npm run build`)
+- Pages are generated once and served as static files
+- No server-side computation needed at request time
+- Content is determined at build time, not request time
+
+**`generateStaticParams()` Function:**
+This function allows you to specify which dynamic route parameters should be pre-rendered at build time. In this lesson, we use it to pre-generate pages for the first 151 Pokemon (IDs 1-151) instead of rendering them on-demand.
+
+**How It Works in This Project:**
+- The `generateStaticParams()` function returns an array of objects with route parameters
+- Each object represents a route that will be statically generated
+- For Pokemon pages: `[{ id: "1" }, { id: "2" }, ...]` generates `/pokemon/1`, `/pokemon/2`, etc.
+- Next.js pre-renders these pages during build time
+- Pages not in the list are still accessible but rendered on-demand (ISR fallback)
+
+**Revalidation:**
+Revalidation is the process of regenerating static pages after they've been built. While this lesson focuses on static generation, revalidation strategies (ISR - Incremental Static Regeneration) allow pages to be updated periodically without rebuilding the entire site.
+
+**Advantages:**
+- **Performance**: Fastest possible page load times (served as static files)
+- **SEO**: Search engines can easily crawl pre-rendered HTML
+- **Cost**: Reduced server costs (no server computation per request)
+- **Scalability**: Static files can be cached at CDN level
+- **Reliability**: No server failures affect static pages
+
+**Disadvantages:**
+- **Build Time**: All pages must be generated during build (can slow down builds)
+- **Stale Data**: Content is frozen at build time (unless using revalidation)
+- **Dynamic Content**: Not suitable for user-specific or real-time content
+- **Storage**: Requires storage for all generated static files
+
+**When to Consider Alternatives:**
+- **Server-Side Rendering (SSR)**: When content changes frequently or is user-specific
+- **Client-Side Rendering**: When content is highly dynamic and user-interactive
+- **ISR (Incremental Static Regeneration)**: When you need static performance but with periodic updates
+- **On-Demand Revalidation**: When you need to update specific pages after data changes
+
+**Project Implementation:**
+In this lesson, we implement static generation for Pokemon detail pages by:
+1. Using `Array.from({ length: 151 })` to create an array of 151 elements
+2. Mapping the array to generate Pokemon IDs from 1 to 151
+3. Returning these IDs in `generateStaticParams()` to pre-generate 151 Pokemon pages
+4. Using `cache: "force-cache"` to ensure data is cached during build time
+5. Pages are pre-built during `npm run build` and stored in `.next/server/app/dashboard/pokemon/`
+
+**Build Output Analysis:**
+After implementing `generateStaticParams()`, running `npm run build` shows:
+- The `/dashboard/pokemon/[id]` route changes from dynamic (ƒ) to static (○) for the 151 pre-generated pages
+- Additional Pokemon pages (beyond 151) are still rendered on-demand
+- Build time increases as 151 pages are generated, but runtime performance improves significantly
+
+### ⚙️ 1.2 Updating code according the context:
+
+#### 1.2.1 Remember - create an array:
+```tsx
+Array.from({ length: 151 })
+```
+> Expected Result:
+
++ An array with 151 elements and each element is `undefined`.
+
+```tsx
+Array.from({ length: 151 }).map( (value, index) => index + 1);
+```
+
+> Expected Result:
+
++ An array with 151 elements and each element is `index + 1`.
+
+![Create an array from length](../img/section06-lecture069-001.png)
+
+
+#### 1.2.2 Add the `generateStaticParams()` method with some static values:
+```tsx
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export async function generateStaticParams() { // 👈🏽 ✅ 
+  return [
+    { id: "1" }, 
+    { id: "2" }, 
+    { id: "3" }, 
+    { id: "4" }
+  ];
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const pokemon = await getPokemon(id);
+    return {
+      title: `Pokemon #${id} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  });
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); 
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (....);
+}
+```
+
+#### 1.2.3 Go to the terminal and run:
+```bash
+npm run build
+```
+
+![4 pokemon pages prebuilt](../img/section06-lecture069-003.png)
+
+
+```bash
+npm run start
+```
+
+- Then go to `.next/server/app/dashboard/pokemon`
+- There are only 4 preloaded Pokémon pages
+
+![Only 4 pokemon pages are preloaded](../img/section06-lecture069-002.png)
+
+* In case user scrolls down, all data will be built and loaded on demand!
+
+![Pokemon page loaded on demand](../img/section06-lecture069-004.png)
+
+#### 1.2.4 Adding the algorithm to generate the 151 pokemons element in an array:
+```ts
+/* src/app/dashboard/pokemon/[id]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+interface Props {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export async function generateStaticParams() {
+  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
+  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+
+  return static151Pokemons.map((id) => ({ // 👈🏽 ✅ 
+    id: id,
+  }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const pokemon = await getPokemon(id);
+    return {
+      title: `Pokemon #${id} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+const getPokemon = async (id: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+    cache: "force-cache", // TODO: change this in future steps
+  });
+  if (!resp.ok) {
+    notFound(); 
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { id } = await params;
+  const pokemon = await getPokemon(id);
+
+  return (....);
+}
+```
+
+
+### 🐞 1.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Missing revalidation strategy** | ⚠️ Identified | No revalidation configured in `getPokemon()` function. Using `cache: "force-cache"` means Pokemon data will never update after build time. If Pokemon data changes in the API, pages will show stale content until next build. Location: `src/app/dashboard/pokemon/[id]/page.tsx:39-40` |
+| **Console.log in production code** | ⚠️ Identified | `console.log("🐼 Pokemon name:", pokemon)` statement should be removed or replaced with proper logging solution for production. Location: `src/app/dashboard/pokemon/[id]/page.tsx:49` |
+| **Hardcoded Pokemon count** | ℹ️ Low Priority | The number 151 is hardcoded in `generateStaticParams()`. Consider making it configurable or extracting to a constant. Location: `src/app/dashboard/pokemon/[id]/page.tsx:14` |
+| **No error handling in generateStaticParams** | ⚠️ Identified | If the API fails during build time for any Pokemon ID, the entire build could fail. Consider adding error handling or try-catch blocks. Location: `src/app/dashboard/pokemon/[id]/page.tsx:13-20` |
+| **Typo in documentation** | ✅ Fixed | Documentation shows `generateStaticPatams()` instead of `generateStaticParams()` in section 1.2.2. This is a typo in the docs, not in the actual code. |
+| **Missing ISR configuration** | ℹ️ Low Priority | No Incremental Static Regeneration (ISR) strategy implemented. If Pokemon data needs periodic updates, consider adding `revalidate` option to fetch or page configuration. |
+| **Build performance concern** | ℹ️ Low Priority | Generating 151 pages at build time increases build duration. For larger datasets, consider implementing ISR or on-demand generation for less popular Pokemon. |
+
+### 🧱 1.4 Pending Fixes (TODO)
+
+```md
+- [ ] Add revalidation strategy to `getPokemon()` function - consider using `revalidate` option in fetch or implementing ISR with `revalidate` export
+- [ ] Remove or replace `console.log("🐼 Pokemon name:", pokemon)` with proper logging solution (e.g., using a logging library or environment-based logging)
+- [ ] Extract hardcoded Pokemon count (151) to a configuration constant or environment variable for easier maintenance
+- [ ] Add error handling in `generateStaticParams()` to gracefully handle API failures during build time (e.g., try-catch or filtering out failed Pokemon IDs)
+- [ ] Consider implementing ISR (Incremental Static Regeneration) by adding `export const revalidate = 3600` to enable periodic page regeneration
+- [ ] Add on-demand revalidation endpoint for updating specific Pokemon pages when data changes in the API
+- [ ] Monitor build times and consider optimizing `generateStaticParams()` if build duration becomes problematic
+- [ ] Add TypeScript type safety for Pokemon ID range (1-151) to prevent invalid IDs
+- [ ] Consider implementing a fallback strategy for Pokemon IDs beyond 151 (currently handled on-demand, but could be optimized)
+- [ ] Document the static generation strategy and revalidation approach for future developers
+```
+
+
+## 📚 2. Lesson 072 - *Task solution*
+
+### 🧠 2.1 Context:
+
+**Static Site Generation (SSG) with Dynamic Routes Using Names**
+
+In Next.js, `generateStaticParams()` is a powerful function that allows pre-generating static pages for dynamic routes at build time. This lesson focuses on implementing static generation for Pokemon pages using **names** instead of **IDs** as route parameters.
+
+**When and Why It's Used:**
+
+1. **Build-Time Pre-rendering**: When you want to generate static HTML pages for all possible route parameters during the build process, rather than on-demand at request time.
+
+2. **Performance Optimization**: Pre-generated pages are served instantly from the CDN, providing better performance and SEO benefits compared to server-side rendering or client-side rendering.
+
+3. **API Data Fetching**: Unlike the previous lesson (071) where we generated IDs numerically (1-151), this lesson demonstrates fetching actual Pokemon names from the PokeAPI and using them as route parameters.
+
+**How It Works in This Project:**
+
+The implementation in ```14:19:src/app/dashboard/pokemons/[name]/page.tsx``` shows:
+
+1. **Fetching Pokemon Names**: The `generateStaticParams()` function fetches the first 151 Pokemon from the PokeAPI endpoint (`http://pokeapi.co/api/v2/pokemon?limit=151`).
+
+2. **Mapping to Route Parameters**: Each Pokemon's name is extracted from the API response and mapped to the route parameter format `{ name: pokemon.name }`.
+
+3. **Static Generation**: Next.js uses these parameters to pre-generate 151 static pages at build time, one for each Pokemon name.
+
+4. **URL Structure**: Pages are accessible via URLs like `/dashboard/pokemons/bulbasaur`, `/dashboard/pokemons/charmander`, etc.
+
+**Advantages:**
+
+- ✅ **Better SEO**: Static pages are fully crawlable by search engines
+- ✅ **Faster Load Times**: Pre-rendered HTML is served immediately without server computation
+- ✅ **Lower Server Costs**: Static files can be served from CDN without server processing
+- ✅ **User-Friendly URLs**: Names are more readable and memorable than numeric IDs (e.g., `/pokemons/bulbasaur` vs `/pokemon/1`)
+- ✅ **Consistent Data**: All 151 Pokemon pages are generated with the same data snapshot at build time
+
+**Disadvantages:**
+
+- ⚠️ **Case Sensitivity**: Pokemon API is case-sensitive. URLs must match exactly (e.g., `bulbasaur` works, but `Bulbasaur` may fail)
+- ⚠️ **Build Time**: Generating 151 pages increases build time compared to on-demand rendering
+- ⚠️ **Data Freshness**: Static pages contain data from build time. Requires revalidation or rebuild to update content
+- ⚠️ **API Dependency**: Build process depends on external API availability. If PokeAPI is down during build, generation fails
+
+**When to Consider Alternatives:**
+
+- **Incremental Static Regeneration (ISR)**: Use `revalidate` option (as implemented in ```41:43:src/app/dashboard/pokemons/[name]/page.tsx```) when you need periodic updates without full rebuilds
+- **On-Demand Rendering**: For routes with frequently changing or user-specific content
+- **Server-Side Rendering (SSR)**: When you need real-time data on every request
+- **Client-Side Rendering**: For highly interactive pages that don't need SEO
+
+**Key Differences from ID-Based Approach:**
+
+| Aspect | ID-Based (`/pokemon/[id]`) | Name-Based (`/pokemons/[name]`) |
+|--------|---------------------------|--------------------------------|
+| Parameter Source | Generated numerically (1-151) | Fetched from API response |
+| URL Example | `/pokemon/1` | `/pokemons/bulbasaur` |
+| Readability | Less intuitive | More user-friendly |
+| Case Sensitivity | Not applicable | Must match API exactly |
+| Build Dependency | No external API call needed | Requires API call during build |
+
+**Connection to Practical Implementation:**
+
+This lesson demonstrates a real-world pattern where route parameters come from external API data rather than being programmatically generated. The implementation shows how to:
+- Fetch data during build time
+- Transform API responses into route parameters
+- Handle async operations in `generateStaticParams()`
+- Maintain consistency with existing ID-based routes while providing a more user-friendly alternative
+
+
+### ⚙️ 2.2 Updating code according the context:
+
+Generate the `pokemons/[name]` page so that it behaves very similarly to the existing `pokemon/[id]` page.
+
+#### 2.2.1 Create `/pokemons/[name]/page.tsx`  & `/pokemons/[name]/not-found.tsx`files:
+```tsx
+/* /pokemons/[name]/page.tsx */
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+
+interface Props {
+  params: Promise<{
+    name: string;  // 👈🏽 ✅
+  }>;
+}
+//TODO: Need to update
+export async function generateStaticParams() {
+  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
+  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+
+  return static151Pokemons.map((id) => ({
+    id: id,
+  }));
+}
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;  // 👈🏽 ✅
+  try {
+    const pokemon = await getPokemon(name);  // 👈🏽 ✅
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+const getPokemon = async (name: string): Promise<Pokemon> => {  // 👈🏽 ✅
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {  // 👈🏽 ✅
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {  // 👈🏽 ✅
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
+  });
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;  // 👈🏽 ✅
+  const pokemon = await getPokemon(name);  // 👈🏽 ✅
+  return (
+    // ....more code
+  );
+}
+```
+
+Testing:
+- [search bulbasaur](localhost:3000/api/v2/pokemons/bulbasaur) ✅
+- [search charmeleon](localhost:3000/api/v2/pokemons/charmeleon) ✅
+- [search Charmeleon](localhost:3000/api/v2/pokemons/Charmeleon) 🔥 
+
+#### 2.2.2 Update `PokemonCard` href in Link:
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeartOutline } from "react-icons/io5";
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+  if (!id) return null;
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}  // 👈🏽 ✅
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">
+              <IoHeartOutline size={20} />
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">It&apos;s not favourite</p>
+              <p className="text-xs text-gray-500">View your campaigns</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PokemonCard;
+```
+
+Testing:
+* Go to Dashboard
+* Click on `Pokemons` in sidebar.
+* Click on any `More Info` button
+* Verify URL: [Bulbasaur](http://loclahost:3000/dashboard/pokemon/bulbasaur)
+
+#### 2.2.3 Update `generateStaticParams()` function in `7dashboard/pokemons/[name]/page.jsx`
+```tsx
+/* src/app/dashboard/pokemons/[name]/page.tsx */
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+
+interface Props {
+  params: Promise<{
+    name: string;
+  }>;
+}
+
+//! Preload in Build time
+/*
+Following from `src/app/dashboard/pokemons/page.tsx` in `getPokemons()` method
+*/
+export async function generateStaticParams() {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`)  // 👈🏽 ✅
+    .then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));  // 👈🏽 ✅
+  
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);  // 👈🏽 ✅
+
+  return static151Pokemons.map(({ name }) => ({ name: name }));  // 👈🏽 ✅
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  try {
+    const pokemon = await getPokemon(name);
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
+  });
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+  const pokemon = await resp.json();
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
+
+  return (
+    // .... more code hidden
+  );
+}
+```
+
+Notes:
+* In `generateStaticParams()` method, the _return_ could be `return static151Pokemons;` only.
+* The `console.log("🤔 Static 151 Pokemons:", static151Pokemons);` is showing this static151Pokemons as an array with `{name: name}`.
+
+![useless second static151Pokemon mapping](../img/section06-lecture072-001.png)
+
+
+#### 2.2.4 Generate the build and the start:
+```bash
+npm run build
+```
+![IDs and NAMEs building](../img/section06-lecture072-002.png)
+
+```bash
+npm run start
+```
+
+
+
+
+### 🐞 2.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Redundant mapping in generateStaticParams** | ⚠️ Identified | In ```14:19:src/app/dashboard/pokemons/[name]/page.tsx```, there's a double mapping operation. Line 16 creates `static151Pokemons` with `{name: pokemon.name}`, and line 19 maps again to `{name: pokemon.name}`. This is unnecessary and can be simplified to `return static151Pokemons;` directly. |
+| **Case sensitivity in Pokemon names** | ⚠️ Identified | The PokeAPI is case-sensitive. Testing shows that `charmeleon` works but `Charmeleon` fails (line 5383). URLs must match the exact lowercase format returned by the API. This can cause 404 errors if users type names with capital letters. |
+| **Incorrect metadata title format** | ⚠️ Identified | In ```27:27:src/app/dashboard/pokemons/[name]/page.tsx```, the metadata title uses `Pokemon #${name}` which displays the name parameter instead of the Pokemon's ID number. Should be `Pokemon #${pokemon.id} - ${pokemon.name}` for consistency with the ID-based route. |
+| **Missing URL normalization** | ⚠️ Identified | No normalization of Pokemon names to lowercase in URLs. The `PokemonCard` component (```23:23:src/pokemons/components/PokemonCard.tsx```) uses the raw `name` from the API, which should be lowercase, but there's no explicit normalization to prevent case-related issues. |
+| **Inconsistent cache strategy** | ℹ️ Low Priority | The `getPokemon` function uses `revalidate: 60 * 60 * 24 * 7` (7 days) instead of `cache: "force-cache"` like the ID-based route. While ISR is valid, the inconsistency between routes may cause confusion. The commented TODO suggests this was intentional for future steps. |
+
+### 🧱 2.4 Pending Fixes (TODO)
+
+```md
+- [ ] Remove redundant mapping in `generateStaticParams()` function at ```14:19:src/app/dashboard/pokemons/[name]/page.tsx``` - simplify to `return static151Pokemons;` instead of double mapping
+- [ ] Add URL normalization to ensure Pokemon names are always lowercase in routes - implement `.toLowerCase()` when generating links in `PokemonCard` component (```23:23:src/pokemons/components/PokemonCard.tsx```)
+- [ ] Fix metadata title format in `generateMetadata()` function (```27:27:src/app/dashboard/pokemons/[name]/page.tsx```) - change from `Pokemon #${name}` to `Pokemon #${pokemon.id} - ${pokemon.name}` for consistency
+- [ ] Add input validation/normalization in `getPokemon()` function to handle case-insensitive Pokemon name lookups or provide clear error messages for case mismatches
+- [ ] Consider adding a redirect or normalization middleware to handle capitalized Pokemon names (e.g., `/pokemons/Charmeleon` → `/pokemons/charmeleon`)
+- [ ] Document the case sensitivity requirement in the component or add TypeScript types to enforce lowercase Pokemon names
+- [ ] Review and align cache strategy between `/pokemon/[id]` and `/pokemons/[name]` routes for consistency (currently using different approaches: `force-cache` vs `revalidate`)
+```
+
+
+## 📚 07. Lesson 073 - *Revalidation - no Fetch API*
+
+
+### 🧠 07.1 Context:
+
+**Time-based Revalidation in Next.js:**
+
+Time-based revalidation (also known as Incremental Static Regeneration or ISR) is a caching strategy in Next.js that allows you to automatically regenerate static pages at specified time intervals. Unlike `force-cache` which caches data indefinitely until the next build, time-based revalidation ensures that cached data is refreshed periodically without requiring a full rebuild of the application.
+
+**How It Works:**
+
+When you use `next: { revalidate: seconds }` in a fetch request, Next.js:
+1. Caches the response in the Data Cache during the initial request
+2. Serves the cached response for all subsequent requests within the revalidation period
+3. Automatically triggers a background revalidation after the specified time expires
+4. Updates the cache with fresh data while still serving the stale data to users (stale-while-revalidate pattern)
+5. Subsequent requests receive the newly cached data
+
+**When It Occurs:**
+
+- **During Build Time**: If `generateStaticParams()` is used, pages are pre-rendered with cached data
+- **On First Request**: After build, the first request to a page fetches and caches the data
+- **After Revalidation Period**: Once the revalidation time expires, Next.js fetches fresh data in the background
+- **On Subsequent Requests**: Users receive cached data immediately while revalidation happens in the background
+
+**Project Implementation:**
+
+In this lesson, we implement time-based revalidation for Pokemon data:
+
+```44:49:src/app/dashboard/pokemons/[name]/page.tsx
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
+  });
+```
+
+The `revalidate: 60 * 60 * 24 * 7` configuration means:
+- Cache lifetime: 7 days (604,800 seconds)
+- After 7 days, Next.js will automatically fetch fresh data from the PokeAPI
+- Users continue to see cached data during revalidation (no loading delays)
+
+**Key Difference from `force-cache`:**
+
+| Strategy | Cache Duration | Data Freshness | Use Case |
+|----------|---------------|----------------|----------|
+| `cache: "force-cache"` | Until next build | Frozen at build time | Static content that rarely changes |
+| `next: { revalidate: seconds }` | Specified time interval | Updated periodically | Content that changes occasionally |
+
+**Advantages:**
+
+- ✅ **Automatic Updates**: Data refreshes automatically without manual intervention or rebuilds
+- ✅ **Performance**: Users get instant responses from cache while revalidation happens in background
+- ✅ **Freshness Balance**: Ensures data doesn't become too stale while maintaining fast load times
+- ✅ **Cost Effective**: Reduces API calls compared to fetching on every request
+- ✅ **Scalability**: Works well with CDN caching strategies
+- ✅ **User Experience**: No loading delays for users during revalidation
+
+**Disadvantages:**
+
+- ⚠️ **Stale Data Window**: Users may see slightly outdated data during the revalidation period
+- ⚠️ **Time Configuration**: Requires careful consideration of the revalidation interval (too short = more API calls, too long = stale data)
+- ⚠️ **Not Real-time**: Not suitable for data that requires immediate updates (e.g., live chat, real-time scores)
+- ⚠️ **Build vs Runtime**: Different behavior during build time vs runtime can be confusing
+- ⚠️ **API Rate Limits**: Frequent revalidations might hit API rate limits if not configured properly
+
+**When to Consider Alternatives:**
+
+- **On-Demand Revalidation**: Use `revalidatePath()` or `revalidateTag()` when you need immediate updates after data changes (e.g., CMS content updates, user-generated content)
+- **Server-Side Rendering (SSR)**: When data must be fresh on every request (e.g., user-specific content, real-time data)
+- **Client-Side Fetching**: For highly dynamic, user-interactive content that doesn't need SEO
+- **`force-cache`**: For truly static content that never changes (e.g., historical data, documentation)
+- **`no-store`**: When you need to bypass caching entirely and always fetch fresh data
+
+**Connection to Lesson Implementation:**
+
+This lesson demonstrates moving from `force-cache` (which caches indefinitely) to time-based revalidation, providing a balance between performance and data freshness. The 7-day revalidation period is appropriate for Pokemon data, which changes infrequently but may have occasional updates (e.g., new sprites, corrected information).
+
+
+### ⚙️ 07.2 Updating code according the context:
+
+
+#### 07.2.1 Update the metadata:
+```tsx
+/*  */
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { metadata } from "../page";
+
+interface Props {
+  params: Promise<{
+    name: string;
+  }>;
+}
+
+//! Preload in Build time 🤔
+export async function generateStaticParams() {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
+
+  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  try {
+    const pokemon = await getPokemon(name);
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+export const metadata = {  // 👈🏽 ✅
+  title: "151 Pokémons",
+  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+
+  const pokemon = await resp.json();
+
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
+
+  return (....);
+}
+```
+
+#### 07.2.2 Apply the `Revalidation`:
+```tsx
+/*  */
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
+import { Pokemon } from "@/pokemons";
+import { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { metadata } from "../page";
+
+interface Props {
+  params: Promise<{
+    name: string;
+  }>;
+}
+
+//! Preload in Build time
+export async function generateStaticParams() {
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
+
+  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { name } = await params;
+  try {
+    const pokemon = await getPokemon(name);
+    return {
+      title: `Pokemon #${name} - ${pokemon.name}`,
+      description: `${pokemon.name} page`,
+    };
+  } catch {
+    return {
+      title: "Pokemon page not found",
+      description: "Pokemon page not found",
+    };
+  }
+}
+
+export const metadata = {
+  title: "151 Pokémons",
+  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days 👈🏽 ✅
+    },
+  });
+  //.then((resp) => {
+  if (!resp.ok) {
+    notFound(); // Esto activará not-found.tsx
+  }
+
+  const pokemon = await resp.json();
+
+  console.log("🐼 Pokemon name:", pokemon);
+  return pokemon;
+};
+
+export default async function PokemonPage({ params }: Props) {
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
+
+  return (....);
+}
+```
+
+> [Data Fetching: Fetching, Caching, and Revalidating | Next.js](https://nextjs.org/docs/14/app/building-your-application/data-fetching/fetching-caching-and-revalidating)
+
+`Revalidating Data`:
+
+Revalidation is the process of purging the Data Cache and re-fetching the latest data. This is useful when your data changes and you want to ensure you show the latest information.
+
+
+Cached data can be revalidated in two ways:
+
+- Time-based revalidation: Automatically revalidate data after a certain amount of time has passed. This is useful for data that changes infrequently and freshness is not as critical.
+- On-demand revalidation: Manually revalidate data based on an event (e.g. form submission). On-demand revalidation can use a tag-based or path-based approach to revalidate groups of data at once. This is useful when you want to ensure the latest data is shown as soon as possible (e.g. when content from your headless CMS is updated).
+
+`Time-based Revalidation`:
+
+To revalidate data at a timed interval, you can use the next.revalidate option of fetch to set the cache lifetime of a resource (in seconds).
+
+```tsx
+fetch('https://...', { next: { revalidate: 3600 } })
+```
+
+### 🐞 07.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Inconsistent cache strategy between routes** | ⚠️ Identified | The `/pokemon/[id]` route uses `cache: "force-cache"` (```39:41:src/app/dashboard/pokemon/[id]/page.tsx```) while `/pokemons/[name]` uses `next: { revalidate: 60 * 60 * 24 * 7 }` (```45:49:src/app/dashboard/pokemons/[name]/page.tsx```). This inconsistency may lead to different caching behaviors and data freshness between similar routes. |
+| **Hardcoded revalidation time calculation** | ℹ️ Low Priority | The revalidation time is calculated inline as `60 * 60 * 24 * 7` which is less readable than a named constant. Consider extracting to a constant like `const REVALIDATION_TIME_7_DAYS = 60 * 60 * 24 * 7`. Location: ```48:48:src/app/dashboard/pokemons/[name]/page.tsx``` |
+| **No revalidation strategy in generateStaticParams** | ⚠️ Identified | The `generateStaticParams()` function (```15:21:src/app/dashboard/pokemons/[name]/page.tsx```) fetches Pokemon list without any revalidation configuration. This means the list of 151 Pokemon is cached indefinitely until the next build, even though individual Pokemon data is revalidated every 7 days. |
+| **Commented TODO in code** | ℹ️ Low Priority | There's a commented TODO `//cache: "force-cache", // TODO: change this in future steps` (```46:46:src/app/dashboard/pokemons/[name]/page.tsx```) that should be removed since the change has been implemented. |
+| **Missing error handling for revalidation failures** | ⚠️ Identified | If the API fails during background revalidation, there's no error handling mechanism. The stale cache will continue to be served, but there's no logging or fallback strategy. This could lead to serving outdated data indefinitely if the API is consistently failing. |
+| **Revalidation time may not match Pokemon data update frequency** | ℹ️ Low Priority | The 7-day revalidation period is arbitrary and may not align with actual Pokemon data update frequency. Consider making this configurable via environment variables to allow different revalidation periods for different environments (e.g., shorter for development, longer for production). |
+
+
+### 🧱 07.4 Pending Fixes (TODO)
+
+```md
+- [ ] Align cache strategy between `/pokemon/[id]` and `/pokemons/[name]` routes - consider using the same revalidation approach (`next: { revalidate }`) for consistency. Update ```39:41:src/app/dashboard/pokemon/[id]/page.tsx``` to match the strategy in ```45:49:src/app/dashboard/pokemons/[name]/page.tsx```
+- [ ] Extract revalidation time to a named constant - create `const REVALIDATION_TIME_7_DAYS = 60 * 60 * 24 * 7` or similar constant for better readability and maintainability. Location: ```48:48:src/app/dashboard/pokemons/[name]/page.tsx```
+- [ ] Add revalidation configuration to `generateStaticParams()` fetch call - apply `next: { revalidate }` option to the Pokemon list fetch in ```16:16:src/app/dashboard/pokemons/[name]/page.tsx``` to ensure the list of Pokemon is also periodically refreshed
+- [ ] Remove commented TODO and old cache configuration - clean up the commented `//cache: "force-cache", // TODO: change this in future steps` line in ```46:46:src/app/dashboard/pokemons/[name]/page.tsx``` since the change has been implemented
+- [ ] Add error handling and logging for revalidation failures - implement try-catch or error monitoring for background revalidation failures to ensure stale data doesn't persist indefinitely if API fails
+- [ ] Make revalidation time configurable via environment variables - create `NEXT_PUBLIC_REVALIDATION_TIME` or `REVALIDATION_TIME_SECONDS` environment variable to allow different revalidation periods for different environments (development vs production)
+- [ ] Document revalidation strategy decision - add comments explaining why 7 days was chosen as the revalidation period and when it should be adjusted
+- [ ] Consider implementing on-demand revalidation endpoint - create an API route using `revalidatePath()` or `revalidateTag()` for manual cache invalidation when Pokemon data is known to have changed
+- [ ] Add monitoring/logging for revalidation events - implement logging to track when revalidations occur and if they succeed or fail, to help diagnose caching issues
+- [ ] Review and optimize revalidation time based on Pokemon API update frequency - research PokeAPI update patterns and adjust revalidation period accordingly to balance freshness and API call frequency
+```
 
 
 
 ---
 
-🔥 🔥 🔥 
+## 🔥 🔥 🔥
 
-## 🔧 XX. Lesson YYY — *{{TITLE_NAME}}*
+---
 
-### 🧠 XX.1 Context:
+[TEMPLATE]
+
+## 📚 X. Lesson YYY - *{{TITLE_NAME}}*
 
 
-### ⚙️ XX.2 Updating code according the context:
+### 🧠 X.1 Context:
 
-#### XX.2.1
+
+### ⚙️ X.2 Updating code according the context:
+
+
+#### X.2.1
 ```tsx
 /*  */
 
 ```
 
-#### XX.2.2
+#### X.2.2
 ```tsx
 /*  */
 
 ```
 
-### 🐞 XX.3 Issues:
+### 🐞 X.3 Issues:
 - **first issue**: something..
 
-### 🧱 XX.4 Pending Fixes (TODO)
+
+### 🧱 X.4 Pending Fixes (TODO)
 
 ```md
 - [ ]

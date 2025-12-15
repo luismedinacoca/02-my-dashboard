@@ -1,30 +1,31 @@
+import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
 import { Pokemon } from "@/pokemons";
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { metadata } from "../page";
 
 interface Props {
   params: Promise<{
-    id: string;
+    name: string;
   }>;
 }
 
 //! Preload in Build time
 export async function generateStaticParams() {
-  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
-  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
+  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
+  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
+  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
 
-  return static151Pokemons.map((id) => ({
-    id: id,
-  }));
+  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { name } = await params;
   try {
-    const pokemon = await getPokemon(id);
+    const pokemon = await getPokemon(name);
     return {
-      title: `Pokemon #${id} - ${pokemon.name}`,
+      title: `Pokemon #${name} - ${pokemon.name}`,
       description: `${pokemon.name} page`,
     };
   } catch {
@@ -35,9 +36,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-const getPokemon = async (id: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-    cache: "force-cache", // TODO: change this in future steps
+export const metadata = {
+  title: "151 Pokémons",
+  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+
+const getPokemon = async (name: string): Promise<Pokemon> => {
+  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
+    //cache: "force-cache", // TODO: change this in future steps
+    next: {
+      revalidate: 60 * 60 * 24 * 7, // 7 days
+    },
   });
   //.then((resp) => {
   if (!resp.ok) {
@@ -51,8 +60,8 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 };
 
 export default async function PokemonPage({ params }: Props) {
-  const { id } = await params;
-  const pokemon = await getPokemon(id);
+  const { name } = await params;
+  const pokemon = await getPokemon(name);
 
   return (
     <div className="flex mt-5 flex-col items-center text-slate-800">
