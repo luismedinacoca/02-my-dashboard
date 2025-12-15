@@ -5880,6 +5880,272 @@ fetch('https://...', { next: { revalidate: 3600 } })
 - [ ] Review and optimize revalidation time based on Pokemon API update frequency - research PokeAPI update patterns and adjust revalidation period accordingly to balance freshness and API call frequency
 ```
 
+---
+
+# 👨🏾‍💻 Section 07: Global State - Redux & LocalStorage
+
+
+## 📚 01. Lesson 079 - *Continuing with the app*
+
+
+### 🧠 01.1 Context:
+
+This lesson focuses on extending the dashboard application structure by adding a new "Favourites" page and enhancing the main dashboard page with reusable widget components. The lesson prepares the foundation for implementing global state management (which will be covered in subsequent lessons) by creating the necessary UI structure.
+
+**What this lesson covers:**
+- Creating a new route/page for displaying favorite Pokémons (`/dashboard/favourites`)
+- Adding navigation menu items to the Sidebar component
+- Creating reusable widget components (`SimpleWidget`) for the dashboard
+- Setting up the structure for future global state implementation
+
+**When and why it's used:**
+- **Route creation**: Next.js App Router allows creating new pages by adding `page.tsx` files in the appropriate directory structure. The `favourites` page is created as a Server Component that will later consume global state.
+- **Component reusability**: The `SimpleWidget` component demonstrates a reusable pattern for displaying dashboard metrics and information cards that can be used across different parts of the application.
+- **Navigation structure**: Adding menu items to the Sidebar provides a consistent navigation experience and prepares the UI for the favorites functionality.
+
+**Examples from the project:**
+- ```1:18:src/app/dashboard/favourites/page.tsx``` - The favourites page uses `PokemonGrid` component with an empty array, preparing for global state integration
+- ```1:32:src/components/SimpleWidget.tsx``` - A reusable widget component that displays information cards with icons, titles, and subtitles
+- ```24:29:src/components/Sidebar.tsx``` - The favourites menu item is added with `IoHeartOutline` icon and "Global State" subtitle, indicating future state management
+
+**Advantages:**
+- **Modular structure**: Separating concerns into reusable components makes the codebase more maintainable
+- **Server Components**: Using Server Components by default provides better performance and SEO
+- **Type safety**: TypeScript interfaces ensure type safety across components
+- **Scalability**: The widget pattern allows easy addition of more dashboard widgets
+
+**Disadvantages:**
+- **Placeholder content**: The favourites page currently shows an empty array, which might confuse users until global state is implemented
+- **Hardcoded values**: Widget content is hardcoded, limiting flexibility
+- **No state management**: Without global state, favorites functionality is not yet functional
+
+**When to consider alternatives:**
+- If you need immediate client-side interactivity, consider using Client Components (`'use client'`) instead of Server Components
+- For complex state management, consider using state management libraries (Redux, Zustand, Jotai) instead of React Context
+- If widgets need dynamic data, consider fetching data server-side or using API routes
+
+**Connection to practical implementation:**
+This lesson establishes the UI foundation that will be enhanced in subsequent lessons with Redux and LocalStorage for managing favorite Pokémons globally across the application. The empty `pokemons={[]}` prop in `PokemonGrid` is intentional, as it will be populated from global state in later lessons.
+
+### ⚙️ 01.2 Updating code according the context:
+
+
+#### 01.2.1 Create `favourites/page.tsx` file:
+```tsx
+/* src/app/dashboard/favourites/page.tsx */  // 👈🏽 ✅
+import PokemonGrid from "../../../pokemons/components/PokemonGrid";
+export const metadata = {
+  title: "Favourites",
+  description: "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+export default async function PokemonsPage() {
+  return (
+    <div className="flex flex-col">
+      <span className="text-5xl my-2 text-center">
+        Favourites Pokémons & <span className="text-blue-500">Global State</span>
+      </span>
+
+      <PokemonGrid pokemons={[]} />
+    </div>
+  );
+}
+```
+
+#### 01.2.2 Add the `favourites` in `Sidebar`:
+```tsx
+/* src/components/Sidebar.tsx */
+import Image from "next/image";
+import { IoBrowsersOutline, IoCalculator, IoFootball, IoHeartOutline, IoLogoReact } from "react-icons/io5";
+import SidebarMenuItem from "./SidebarMenuItem";
+
+const menuItems = [
+  {
+    path: "/dashboard/main",
+    icon: <IoBrowsersOutline size={40} />,
+    title: "Dashboard",
+    subTitle: "Visualization",
+  },
+  {
+    path: "/dashboard/counter",
+    icon: <IoCalculator size={40} />,
+    title: "Counter",
+    subTitle: "Counter Client Side",
+  },
+  {
+    path: "/dashboard/pokemons",
+    icon: <IoFootball size={40} />,
+    title: "Pokemons",
+    subTitle: "Static Generation",
+  },
+  {
+    path: "/dashboard/favourites",        // 👈🏽 ✅
+    icon: <IoHeartOutline size={40} />,   // 👈🏽 ✅
+    title: "Favourites",                  // 👈🏽 ✅
+    subTitle: "Global State",             // 👈🏽 ✅
+  },
+];
+
+export const Sidebar = () => {
+  return (
+    <div
+      id="menu"
+      style={{ width: "400px" }}
+      className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 overflow-y-scroll"
+    >
+      <div id="logo" className="my-4 px-6">
+        <h1 className="flex items-center text-lg md:text-2xl font-bold text-white">
+          <IoLogoReact className="mr-2" />
+          <span>Dash-67</span>
+          <span className="text-blue-500">8</span>.
+        </h1>
+        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+      </div>
+      <div id="profile" className="px-6 py-10">
+        <p className="text-slate-500">Welcome back,</p>
+        <a href="#" className="inline-flex space-x-2 items-center">
+          <span>
+            <Image
+              className="rounded-full w-8 h-8"
+              src="https://avatars.githubusercontent.com/u/22944665?s=400&u=8a534a97c6ab962dce06133516a46f3bf38fd5e0&v=4"
+              alt="User avatar"
+              width={50}
+              height={50}
+            />
+          </span>
+          <span className="text-sm md:text-base font-bold">Luis Medina Coca</span>
+        </a>
+      </div>
+      <div id="nav" className="w-full px-6">
+        {menuItems.map((item) => (
+          <SidebarMenuItem key={item.path} {...item} />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+#### 01.2.3 Update or add some code to `main` or `MainPage`:
+```tsx
+/* src/app/dashboard/main/page.tsx */
+export default function MainPage() {
+  return (
+    <div className="text-black p-2">
+      <h1 className="mt-2 text-3xl">Dashboard</h1>
+      <span className="text-xl">General Information</span>
+
+      <div className="flex flex-wrap p-2">....</div>
+    </div>
+  );
+}
+```
+
+#### 01.2.4 Create `SimpleWidget.tsx` file:
+```tsx
+/* src/components/SimpleWidget.tsx */
+import { IoCafeOutline } from "react-icons/io5";
+
+export const SimpleWidget = () => {
+  return (
+    <div className="bg-white shadow-xl p-3 sm:min-w-[25%] min-w-full  rounded-2xl border-1 border-gray-50 mx-2">
+      <div className="flex flex-col">
+        <div>
+          <h2 className="font-bold text-gray-600 text-center">Contador</h2>
+        </div>
+        <div className="my-3">
+          <div className="flex flex-row items-center justify-center space-x-1 ">
+            <div id="icon">
+              {/* Icono irá aquí */}
+              <IoCafeOutline size={50} className="text-blue-500" />
+            </div>
+            <div id="temp" className="text-center">
+              <h4 className="text-4xl">Titulo</h4>
+              <p className="text-xs text-gray-500">Subtitulo</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full place-items-end text-right border-t-2 border-gray-100 mt-2">
+          <a href="#" className="text-indigo-600 text-xs font-medium">
+            Más
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+Import this `SimpleWidget` into the barrel file:
+```ts
+/* src/components/index.ts */
+export { Sidebar } from "./Sidebar";
+export { SimpleWidget } from "./SimpleWidget";  // 👈🏽 ✅
+```
+
+#### 01.2.5 Import `SimpleWidget` into `MainPage`:
+```tsx
+/* src/app/dashboard/main/page.tsx */
+import { SimpleWidget } from "../../../components";
+export default function MainPage() {
+  return (
+    <div className="text-black p-2">
+      <h1 className="mt-2 text-3xl">Dashboard</h1>
+      <span className="text-xl">General Information</span>
+
+      <div className="flex flex-wrap p-2">
+        <SimpleWidget />
+      </div>
+    </div>
+  );
+}
+```
+
+![](../img/section07_lecture079-001.png)
+
+### 🐞 01.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Incorrect function name in favourites page** | ⚠️ Identified | The function in `src/app/dashboard/favourites/page.tsx` is named `PokemonsPage` instead of `FavouritesPage`, which is misleading and inconsistent with the page purpose. Location: ```8:8:src/app/dashboard/favourites/page.tsx``` |
+| **Placeholder metadata description** | ⚠️ Identified | The metadata description contains placeholder text "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos." instead of a meaningful description for SEO and accessibility. Location: ```5:5:src/app/dashboard/favourites/page.tsx``` |
+| **Empty pokemons array without user feedback** | ⚠️ Identified | The `PokemonGrid` component receives an empty array `pokemons={[]}` without any loading state or empty state message, which may confuse users. Location: ```15:15:src/app/dashboard/favourites/page.tsx``` |
+| **Hardcoded Spanish text in SimpleWidget** | ⚠️ Identified | The `SimpleWidget` component contains hardcoded Spanish text ("Contador", "Titulo", "Subtitulo", "Más") instead of using props or internationalization. This limits reusability and makes it difficult to use in different contexts. Location: ```8:26:src/components/SimpleWidget.tsx``` |
+| **Static widget content** | ⚠️ Identified | The `SimpleWidget` component doesn't accept props for dynamic content, making it inflexible. The title, subtitle, icon, and link are all hardcoded. Location: ```3:31:src/components/SimpleWidget.tsx``` |
+| **Incorrect link in PokemonCard** | ⚠️ Identified | The favorites link in `PokemonCard` component points to `/dashboard/main` instead of handling favorite state or linking to the favourites page. Location: ```31:31:src/pokemons/components/PokemonCard.tsx``` |
+| **Missing accessibility attributes** | ⚠️ Identified | The `SimpleWidget` component's "Más" link uses an `<a>` tag with `href="#"` without proper accessibility attributes like `aria-label` or `role`. Location: ```24:24:src/components/SimpleWidget.tsx``` |
+
+### 🧱 01.4 Pending Fixes (TODO)
+
+```md
+- [ ] Rename `PokemonsPage` function to `FavouritesPage` in `src/app/dashboard/favourites/page.tsx` for consistency and clarity
+- [ ] Replace placeholder metadata description with meaningful text describing the favourites page functionality
+- [ ] Add empty state message or loading indicator when `pokemons` array is empty in favourites page to improve UX
+- [ ] Refactor `SimpleWidget` component to accept props (title, subtitle, icon, href) instead of hardcoded values for better reusability
+- [ ] Replace hardcoded Spanish text in `SimpleWidget` with English or implement internationalization (i18n)
+- [ ] Update `PokemonCard` component to properly handle favorites functionality - link should toggle favorite state or navigate to favourites page
+- [ ] Add accessibility attributes (`aria-label`, `role`, `tabindex`) to interactive elements in `SimpleWidget` component
+- [ ] Consider creating a TypeScript interface for `SimpleWidget` props to ensure type safety
+- [ ] Add error boundary or fallback UI for `PokemonGrid` component when pokemons array is empty or undefined
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
