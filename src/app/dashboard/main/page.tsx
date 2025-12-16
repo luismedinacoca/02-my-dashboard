@@ -1,4 +1,11 @@
+import { Metadata } from "next/types";
 import { SimpleWidget } from "../../../components";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Dashboard page",
+};
+
 export default function MainPage() {
   return (
     <div className="text-black p-2">

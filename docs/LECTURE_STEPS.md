@@ -6093,7 +6093,7 @@ export default function MainPage() {
       <h1 className="mt-2 text-3xl">Dashboard</h1>
       <span className="text-xl">General Information</span>
 
-      <div className="flex flex-wrap p-2">
+      <div className="flex flex-wrap p-2 items-center justify-center">
         <SimpleWidget />
       </div>
     </div>
@@ -6129,6 +6129,356 @@ export default function MainPage() {
 - [ ] Add error boundary or fallback UI for `PokemonGrid` component when pokemons array is empty or undefined
 ```
 
+
+## 📚 02. Lesson 080 - *Redux Toolkit: Installation and Configuration*
+
+
+### 🧠 02.1 Context:
+
+**Redux Toolkit (RTK)** is the official, opinionated, batteries-included toolset for efficient Redux development. It simplifies Redux usage by providing utilities that reduce boilerplate code and follow Redux best practices.
+
+#### What is Redux Toolkit?
+
+Redux Toolkit is a package that provides:
+- **`configureStore()`**: A simplified store setup with good defaults (includes Redux DevTools, thunk middleware, etc.)
+- **`createSlice()`**: A function that generates action creators and action types automatically
+- **`createAsyncThunk()`**: Handles async logic in Redux
+- **`createEntityAdapter()`**: Manages normalized state for collections
+- Built-in **Immer** for immutable updates
+- Built-in **Redux Thunk** middleware for async actions
+
+#### When and Why It's Used
+
+**When to use Redux Toolkit:**
+- Managing complex application state that needs to be shared across multiple components
+- When you need predictable state management with time-travel debugging
+- Applications with complex data flows and state dependencies
+- When you need middleware support (logging, async actions, etc.)
+- Large applications where prop drilling becomes problematic
+
+**Why use Redux Toolkit over plain Redux:**
+- **Less boilerplate**: Reduces the amount of code needed significantly
+- **Better defaults**: Includes Redux DevTools and thunk middleware by default
+- **Immutability helpers**: Uses Immer under the hood, allowing "mutating" syntax
+- **TypeScript support**: Excellent TypeScript support out of the box
+- **Best practices**: Enforces Redux best practices automatically
+
+#### Example from This Project
+
+In this project, Redux Toolkit is configured in ```1:11:src/store/index.ts```:
+
+```typescript
+import { configureStore } from "@reduxjs/toolkit";
+
+export const store = configureStore({
+  reducer: {},
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+The store is then provided to the React application through a `Providers` component (```1:14:src/store/Providers.tsx```) that wraps the application in the root layout, ensuring all components have access to the Redux store.
+
+#### Advantages
+
+1. **Reduced Boilerplate**: Less code to write and maintain
+2. **Better Developer Experience**: Redux DevTools integration by default
+3. **Type Safety**: Excellent TypeScript support with inferred types
+4. **Performance**: Optimized for performance with built-in optimizations
+5. **Community Standard**: Official Redux recommendation, widely adopted
+6. **Immutability Made Easy**: Immer integration allows writing "mutating" logic
+7. **Middleware Included**: Redux Thunk included by default for async actions
+
+#### Disadvantages
+
+1. **Learning Curve**: Still requires understanding Redux concepts (actions, reducers, selectors)
+2. **Bundle Size**: Adds ~13KB (minified + gzipped) to your bundle
+3. **Overkill for Simple Apps**: May be unnecessary for small applications with simple state
+4. **Abstraction Layer**: Hides some Redux internals, which can be confusing when debugging
+5. **Next.js Considerations**: Requires "use client" directive in Next.js App Router for client components
+
+#### When to Consider Alternatives
+
+Consider alternatives when:
+- **Simple state**: Use React's `useState` or `useReducer` for component-local state
+- **Server state**: Use React Query, SWR, or Apollo Client for server data fetching
+- **Form state**: Use React Hook Form or Formik for form-specific state
+- **Small apps**: Context API might be sufficient for simple global state
+- **Real-time data**: Consider Zustand, Jotai, or Recoil for lighter-weight solutions
+
+#### Next.js App Router Specific Considerations
+
+In Next.js 13+ with App Router:
+- Redux store must be provided in a **Client Component** (marked with `"use client"`)
+- Cannot use Redux Provider directly in Server Components (like root `layout.tsx`)
+- Solution: Create a separate `Providers.tsx` client component that wraps the Provider
+- This allows keeping metadata and other server-side features in the root layout
+
+This project follows this pattern by creating ```1:14:src/store/Providers.tsx``` as a client component that wraps the Redux Provider, which is then imported into the server component layout.
+
+
+### ⚙️ 02.2 Updating code according the context:
+
+
+#### 02.2.1 Install redux tollkit:
+
+[Quick Start | Redux Toolkit](https://redux-toolkit.js.org/tutorials/quick-start)
+```bash
+npm install @reduxjs/toolkit react-redux
+```
+
+#### 02.2.2 Create `store/index.ts` file:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from '@reduxjs/toolkit';
+
+export const store = configureStore({
+  reducer: {
+
+  }
+})
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch
+```
+
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   ├── LECTURE_STEPS.md
+│   └── LECTURE_STEPS_v01.md
+├── 📁 img/                               # Course reference images
+│   └── ...
+├── 📁 public/                            # Public static files
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+└── 📁 src/                               # Main source code
+    ├── 📁 app/                           # Next.js App Router
+    │   └── 📄 ....
+    ├── 📁 components/                    # Shared components
+    │   └── 📄 ....
+    ├── 📁 pokemons/ 
+    │   └── 📁 ....
+    ├── 📁 shopping-cart/ 
+    │   └── 📁 ....
+    └── 📁 store/                         # Store
+        └── 📄 index.ts                   # Barrel export
+```
+
+
+#### 02.2.3 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file:
+
+> According [Provide the Redux Store to React](https://redux-toolkit.js.org/tutorials/quick-start#provide-the-redux-store-to-react) documentation
+
+```tsx
+/* src/app/layout.tsx */
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Provider } from "react-redux";   // 👈🏽 ✅
+import { store } from "@/store";          // 👈🏽 ✅
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Provider store={store}>{children}</Provider>  {/* 👈🏽 ✅ */}
+      </body>
+    </html>
+  );
+}
+```
+![Error found in server side](../img/section07-lecture080-001.png)
+
+* This function is not supported in React Server Components.
+
+```tsx
+/* src/app/layout.tsx */
+'use client'     // 👈🏽 ✅
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Provider } from "react-redux";
+import { store } from "@/store"; 
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Provider store={store}>{children}</Provider>  {/* 👈🏽 ✅ */}
+      </body>
+    </html>
+  );
+}
+```
+![Error found in server side](../img/section07-lecture080-002.png)
+
+
+#### 02.2.4 Restore its previous state in `layout.tsx` file:
+```tsx
+/* src/app/layout.tsx */
+//"use client";  // 👈🏽 ✅
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+//import { Provider } from "react-redux";  // 👈🏽 ✅
+//import { store } from "@/store";  // 👈🏽 ✅
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* <Provider store={store}>{children}</Provider> */}  {/* 👈🏽 ✅ */}
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+#### 02.2.4 Create `Providers.tsx` file:
+```tsx
+/* src/store/Providers.tsx */  // 👈🏽 ✅
+"use client";
+import { Provider } from "react-redux";
+import { store } from "./";
+
+interface Props {
+  children: React.ReactNode;
+}
+
+const Providers = ({ children }: Props) => {
+  return <Provider store={store}>{children}</Provider>;
+};
+
+export default Providers;
+```
+
+#### 02.2.5 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file again:
+```tsx
+/* src/app/layout.tsx */
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import Providers from "@/store/Providers";  // 👈🏽 ✅
+//import { store } from "@/store";    // 👈🏽 ✅
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>{children}</Providers>  {/* 👈🏽 ✅*/}
+      </body>
+    </html>
+  );
+}
+```
+
+![](../img/section07-lecture080-003.png)
+
+
+### 🐞 02.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Typo in documentation code example** | ⚠️ Identified | Line 6154 uses `configureState` instead of `configureStore`. The correct function name is `configureStore` from `@reduxjs/toolkit`. Location: ```6154:6154:docs/LECTURE_STEPS.md``` |
+| **Empty reducer object in store configuration** | ℹ️ Low Priority | The store is configured with an empty reducer object `{}`. While this is valid for initial setup, it means no state management is currently active. Location: ```4:4:src/store/index.ts``` |
+| **Missing export in barrel file** | ℹ️ Low Priority | The `Providers` component is not exported from `src/store/index.ts` barrel file, requiring direct imports. Consider adding `export { default as Providers } from './Providers'` for consistency. Location: ```1:11:src/store/index.ts``` |
+| **Commented import in layout.tsx** | ℹ️ Low Priority | There's a commented import statement `//import { store } from "@/store";` in the layout file. While not breaking, it's better to remove commented code for cleanliness. Location: ```5:5:src/app/layout.tsx``` |
+
+
+### 🧱 02.4 Pending Fixes (TODO)
+
+```md
+- [ ] Remove commented import statement from `src/app/layout.tsx` (line 5) to keep code clean
+- [ ] Consider adding `Providers` export to `src/store/index.ts` barrel file for consistent import patterns
+- [ ] Add initial reducer(s) to the store configuration when implementing state management features (e.g., counter, favorites, shopping cart)
+- [ ] Consider adding Redux DevTools configuration for production builds if needed
+- [ ] Add typed hooks (`useAppDispatch`, `useAppSelector`) to `src/store/index.ts` for better TypeScript support in components
+```
 
 
 
