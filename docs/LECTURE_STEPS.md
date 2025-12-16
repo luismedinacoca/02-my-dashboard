@@ -6457,9 +6457,6 @@ export default function RootLayout({
 }
 ```
 
-![](../img/section07-lecture080-003.png)
-
-
 ### 🐞 02.3 Issues:
 
 | Issue | Status | Log/Error |
@@ -6480,6 +6477,181 @@ export default function RootLayout({
 - [ ] Add typed hooks (`useAppDispatch`, `useAppSelector`) to `src/store/index.ts` for better TypeScript support in components
 ```
 
+---
+
+## 📚 03. Lesson 081 - *Counter Slice*
+
+### 🧠 03.1 Context:
+
+A **Redux Slice** is a collection of Redux reducer logic and actions for a single feature in your app, typically defined together in one file. The `createSlice` function from Redux Toolkit is a higher-order function that automatically generates action creators and action types that correspond to the reducers and state.
+
+**When it occurs/is used:**
+- When you need to manage state for a specific feature (e.g., counter, shopping cart, user authentication)
+- When you want to centralize state management logic instead of using local component state
+- When multiple components need to share and update the same state
+- When you need predictable state updates with a clear history of changes
+
+**How it works:**
+The `createSlice` function takes an object with three main properties:
+- `name`: A string that will be used as the prefix for generated action types
+- `initialState`: The initial state value for this slice
+- `reducers`: An object of reducer functions, where each function handles a specific action
+
+Redux Toolkit automatically generates:
+- Action creators for each reducer function
+- Action types based on the slice name and reducer name
+- A reducer function that combines all the reducers
+
+**Example from the project:**
+```1:19:src/store/counter/counterSlice.ts
+import { createSlice } from "@reduxjs/toolkit";
+
+interface CounterState {
+  count: number;
+}
+
+const initialState: CounterState = {
+  count: 5,
+};
+
+const counterSlice = createSlice({
+  // always an object
+  name: "counter",
+  initialState,
+  reducers: {},
+});
+
+export const {} = counterSlice.actions;
+export default counterSlice.reducer;
+```
+
+The slice is then integrated into the Redux store:
+```1:13:src/store/index.ts
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+```
+
+**Advantages:**
+- **Less boilerplate**: Automatically generates action creators and types
+- **Immutability**: Uses Immer under the hood, allowing "mutating" logic in reducers
+- **Type safety**: Works seamlessly with TypeScript when properly typed
+- **Organization**: Keeps related reducer logic and actions together
+- **DevTools integration**: Automatically works with Redux DevTools for debugging
+- **Predictable state updates**: All state changes go through defined reducers
+
+**Disadvantages:**
+- **Learning curve**: Requires understanding Redux concepts and patterns
+- **Overhead**: May be overkill for simple local component state
+- **Bundle size**: Adds Redux Toolkit to your bundle size
+- **Complexity**: Can add complexity for small applications that don't need global state
+
+**When to consider alternatives:**
+- **Local state (`useState`)**: For component-specific state that doesn't need to be shared
+- **Context API**: For simple global state that doesn't require complex updates or middleware
+- **Zustand/Jotai**: For lighter-weight state management solutions
+- **Server state libraries (React Query, SWR)**: For server data fetching and caching
+
+**Connection to the lesson's practical implementation:**
+This lesson establishes the foundation for Redux state management in the dashboard. The counter slice will be used to manage the shopping cart counter state across multiple components, replacing local `useState` implementations. The slice is currently set up with an initial state of `count: 5`, but reducers are empty and need to be implemented in subsequent lessons to handle increment/decrement actions.
+
+### ⚙️ 03.2 Updating code according the context:
+
+#### 03.2.1 Create `counter/counterSlice.ts` file:
+```tsx
+/* src/store/counter/counterSlice.ts */   // 👈🏽 ✅
+import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  // ....
+}
+
+const counterSlice = createSlice({
+  // always an object
+  name: 'counter',
+  initialState,
+  reducers: {}
+});
+
+export const {} = counterSlice.actions;
+export default counterSlice.reducer;
+```
+
+#### 03.2.2 Adding the `CounterState` as `interface`:
+```ts
+/* src/store/counter/counterSlice.ts */
+import { createSlice } from '@reduxjs/toolkit';
+interface CounterState {  // 👈🏽 ✅
+  count: number;
+}
+const initialState: CounterState = {
+  count: 5,   // 👈🏽 ✅
+}
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {}
+});
+export const {} = counterSlice.actions;
+export default counterSlice.reducer;```
+```
+
+
+#### 03.2.3 Import `counterSlice` as ***`counterReducer`*** in `store/counter/index.ts` file:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";  // 👈🏽 ✅
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,  // 👈🏽 ✅
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+```
+
+![missing reducer warning is not anymore](../img/section07-lecture081-001.png)
+![using Redux from Devtools](../img/section07-lecture081-002.png)
+
+### 🐞 03.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Empty reducers object** | ⚠️ Identified | The `counterSlice` has an empty `reducers` object, meaning no actions are available. The slice cannot modify state without reducer functions. Location: ```15:15:src/store/counter/counterSlice.ts``` |
+| **No actions exported** | ⚠️ Identified | The actions export is empty (`export const {} = counterSlice.actions`), so components cannot dispatch actions to update the counter state. Location: ```18:18:src/store/counter/counterSlice.ts``` |
+| **CartCounter not using Redux** | ⚠️ Identified | The `CartCounter` component still uses local `useState` instead of Redux state, defeating the purpose of the counter slice. The component should use `useAppSelector` and `useAppDispatch` to interact with Redux. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
+| **Missing typed hooks** | ⚠️ Identified | The store exports `RootState` and `AppDispatch` types but doesn't provide typed hooks (`useAppDispatch`, `useAppSelector`) for components. This leads to less type-safe Redux usage. Location: ```11:13:src/store/index.ts``` |
+| **Counter state not connected** | ⚠️ Identified | The counter slice is configured in the store but not being used by any component. The `CartCounter` component should be refactored to use Redux state instead of local state. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
+| **Initial state hardcoded** | ℹ️ Low Priority | The initial state has `count: 5` hardcoded. Consider making it configurable or using a more meaningful default value (e.g., 0 for a shopping cart). Location: ```7:9:src/store/counter/counterSlice.ts``` |
+
+
+### 🧱 03.4 Pending Fixes (TODO)
+
+```md
+- [ ] Implement reducer functions in `counterSlice` for increment and decrement actions (e.g., `increment`, `decrement`, `reset`) in `src/store/counter/counterSlice.ts`
+- [ ] Export action creators from `counterSlice.actions` (e.g., `increment`, `decrement`) in `src/store/counter/counterSlice.ts`
+- [ ] Create typed hooks (`useAppDispatch`, `useAppSelector`) in `src/store/index.ts` for type-safe Redux usage in components
+- [ ] Refactor `CartCounter` component to use Redux state instead of local `useState` in `src/shopping-cart/components/CartCounter.tsx`
+- [ ] Remove `value` prop from `CartCounter` component since state will come from Redux store
+- [ ] Update `CounterPage` to remove the `value` prop being passed to `CartCounter` in `src/app/dashboard/counter/page.tsx`
+- [ ] Consider adding a `reset` action to the counter slice for resetting the count to initial state
+- [ ] Add validation in reducers to prevent negative count values (if business logic requires it)
+```
 
 
 
