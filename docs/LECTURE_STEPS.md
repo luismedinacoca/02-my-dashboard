@@ -6567,6 +6567,98 @@ This lesson establishes the foundation for Redux state management in the dashboa
 
 ### ⚙️ 03.2 Updating code according the context:
 
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Favicon
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favourites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Barrel export
+    │   ├── 📄 Sidebar.tsx                # Sidebar component
+    │   ├── 📄 SidebarMenuItem.tsx        # Sidebar menu item component
+    │   └── 📄 SimpleWidget.tsx           # Simple widget component
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   ├── 📁 components/                # Pokemon components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # Pokemon TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simple pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component
+    │
+    └── 📁 store/                         # Redux/State management store
+        ├── 📄 index.ts                   # Store configuration
+        ├── 📄 Providers.tsx              # Store providers wrapper
+        │
+        └── 📁 counter/                   # 👈🏽 ✅ Counter slice
+            └── 📄 counterSlice.ts        # 👈🏽 ✅ Counter Redux slice
+```
+
 #### 03.2.1 Create `counter/counterSlice.ts` file:
 ```tsx
 /* src/store/counter/counterSlice.ts */   // 👈🏽 ✅
@@ -6576,8 +6668,7 @@ const initialState = {
   // ....
 }
 
-const counterSlice = createSlice({
-  // always an object
+const counterSlice = createSlice({    // 👈🏽 always an object
   name: 'counter',
   initialState,
   reducers: {}
@@ -6588,6 +6679,9 @@ export default counterSlice.reducer;
 ```
 
 #### 03.2.2 Adding the `CounterState` as `interface`:
+> Giving a data type to `initialState`: `CounterState`.
+
+Defining `CounterState` as interface.
 ```ts
 /* src/store/counter/counterSlice.ts */
 import { createSlice } from '@reduxjs/toolkit';
@@ -6653,6 +6747,170 @@ export type AppDispatch = typeof store.dispatch;
 - [ ] Add validation in reducers to prevent negative count values (if business logic requires it)
 ```
 
+## 📚 04. Lesson 082 - *Exporting Redux Toolkit Hooks*
+
+
+### 🧠 04.1 Context:
+
+**Typed Redux Hooks** are custom wrappers around React-Redux's `useDispatch` and `useSelector` hooks that provide full TypeScript type safety. Instead of using the plain hooks directly, you export typed versions from your store configuration that automatically infer the correct types for your application's state and dispatch functions.
+
+**When it occurs/is used:**
+- When you want type-safe access to Redux state in React components
+- When you need to dispatch actions with proper TypeScript autocomplete and type checking
+- When working with TypeScript in Redux applications to prevent runtime errors
+- When you want better developer experience with IDE autocomplete for state properties
+- When you need to ensure type consistency across your entire Redux application
+
+**How it works:**
+The typed hooks are created by binding the generic types (`RootState` and `AppDispatch`) to the base React-Redux hooks using the `.withTypes<T>()` method (introduced in React-Redux v9). This creates new hook instances that:
+- Automatically infer the correct state type when using `useAppSelector`
+- Provide properly typed dispatch function when using `useAppDispatch`
+- Give full TypeScript IntelliSense support in your IDE
+- Catch type errors at compile time instead of runtime
+
+**Examples from the project:**
+In ```17:18:src/store/index.ts```, the typed hooks are exported:
+```tsx
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+
+These hooks should be used throughout the application instead of the plain `useDispatch` and `useSelector` hooks from `react-redux`. For example, in a component:
+```tsx
+// ✅ Correct usage
+import { useAppDispatch, useAppSelector } from "@/store";
+
+const MyComponent = () => {
+  const dispatch = useAppDispatch(); // Typed as AppDispatch
+  const count = useAppSelector((state) => state.counterReducer.count); // state is RootState
+  // ...
+};
+
+// ❌ Avoid using plain hooks
+import { useDispatch, useSelector } from "react-redux";
+```
+
+**Advantages:**
+1. **Type Safety**: Prevents accessing non-existent state properties or dispatching invalid actions
+2. **Better DX**: Full autocomplete and IntelliSense support in IDEs
+3. **Compile-time Errors**: Catches type mismatches during development, not production
+4. **Refactoring Safety**: TypeScript will catch breaking changes when you modify the store structure
+5. **Self-documenting**: Types serve as documentation for available state and actions
+6. **Less Boilerplate**: The `withTypes` approach is cleaner than explicit type annotations
+7. **Consistency**: Ensures all components use the same typed store interface
+
+**Disadvantages:**
+1. **Requires TypeScript**: Only beneficial in TypeScript projects (not needed in JavaScript)
+2. **Initial Setup**: Requires defining `RootState` and `AppDispatch` types
+3. **Learning Curve**: Developers need to understand TypeScript generics and Redux types
+4. **Migration Effort**: Existing code using plain hooks needs to be updated
+5. **Type Complexity**: Can become complex with deeply nested state structures
+
+**When to Consider Alternatives:**
+- **JavaScript Projects**: Typed hooks are unnecessary in plain JavaScript projects
+- **Small Projects**: For very small apps, the type safety might be overkill
+- **Non-Redux State**: For local component state, use React's `useState` or `useReducer`
+- **Server State**: For server data, consider React Query or SWR which have their own typing
+
+**Connection to the lesson's practical implementation:**
+This lesson focuses on exporting these typed hooks from the store configuration file so they can be imported and used consistently across all components. The implementation uses the modern `withTypes<T>()` approach which is the recommended pattern in Redux Toolkit v2 and React-Redux v9+, replacing the older explicit typing pattern that required importing `TypedUseSelectorHook` from `react-redux`.
+
+
+### ⚙️ 04.2 Updating code according the context:
+
+#### 04.2.1 Current version:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();     // 👈🏽 ✅
+export const useAppSelector = useSelector.withTypes<RootState>();       // 👈🏽 ✅
+```
+
+#### 04.2.2 Legacy version
+```tsx
+/*  */
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch: () => AppDispatch = useDispatch;                 // 👈🏽 ✅
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;   // 👈🏽 ✅
+```
+
+#### 04.2.3 `withTypes` approach vs Explicit typing approach:
+```ts
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+vs
+```ts
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+```
+
+| Aspect | `withTypes` approach | Explicit typing approach |
+|------|----------------------|--------------------------|
+| Introduced in | Redux Toolkit v2 / React-Redux v9 | Older / classic pattern |
+| Typing mechanism | Uses generic helpers built into React-Redux | Uses TypeScript type annotations |
+| Boilerplate | ✅ Less boilerplate | ❌ Slightly more verbose |
+| Type inference | ✅ Fully inferred automatically | ✅ Correct but more manual |
+| Dispatch typing | `dispatch` automatically knows thunks, async actions, etc. | Same result, but defined explicitly |
+| Selector typing | `state` is inferred as `RootState` | `state` is typed via `TypedUseSelectorHook` |
+| Risk of mismatch | ✅ Very low (types are bound at creation) | ⚠️ Possible if you mistype the signature |
+| Refactor safety | ✅ Safer during refactors | ⚠️ Needs manual updates |
+| Learning curve | ✅ Easier for new Redux users | ❌ Requires understanding TS utility types |
+| Official recommendation | ⭐ Recommended going forward | Legacy but still supported |
+| Runtime behavior | 🟰 Identical | 🟰 Identical |
+| Type-only or runtime? | Type-only (erased at runtime) | Type-only (erased at runtime) |
+
+
+### 🐞 04.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Typed hooks not being used in components** | ⚠️ Identified | The typed hooks (`useAppDispatch`, `useAppSelector`) are exported from the store but not being used anywhere in the codebase. Components should import and use these hooks instead of the plain `useDispatch` and `useSelector` from `react-redux`. Current state: No components are using Redux hooks yet. Location: ```17:18:src/store/index.ts``` |
+| **CartCounter component not using Redux hooks** | ⚠️ Identified | The `CartCounter` component still uses local `useState` instead of Redux state management. It should be refactored to use `useAppSelector` to read state and `useAppDispatch` to dispatch actions. This prevents the typed hooks from being utilized. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
+| **Missing import examples in documentation** | ℹ️ Low Priority | While the hooks are properly exported, there are no examples in the codebase showing how to import and use them in components. Consider adding usage examples or updating components to demonstrate proper usage patterns. |
+| **No validation that hooks are used correctly** | ℹ️ Low Priority | Since no components are using the hooks yet, there's no way to verify that the type inference is working correctly. Once components start using the hooks, TypeScript will validate the types automatically. |
+
+### 🧱 04.4 Pending Fixes (TODO)
+
+```md
+- [ ] Refactor `CartCounter` component to use `useAppSelector` and `useAppDispatch` hooks instead of local `useState` in `src/shopping-cart/components/CartCounter.tsx`
+- [ ] Update all future components to import typed hooks from `@/store` instead of using plain hooks from `react-redux`
+- [ ] Add example usage comments or documentation showing how to use `useAppDispatch` and `useAppSelector` in components
+- [ ] Verify TypeScript type inference is working correctly by using the hooks in at least one component
+- [ ] Consider adding ESLint rules to enforce usage of typed hooks (`useAppDispatch`/`useAppSelector`) instead of plain hooks (`useDispatch`/`useSelector`)
+- [ ] Update any existing components that might use Redux hooks to use the typed versions for consistency
+```
+
 
 
 
@@ -6678,32 +6936,32 @@ export type AppDispatch = typeof store.dispatch;
 
 [TEMPLATE]
 
-## 📚 X. Lesson YYY - *{{TITLE_NAME}}*
+## 📚 XX. Lesson YYY - *{{TITLE_NAME}}*
 
 
-### 🧠 X.1 Context:
+### 🧠 XX.1 Context:
 
 
-### ⚙️ X.2 Updating code according the context:
+### ⚙️ XX.2 Updating code according the context:
 
 
-#### X.2.1
+#### XX.2.1
 ```tsx
 /*  */
 
 ```
 
-#### X.2.2
+#### XX.2.2
 ```tsx
 /*  */
 
 ```
 
-### 🐞 X.3 Issues:
+### 🐞 XX.3 Issues:
 - **first issue**: something..
 
 
-### 🧱 X.4 Pending Fixes (TODO)
+### 🧱 XX.4 Pending Fixes (TODO)
 
 ```md
 - [ ]
