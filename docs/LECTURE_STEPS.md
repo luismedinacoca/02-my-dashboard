@@ -6911,6 +6911,361 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 - [ ] Update any existing components that might use Redux hooks to use the typed versions for consistency
 ```
 
+## 📚 05. Lesson 083 - *Counter Reducer & Actions*
+
+
+### 🧠 05.1 Context:
+
+**Counter Reducer & Actions** in Redux Toolkit represent the core pattern for managing state changes in a Redux application. This lesson focuses on implementing reducer functions and their corresponding actions for a counter feature.
+
+#### Definition and Explanation
+
+A **reducer** is a pure function that takes the current state and an action, then returns a new state. In Redux Toolkit, reducers are defined within a `createSlice`, which automatically generates action creators and action types.
+
+**Actions** are plain JavaScript objects that describe what happened in the application. Redux Toolkit's `createSlice` automatically creates action creators for each reducer function, eliminating the need to manually define action types and creators.
+
+#### When It Occurs/Is Used
+
+Reducers and actions are used when:
+- **State needs to be updated**: Any time application state must change, it goes through a reducer
+- **Predictable state management**: When you need a single source of truth for state
+- **Complex state logic**: When state updates involve validation, conditional logic, or multiple steps
+- **Shared state**: When multiple components need to access and modify the same state
+- **Debugging**: When you need time-travel debugging and state history (via Redux DevTools)
+
+#### Examples from This Project
+
+In this project, the counter reducer is implemented in ```11:28:src/store/counter/counterSlice.ts```:
+
+```11:28:src/store/counter/counterSlice.ts
+const counterSlice = createSlice({
+  // always an object
+  name: "counter",
+  initialState,
+  reducers: {
+    addOne(state) {
+      state.count++;
+    },
+    substractOne(state) {
+      if (state.count === 0) return;
+      state.count--;
+    },
+    resetCount(state, action: PayloadAction<number>) {
+      if (action.payload < 0) action.payload = 0;
+      state.count = action.payload;
+    },
+  },
+});
+```
+
+The actions are exported and used in the `CartCounter` component (```1:38:src/shopping-cart/components/CartCounter.tsx```):
+
+```1:38:src/shopping-cart/components/CartCounter.tsx
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, substractOne } from "@/store/counter/counterSlice";
+
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+
+const CartCounter = ({ value = 10 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+
+export default CartCounter;
+```
+
+#### Advantages
+
+1. **Automatic Action Creation**: Redux Toolkit automatically generates action creators, reducing boilerplate
+2. **Immutability Made Easy**: Uses Immer under the hood, allowing "mutating" syntax in reducers
+3. **Type Safety**: Full TypeScript support with `PayloadAction<T>` for typed actions
+4. **Validation Logic**: Can include validation and conditional logic directly in reducers
+5. **Predictable Updates**: All state changes go through defined reducers, making debugging easier
+6. **DevTools Integration**: Works seamlessly with Redux DevTools for time-travel debugging
+7. **Single Source of Truth**: Centralized state management prevents inconsistencies
+
+#### Disadvantages
+
+1. **Learning Curve**: Requires understanding Redux concepts (reducers, actions, dispatch)
+2. **Boilerplate**: Still requires setup (store, slices, providers) even with reduced boilerplate
+3. **Overkill for Simple State**: May be unnecessary for component-local state
+4. **Bundle Size**: Adds Redux Toolkit to bundle size (~13KB minified + gzipped)
+5. **Next.js Considerations**: Requires "use client" directive in Next.js App Router
+6. **Action Payload Mutation**: Can accidentally mutate payloads if not careful (as seen in `resetCount`)
+
+#### When to Consider Alternatives
+
+Consider alternatives when:
+- **Local Component State**: Use `useState` or `useReducer` for component-specific state
+- **Simple State**: Context API might be sufficient for simple global state
+- **Server State**: Use React Query, SWR, or Apollo Client for server data
+- **Form State**: Use React Hook Form or Formik for form-specific state
+- **Lightweight Solutions**: Consider Zustand, Jotai, or Recoil for smaller apps
+- **Real-time Data**: Consider specialized libraries for WebSocket/real-time updates
+
+#### Connection to the Lesson's Practical Implementation
+
+This lesson demonstrates the complete flow from defining reducers and actions in a slice to dispatching those actions from React components. It shows how Redux Toolkit simplifies the traditional Redux pattern by:
+- Automatically generating action creators (`addOne`, `substractOne`, `resetCount`)
+- Using Immer for immutable updates (allowing direct state mutations)
+- Integrating with TypeScript for type safety
+- Connecting client components to the Redux store through typed hooks (`useAppDispatch`, `useAppSelector`)
+
+The implementation also highlights the Server/Client Component boundary in Next.js, where the counter page is a Server Component (for metadata) but uses a Client Component (`CartCounter`) to interact with Redux.
+
+### ⚙️ 05.2 Updating code according the context:
+
+
+#### 05.2.1 Add some actions into `CounterSlice.ts` with their validations:
+```tsx
+/* src/store/counter/counterSlice.ts */
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";  // 👈🏽 ✅
+interface CounterState {
+  count: number;
+}
+const initialState: CounterState = {
+  count: 5,
+};
+const counterSlice = createSlice({
+  name: "counter",
+  initialState,
+  reducers: {
+    addOne(state) {  // 👈🏽 ✅
+      state.count++;
+    },
+    substractOne(state) {  // 👈🏽 ✅
+      if (state.count === 0) return;
+      state.count--;
+    },
+    resetCount(state, action: PayloadAction<number>) {  // 👈🏽 ✅
+      if (action.payload < 0) action.payload = 0;
+      state.count = action.payload;
+    },
+  },
+});
+export const { addOne, substractOne, resetCount } = counterSlice.actions;  // 👈🏽 ✅
+export default counterSlice.reducer;
+```
+
+#### 05.2.2 Applying actions CounterReducer into Counter from page/dashboard:
+```tsx
+/* src/app/dashboard/counter/page.tsx */
+import { CartCounter } from "../../../shopping-cart";
+import { Metadata } from "next/types";
+// 👉🏽 ✅ 'use client' is omitted because this component relies on metadata.
+export const metadata: Metadata = {
+  title: "𝌰 Shopping Cart",
+  description: "Simple Counter Page",
+};
+// i.e a value generated from the server
+const value = 20;
+export default function CounterPage() {
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <CartCounter value={value} />
+    </div>
+  );
+}
+```
+
+Go to `CartCounter` component which is `'use-client'`:
+```ts
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppSelector } from "@/store";
+interface Props {
+  value?: number;
+}
+const CartCounter = ({ value = 10 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);  // 👈🏽 ✅ (1)
+  const count = useAppSelector((state) => state.counter.count);           // 👈🏽 ✅ (2)
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}    {/* 👈🏽 🔥 ⚠️ */}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}    {/* 👈🏽 🔥 ⚠️ */}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+In `store/index.ts`:
+```ts
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+export const store = configureStore({
+  reducer: {
+    counter: counterReducer,  // 👈🏽 ✅
+  },
+});
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+
+Meanwhile the app when click on `-1` or `+1` buttons:
+![setCount errors](../img/sectio07-lecture083-001.png)
+
+
+#### 05.2.3 Fixing those `-1` button & `+1` button errors:
+```ts
+/* src/shopping-cart/components/CartCounter.tsx */
+ "use client";
+import { useAppDispatch, useAppSelector } from "@/store";  // 👈🏽 ✅
+import { addOne, substractOne } from "@/store/counter/counterSlice";  // 👈🏽 ✅
+interface Props {
+  value?: number;
+}
+const CartCounter = ({ value = 10 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();  // 👈🏽 ✅
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}    {/* 👈🏽 ✅ */}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}    {/* 👈🏽 ✅ */}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+```mermaid
+sequenceDiagram
+    participant CounterPage as CounterPage<br/>(Server Component)
+    participant CartCounter as CartCounter<br/>("👨🏾‍💻 use client")
+    participant useAppSelector as useAppSelector<br/>(Redux Hook)
+    participant useAppDispatch as useAppDispatch<br/>(Redux Hook)
+    participant Store as store/index.ts<br/>(Redux Store)
+    participant CounterSlice as counterSlice<br/>(Redux Slice)
+    participant Provider as Providers<br/>("👨🏾‍💻 use client")
+
+    Note over CounterPage: Server Component<br/>No "use client"<br/>(⚙️ uses metadata)
+    
+    CounterPage->>CartCounter: Renders with value={20}
+    
+    Note over CartCounter: Client Component<br/>"use client"
+    
+    CartCounter->>useAppSelector: useAppSelector((state) => state.counter.count)
+    Note left of useAppSelector: previous looks '((state) => state.counterReducer.count)'
+    useAppSelector->>Store: Gets state from store
+    Note over Store: previous looks<br/>reducer: {<br/>counter: counterReducer,<br/>},
+    Store->>CounterSlice: Reads counter.count (initial: 5)
+    CounterSlice-->>Store: Returns count: 5
+    Store-->>useAppSelector: count: 5
+    useAppSelector-->>CartCounter: count: 5
+    
+    CartCounter->>useAppDispatch: useAppDispatch()
+    useAppDispatch->>Provider: Connects with Redux Provider
+    Provider->>Store: Access to store
+    Store-->>useAppDispatch: dispatch function
+    useAppDispatch-->>CartCounter: dispatch function
+    
+    Note over CartCounter: User clicks on "+1" button
+    
+    CartCounter->>useAppDispatch: dispatch(addOne())
+    useAppDispatch->>Store: Dispatch action addOne
+    Store->>CounterSlice: Executes reducer addOne
+    CounterSlice->>CounterSlice: state.count++ (5 -> 6)
+    CounterSlice-->>Store: Updated state: count: 6
+    Store-->>CartCounter: Notifies state change
+    CartCounter->>CartCounter: Re-renders with count: 6
+    
+    Note over CartCounter: User clicks on "-1" button
+    
+    CartCounter->>useAppDispatch: dispatch(substractOne())
+    useAppDispatch->>Store: Dispatch action substractOne
+    Store->>CounterSlice: Executes reducer substractOne
+    CounterSlice->>CounterSlice: if (count === 0) return<br/>else state.count-- (6 -> 5)
+    CounterSlice-->>Store: Updated state: count: 5
+    Store-->>CartCounter: Notifies state change
+    CartCounter->>CartCounter: Re-renders with count: 5
+    
+    Note over CounterPage,CartCounter: Complete interaction flow<br/>Server Component → Client Component → Redux Store
+```
+
+### 🐞 05.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Unused `value` prop in CartCounter** | ⚠️ Identified | The `value` prop in `CartCounter` component (```10:10:src/shopping-cart/components/CartCounter.tsx```) is assigned but never used. The component receives `value={20}` from `CounterPage` but ignores it, using Redux state instead. ESLint warning: `'value' is assigned a value but never used.` |
+| **Direct payload mutation in resetCount reducer** | ⚠️ Identified | In ```23:26:src/store/counter/counterSlice.ts```, the `resetCount` reducer directly mutates `action.payload` (`if (action.payload < 0) action.payload = 0;`). While this works, it's not a best practice as actions should be immutable. Should validate and use a new value instead. |
+| **Typo in action name: `substractOne`** | ℹ️ Low Priority | The action is named `substractOne` (```19:22:src/store/counter/counterSlice.ts```) which is a common misspelling. The correct spelling is `subtractOne`. However, if this is intentional for consistency, it's acceptable. |
+| **Missing resetCount action usage** | ℹ️ Low Priority | The `resetCount` action is exported (```30:30:src/store/counter/counterSlice.ts```) but never used in any component. Consider adding a reset button to the UI or removing the unused action if not needed. |
+| **No error handling for edge cases** | ℹ️ Low Priority | The reducers don't handle edge cases like `NaN`, `Infinity`, or extremely large numbers. While `resetCount` validates negative numbers, it doesn't validate other invalid inputs. |
+
+
+### 🧱 05.4 Pending Fixes (TODO)
+
+```md
+- [ ] Remove unused `value` prop from `CartCounter` component or implement logic to use it (e.g., initialize Redux state with it). File: `src/shopping-cart/components/CartCounter.tsx:10`
+- [ ] Fix `resetCount` reducer to avoid mutating `action.payload`. Instead, validate and use a new value: `state.count = action.payload < 0 ? 0 : action.payload;`. File: `src/store/counter/counterSlice.ts:23-26`
+- [ ] Consider renaming `substractOne` to `subtractOne` for correct spelling, or document the intentional misspelling. Files: `src/store/counter/counterSlice.ts:19,30` and `src/shopping-cart/components/CartCounter.tsx:3,21`
+- [ ] Add reset button to `CartCounter` component to utilize the `resetCount` action, or remove the unused action if not needed. File: `src/shopping-cart/components/CartCounter.tsx`
+- [ ] Add input validation in `resetCount` reducer to handle `NaN`, `Infinity`, and other edge cases. File: `src/store/counter/counterSlice.ts:23-26`
+- [ ] Add unit tests for counter reducers to ensure all actions work correctly and handle edge cases properly
+```
+
 
 
 
