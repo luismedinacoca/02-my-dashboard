@@ -8,10 +8,10 @@ export const WidgetsGrid = () => {
   return (
     <div className="flex flex-wrap p-2 items-center justify-center">
       <SimpleWidget
-        title={counter.toString() || "0"}
-        subtitle="Products in shopping cart"
+        title={`${counter}`}
+        subtitle=" Products in shopping cart"
         label="Counter"
-        icon={<IoCartOutline size={50} className="text-blue-500" />}
+        icon={<IoCartOutline size={70} className="text-blue-500" />}
         href="/dashboard/counter"
       />
     </div>

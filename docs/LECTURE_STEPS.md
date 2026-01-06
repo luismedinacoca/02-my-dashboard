@@ -7845,6 +7845,136 @@ export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
 
 
 
+<br>
+
+## 📚 08. Lesson 086 - *Task solution*
+
+
+### 🧠 08.1 Context:
+
+This lesson serves as the solution for the previously assigned task: building a dynamic dashboard overview using information from the Redux store. It demonstrates the implementation of a reusable `SimpleWidget` component and a `WidgetsGrid` container that subscribes to the global state.
+
+**Definition & Explanation:**
+The task involved creating a modular UI where individual "widgets" can display different types of data. In this specific case, the widget reflects the state of the shopping cart counter managed by Redux Toolkit. This pattern is essential for creating data-driven dashboards where multiple components need to react to state changes without being tightly coupled to each other.
+
+**When it occurs/is used:**
+- When building dashboard layouts that require summary cards (widgets).
+- When data from a global state (like Redux) needs to be visualized in a different route or section than where it's modified.
+- When creating a consistent UI/UX for displaying various metrics or links.
+
+**Examples from the project:**
+- `WidgetsGrid` uses the `useAppSelector` custom hook to access `state.counter.count`.
+- `SimpleWidget` takes props like `title`, `subtitle`, `label`, `icon`, and `href` to render a standardized card.
+- The `MainPage` in `src/app/dashboard/main/page.tsx` integrates these components to build the overview.
+
+**Advantages:**
+- **Encapsulation**: UI logic for the widget is isolated in `SimpleWidget.tsx`.
+- **Reusability**: The grid can easily be expanded with more widgets by passing different props.
+- **Real-time Updates**: Since it's connected to Redux, the dashboard updates immediately when the counter changes elsewhere in the app.
+
+**Disadvantages:**
+- **Component Specificity**: The current `SimpleWidget` implementation has some hardcoded strings ("Counter page"), which slightly reduces its "generic" nature.
+
+**Alternatives:**
+- If the data only needs to be used in one place and doesn't change frequently, Server Components fetching data directly from a database or API could be a more performant alternative to reduce client-side JS.
+
+**Connection to Practical Implementation:**
+The lesson shows how to bridge the gap between "dumb" presentational components and "smart" container components that are connected to the Redux store, following best practices for state management in React.
+
+
+### ⚙️ 08.2 Updating code according the context:
+
+
+#### 08.2.1 Update `WidgetsGrid` component:
+```tsx
+/* src/components/dashboard/WidgetsGrid.tsx */
+"use client";
+import { useAppSelector } from "@/store";
+import { SimpleWidget } from "./SimpleWidget";
+import { IoCartOutline } from "react-icons/io5";
+
+export const WidgetsGrid = () => {
+  const counter = useAppSelector((state) => state.counter.count);
+  return (
+    <div className="flex flex-wrap p-2 items-center justify-center">
+      <SimpleWidget
+        title={`${counter}`}
+        subtitle=" Products in shopping cart"
+        label="Counter"
+        icon={<IoCartOutline size={70} className="text-blue-500" />}
+        href="/dashboard/counter"
+      />
+    </div>
+  );
+};
+```
+
+#### 08.2.2 Considering those optionnal props:
+```tsx
+/* src/components/dashboard/SimpleWidget.tsx */
+import Link from "next/link";
+interface Props {
+  title: string;
+  subtitle?: string;
+  label?: string;
+  icon?: React.ReactNode;
+  href?: string;
+}
+export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
+  return (
+    <div className="bg-white shadow-xl p-3 sm:min-w-[25%] min-w-full  rounded-2xl border-1 border-gray-50 m-2">
+      <div className="flex flex-col">
+        <div>{label && <h2 className="font-bold text-gray-600 text-center">{label}</h2>}</div> {/* 👈🏽 ✅ */}
+        <div className="my-3">
+          <div className="flex flex-row items-center justify-center space-x-1 ">
+            {icon && <div id="icon">{icon}</div>} {/* 👈🏽 ✅ */}
+            <div id="temp" className="text-center">
+              <h4 className="text-4xl">{title}</h4>
+              {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>} {/* 👈🏽 ✅ */}
+            </div>
+          </div>
+        </div>
+        {href && (
+          <div className="w-full place-items-end text-right border-t-2 border-gray-100 mt-2">
+            <Link href={href || "/"} className="text-indigo-600 text-xs font-medium">
+              Counter page
+            </Link>
+          </div>
+        )} {/* 👈🏽 ✅ */}
+      </div>
+    </div>
+  );
+};
+```
+
+### 🐞 08.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Hardcoded Link Text** | ⚠️ Identified | The `SimpleWidget` component has a hardcoded string "Counter page" in its link, limiting its reuse for other types of widgets. |
+| **Dead Code in WidgetsGrid** | ⚠️ Identified | `src/components/dashboard/WidgetsGrid.tsx` contains commented-out code outside the component body (lines 20-30). |
+| **Invalid Tailwind Class** | ⚠️ Identified | `SimpleWidget.tsx` uses `border-1`, which is not a standard Tailwind class (standard is `border` or `border-2`). |
+
+### 🧱 08.4 Pending Fixes (TODO)
+
+- [ ] Refactor `SimpleWidget` to accept a `labelLink` prop to remove hardcoded "Counter page" text. (src/components/dashboard/SimpleWidget.tsx:28)
+- [ ] Remove unused commented code in `src/components/dashboard/WidgetsGrid.tsx`. (lines 20-30)
+- [ ] Correct the CSS class `border-1` to `border` in `SimpleWidget.tsx`. (line 13)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
