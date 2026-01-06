@@ -7497,7 +7497,7 @@ export default counterSlice.reducer;
 
 #### 06.2.3 Fixing the second issue from `CartCounter`:
 ```tsx
-/*  */
+/* src/shopping-cart/components/CartCounter.tsx */
 "use client";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";  // 👈🏽 ✅
@@ -7559,6 +7559,288 @@ export default CartCounter;
 - [ ] (Code quality) Refactor `resetCount` to avoid mutating `action.payload` (use a new validated value instead). File: `src/store/counter/counterSlice.ts:30-33`
 - [ ] (Consistency) Decide whether `resetCount` should also update `isReady` (or document why it should not). File: `src/store/counter/counterSlice.ts`
 - [ ] (Naming) Rename `substractOne` → `subtractOne` and update all imports/usages. Files: `src/store/counter/counterSlice.ts`, `src/shopping-cart/components/CartCounter.tsx`
+```
+
+
+<br>
+
+## 📚 07. Lesson 085 - *Task - Store, Props & Links*
+
+
+### 🧠 07.1 Context:
+
+This lesson connects three fundamentals you’ll use constantly in a Next.js (App Router) dashboard:
+
+- **Store (global state)**: A centralized place to keep state that must be shared across routes/components (e.g. cart count, favourites). In this project we use **Redux Toolkit** + **react-redux**:
+  - The Redux store is created with `configureStore` and a feature reducer (`counter`) in `src/store/index.ts`.
+  - The app is wrapped with a client-side `Provider` in `src/store/Providers.tsx`, and mounted at the root layout (`src/app/layout.tsx`) so *any* client component can access the store.
+  - Typed hooks (`useAppSelector`, `useAppDispatch`) are exported from `src/store/index.ts` to avoid repeating `RootState`/`AppDispatch` typing across the app.
+
+- **Props (component inputs)**: The primary way to pass data/configuration from a parent component to a child component. In a component-driven UI, props keep components reusable and predictable:
+  - `SimpleWidget` is a “presentational” component parameterized via props (title, subtitle, label, icon, href) in `src/components/dashboard/SimpleWidget.tsx`.
+  - `SidebarMenuItem` receives `path`, `icon`, `title`, and `subTitle` as props and renders a navigation link (`src/components/sidebar/SidebarMenuItem.tsx`).
+  - `CartCounter` receives a `value` prop (server-generated value) and initializes the store from it (`src/shopping-cart/components/CartCounter.tsx:7-19`).
+
+- **Links (navigation)**: In Next.js, navigation is performed with `next/link` to enable client-side transitions (no full page reload) and prefetching. Links are a key part of dashboard UX:
+  - The sidebar uses `Link` and `usePathname()` to highlight the active route (`src/components/sidebar/SidebarMenuItem.tsx:14-20`).
+  - Widgets can link to related pages (e.g. a “Counter” widget that navigates to `/dashboard/counter`) using a `href` prop (`src/components/dashboard/WidgetsGrid.tsx:10-16` and `src/components/dashboard/SimpleWidget.tsx:31-35`).
+
+#### When to use each
+
+- **Use the store** when state must be shared across routes/siblings, or needs to survive navigation (e.g. cart count across `/dashboard/*`). Avoid overusing it for purely local UI state.
+- **Use props** for local composition and reuse: parent owns the data, child renders it. Prefer props over global state when the data only matters to a small subtree.
+- **Use `Link`** for internal navigation. For “active link” UX, derive current route from `usePathname()` and expose the state via classnames and accessibility attributes (like `aria-current="page"`).
+
+#### Pros / cons and alternatives
+
+- **Store (Redux)**:
+  - **Pros**: global access, predictable updates, great devtools, good for cross-route state.
+  - **Cons**: extra boilerplate, can be overkill for small/local state, requires client components for reading/updating.
+  - **Alternatives**: React Context (small global state), URL/search params (state in the route), server state libraries (TanStack Query), or colocated local state.
+
+- **Props**:
+  - **Pros**: explicit API, easy to test, reusable components.
+  - **Cons**: prop drilling when many levels need the same value.
+  - **Alternatives**: context for shared subtree state, or a store for cross-route/sibling state.
+
+- **Links**:
+  - **Pros**: fast client-side navigation, prefetching, better UX.
+  - **Cons**: “active” matching can be tricky with nested routes and dynamic segments.
+  - **Alternatives**: programmatic navigation (`useRouter().push`) for imperative flows, but prefer `Link` for standard navigation.
+
+
+### ⚙️ 07.2 Updating code according the context:
+
+
+#### 07.2.1 Restructuring the project:
+
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Favicon
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favourites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Barrel export
+    │   ├── 📁 dashboard/                 # 👈🏽 ✅ Dashboard folder  
+    │   │   └── 📄 SimpleWidget.tsx       # 👈🏽 ✅ Simple widget component
+    │   └── 📁 sidebar/                   # 👈🏽 ✅ Sidebar folder  
+    │       ├── 📄 Sidebar.tsx            # 👈🏽 ✅ Sidebar component
+    │       └── 📄 SidebarMenuItem.tsx    # 👈🏽 ✅ Sidebar menu item component
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   ├── 📁 components/                # Pokemon components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # Pokemon TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simple pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component
+    │
+    └── 📁 store/                         # Redux/State management store
+        ├── 📄 index.ts                   # Store configuration
+        ├── 📄 Providers.tsx              # Store providers wrapper
+        │
+        └── 📁 counter/                   # Counter slice
+            └── 📄 counterSlice.ts        # Counter Redux slice
+```
+
+#### 07.2.2 Turning SimpleWidget as `use client` mode:
+
+1. Create `WidgetGrid.tsx` component:
+
+```
+02-my-dashboard/
+├── 📁 components/                    # Shared components
+│   ├── 📄 index.ts                   # Barrel export
+│   ├── 📁 dashboard/                 # Dashboard folder  
+│       ├── 📄 WidgetsGrid.tsx        # 👈🏽 ✅ Widgets component
+│   │   └── 📄 SimpleWidget.tsx       # Simple widget component
+│   └── 📁 sidebar/                   # Sidebar folder  
+│       ├── 📄 Sidebar.tsx            # Sidebar component
+│       └── 📄 SidebarMenuItem.tsx    # Sidebar menu item component
+```
+
+2. Replace the `SimpleWidget` code in `src/app/dashboard/main/page.tsx` by `WidgeetsGrid`:
+```tsx
+/* src/app/dashboard/main/page.tsx */
+import { Metadata } from "next/types";
+import { WidgetsGrid } from "../../../components/dashboard/WidgetsGrid";  // 👈🏽 ✅
+// import { SimpleWidget } from "../../../components";  // 👈🏽 ✅
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Dashboard page",
+};
+
+export default function MainPage() {
+  return (
+    <div className="text-black p-2">
+      <h1 className="mt-2 text-3xl">Dashboard</h1>
+      <span className="text-xl">General Information</span>
+
+      {/* <div className="flex flex-wrap p-2 items-center justify-center">
+        <SimpleWidget />
+      </div> */}  {/* 👈🏽 ✅ */}
+      <WidgetsGrid /> {/* 👈🏽 ✅ */}
+    </div>
+  );
+}
+```
+
+3. `WidgetsGrid` component:
+```tsx
+/* src/components/dashboard/WidgetsGrid.tsx */
+import { SimpleWidget } from "./SimpleWidget";
+export const WidgetsGrid = () => {  // 👈🏽 ✅ 
+  return (
+    <div className="flex flex-wrap p-2 items-center justify-center">
+      <SimpleWidget />  {/* 👈🏽 ✅ */}
+    </div>
+  );
+};
+```
+
+4. Updating the barrel `src/components/index.ts` file:
+```tsx
+/* src/components/index.ts */
+export { Sidebar } from "./sidebar/Sidebar";
+export { SimpleWidget } from "./dashboard/SimpleWidget";
+export { WidgetsGrid } from "./dashboard/WidgetsGrid";  // 👈🏽 ✅
+```
+
+#### 07.2.3 Parameterize the `SimpleWidget.tsx` component:
+```tsx
+/* src/components/dashboard/SimpleWidget.tsx */
+import Link from "next/link";
+interface Props {
+  title: string;
+  subtitle?: string;
+  label?: string;
+  icon?: React.ReactNode;
+  href?: string;
+}
+export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
+  return (
+    <div className="bg-white shadow-xl p-3 sm:min-w-[25%] min-w-full  rounded-2xl border-1 border-gray-50 m-2">
+      <div className="flex flex-col">
+        <div>
+          <h2 className="font-bold text-gray-600 text-center">{label}</h2>
+        </div>
+        <div className="my-3">
+          <div className="flex flex-row items-center justify-center space-x-1 ">
+            <div id="icon">
+              {/* Icono irá aquí */}
+              {icon}
+            </div>
+            <div id="temp" className="text-center">
+              <h4 className="text-4xl">{title}</h4>
+              <p className="text-xs text-gray-500">{subtitle}</p>
+            </div>
+          </div>
+        </div>
+        <div className="w-full place-items-end text-right border-t-2 border-gray-100 mt-2">
+          <Link href={href || "/"} className="text-indigo-600 text-xs font-medium">
+            Más
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### 🐞 07.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Active link highlight fails on nested/dynamic routes** | ⚠️ Identified | `SidebarMenuItem` checks `currentPath === path` (`src/components/sidebar/SidebarMenuItem.tsx:18-20`). This won’t mark `/dashboard/pokemons/pikachu` as active for the base `/dashboard/pokemons` item. Consider `startsWith`, route groups, or a dedicated matcher. |
+| **Missing `aria-current` for active navigation item** | ⚠️ Identified | The active sidebar link is styled visually but does not expose active state to assistive tech. Add `aria-current="page"` when active (`src/components/sidebar/SidebarMenuItem.tsx:16-27`). |
+| **Profile “link” is a dead `href="#"` anchor** | ⚠️ Identified | `Sidebar` uses `<a href="#">` around the profile (`src/components/sidebar/Sidebar.tsx:49-60`), which can jump to top and is not meaningful navigation. Replace with a real route (`Link`) or a `<button>` if it triggers an action. |
+| **Redundant and dead code in `WidgetsGrid`** | ℹ️ Low Priority | `counter.toString() || "0"` is redundant because `"0"` is truthy, and there is a large commented-out block at the bottom (`src/components/dashboard/WidgetsGrid.tsx:11-31`). |
+| **`SimpleWidget` renders headings even when optional props are missing** | ℹ️ Low Priority | `label` is optional but always rendered inside `<h2>` (`src/components/dashboard/SimpleWidget.tsx:3-17`). It works (renders nothing for `undefined`) but may produce empty headings and inconsistent semantics. Decide whether `label` should be required or conditionally render it. |
+
+### 🧱 07.4 Pending Fixes (TODO)
+
+```md
+- [ ] (P1 - Navigation) Improve active route matching for sidebar items to support nested/dynamic routes.
+  - Update the equality check to a safer matcher (e.g. `startsWith`) or a dedicated route matcher.
+  - File: `src/components/sidebar/SidebarMenuItem.tsx:14-27`
+
+- [ ] (P1 - Accessibility) Add `aria-current="page"` to the active sidebar link and ensure focus styles are visible.
+  - File: `src/components/sidebar/SidebarMenuItem.tsx`
+
+- [ ] (P2 - UX/Correctness) Replace the profile `<a href="#">` with a real `Link` to a profile page or a `<button>` (if it triggers an action).
+  - Add an accessible label if needed.
+  - File: `src/components/sidebar/Sidebar.tsx:49-60`
+
+- [ ] (P3 - Cleanup) Remove the commented-out block and simplify redundant `counter.toString() || "0"` logic.
+  - File: `src/components/dashboard/WidgetsGrid.tsx:10-31`
+
+- [ ] (P3 - Component API) Decide whether `SimpleWidget.label` should be required or conditionally rendered to avoid empty headings.
+  - File: `src/components/dashboard/SimpleWidget.tsx:3-17`
 ```
 
 
