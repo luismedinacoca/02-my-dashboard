@@ -8168,6 +8168,212 @@ export async function PATCH(request: Request) {
 - [ ] Implement robust error handling with appropriate HTTP status codes (e.g., 201 for success, 400 for bad requests, 500 for server errors).
 
 
+<br>
+
+## 📚 10. Lesson 088 - *counter value from an API*
+
+
+### 🧠 10.1 Context:
+In Next.js, Route Handlers (API Routes) allow you to create custom request handlers for a given route using the Web Request and Response APIs. This lesson focuses on fetching dynamic data from an internal API endpoint (`/api/counter`) to initialize the global state in a Redux store. 
+
+Instead of relying on static props passed from a parent component, the `CartCounter` component now independently fetches its initial state upon mounting. This is achieved using the `useEffect` hook, which triggers an asynchronous call to the API and then dispatches the retrieved value to the Redux store via `initCounterState`.
+
+**When and why it's used:**
+- When data needs to be synchronized with a database or external service that isn't available at build time.
+- When you want to decouple the data fetching logic from the component hierarchy.
+- To ensure the client-side state is consistent with the server-side source of truth.
+
+**Advantages:**
+- **Dynamic Data**: Ensures the UI reflects the most recent state from the server.
+- **Decoupling**: The component doesn't need to know where the data comes from, just how to fetch it from the endpoint.
+
+**Disadvantages:**
+- **Client-Side Fetching**: Can lead to "flicker" or Cumulative Layout Shift (CLS) if loading states aren't handled correctly.
+- **Complexity**: Adds more moving parts (API routes, async functions, loading/error states).
+
+**Alternatives:**
+- **Server Actions**: For mutations or more direct server-side interactions in Next.js.
+- **React Query/SWR**: For more advanced data fetching features like caching, revalidation, and automatic loading/error states.
+
+### ⚙️ 10.2 Updating code according the context:
+
+
+#### 10.2.1 Create in `CartCunter.tsx` the `CounterResponse` interface:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+// Counter response from the API
+export interface CounterResponse {  // 👈🏽 ✅
+  method: string;
+  count: number;
+}
+const CartCounter = ({ value = 0 }: Props) => {
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(initCounterState(value));
+  }, [dispatch, value]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+#### 10.2.2 Create a new function in order to read from the API:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+// Counter response from the API
+export interface CounterResponse {
+  method: string;
+  count: number;
+}
+// Function to get the counter from the API
+const getApiCounter = async (): Promise<CounterResponse> => {  // ✅ 👈🏽
+  const data = await fetch("/api/counter");
+  const dataJson = await data.json();
+  console.log({ dataJson }); // ✅ 👈🏽
+  return dataJson;
+};
+const CartCounter = ({ value = 0 }: Props) => {
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(initCounterState(value));
+  }, [dispatch, value]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+#### 10.2.3 Using the `getApiCounter` function inside a new `useEffect` hook definition:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";
+//Interface for Props:
+// interface Props {  // 👈🏽 ✅. No argument (1)
+//   value?: number;
+// }
+// Counter response from the API
+export interface CounterResponse {
+  method: string;
+  count: number;
+}
+// Function to get the counter from the API
+const getApiCounter = async (): Promise<CounterResponse> => {
+  const data = await fetch("/api/counter");
+  const dataJson = await data.json();
+  console.log({ dataJson });
+
+  return dataJson;
+};
+//const CartCounter = ({ value = 0 }: Props) => {
+const CartCounter = () => {  // 👈🏽 ✅. No argument (1)
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+
+  // useEffect(() => {  👈🏽 ✅ (1)
+  //   dispatch(initCounterState(value));  👈🏽 ✅
+  // }, [dispatch, value]);  👈🏽 ✅
+
+  useEffect(() => {  // 👈🏽 ✅ (2)
+    getApiCounter()
+      // .then((data) => { dispatch(initCounterState(data.count));}) either this line or the next one
+      .then(({ count }) => dispatch(initCounterState(count)));  // object destructuring 🥳
+  }, [dispatch]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+![](../img/section07-lecture088-001.png)
+
+### 🐞 10.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| Stability of `dispatch` in `useEffect` | ✅ Answered | `dispatch` is a stable function provided by Redux. It does not change between renders, so including it in the dependency array ensures the effect runs only once on mount. |
+| Missing error handling in `getApiCounter` | ⚠️ Identified | If the fetch to `/api/counter` fails, the error is not caught, which could crash the component or leave it in an undefined state. |
+| Lack of loading state in UI | ⚠️ Identified | There is no visual feedback to the user while the API request is pending, leading to a potentially confusing UX. |
+
+### 🧱 10.4 Pending Fixes (TODO)
+
+- [ ] Add `try-catch` error handling to the `getApiCounter` function in `src/shopping-cart/components/CartCounter.tsx`.
+- [ ] Implement a loading indicator (e.g., a spinner or skeleton) in `CartCounter` while `getApiCounter` is fetching.
+- [ ] Move `CounterResponse` and `getApiCounter` to a separate utility or service file to improve maintainability.
+
 
 
 

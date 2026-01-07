@@ -8,15 +8,36 @@ interface Props {
   value?: number;
 }
 
+// Counter response from the API
+export interface CounterResponse {
+  method: string;
+  count: number;
+}
+
+// Function to get the counter from the API
+const getApiCounter = async (): Promise<CounterResponse> => {
+  const data = await fetch("/api/counter");
+  const dataJson = await data.json();
+  console.log({ dataJson });
+
+  return dataJson;
+};
+
 const CartCounter = ({ value = 0 }: Props) => {
-  //const [count, setCounts] = useState(value);
-  //const count = useAppSelector((state) => state.counterReducer.count);
   const count = useAppSelector((state) => state.counter.count);
   const dispatch = useAppDispatch();
 
+  // useEffect(() => {
+  //   dispatch(initCounterState(value));
+  // }, [dispatch, value]);
+
   useEffect(() => {
-    dispatch(initCounterState(value));
-  }, [dispatch, value]);
+    getApiCounter()
+      // .then((data) => {
+      //   dispatch(initCounterState(data.count));
+      // });
+      .then(({ count }) => dispatch(initCounterState(count)));
+  }, [dispatch]);
   return (
     <>
       <span className="text-9xl">{count}</span>
