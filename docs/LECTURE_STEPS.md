@@ -5307,6 +5307,9 @@ export default async function PokemonPage({ params }: Props) {
 ```
 
 
+
+<br>
+
 ## 📚 2. Lesson 072 - *Task solution*
 
 ### 🧠 2.1 Context:
@@ -5611,6 +5614,9 @@ npm run start
 ```
 
 
+
+<br>
+
 ## 📚 07. Lesson 073 - *Revalidation - no Fetch API*
 
 
@@ -5803,10 +5809,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const metadata = {
-  title: "151 Pokémons",
-  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
-};
+// export const metadata = {
+//   title: "151 Pokémons",
+//   description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+// };
 
 const getPokemon = async (name: string): Promise<Pokemon> => {
   const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
@@ -5880,6 +5886,2520 @@ fetch('https://...', { next: { revalidate: 3600 } })
 - [ ] Review and optimize revalidation time based on Pokemon API update frequency - research PokeAPI update patterns and adjust revalidation period accordingly to balance freshness and API call frequency
 ```
 
+---
+
+# 👨🏾‍💻 Section 07: Global State - Redux & LocalStorage
+
+
+
+<br>
+
+## 📚 01. Lesson 079 - *Continuing with the app*
+
+### 🧠 01.1 Context:
+
+This lesson focuses on extending the dashboard application structure by adding a new "Favourites" page and enhancing the main dashboard page with reusable widget components. The lesson prepares the foundation for implementing global state management (which will be covered in subsequent lessons) by creating the necessary UI structure.
+
+**What this lesson covers:**
+- Creating a new route/page for displaying favorite Pokémons (`/dashboard/favourites`)
+- Adding navigation menu items to the Sidebar component
+- Creating reusable widget components (`SimpleWidget`) for the dashboard
+- Setting up the structure for future global state implementation
+
+**When and why it's used:**
+- **Route creation**: Next.js App Router allows creating new pages by adding `page.tsx` files in the appropriate directory structure. The `favourites` page is created as a Server Component that will later consume global state.
+- **Component reusability**: The `SimpleWidget` component demonstrates a reusable pattern for displaying dashboard metrics and information cards that can be used across different parts of the application.
+- **Navigation structure**: Adding menu items to the Sidebar provides a consistent navigation experience and prepares the UI for the favorites functionality.
+
+**Examples from the project:**
+- ```1:18:src/app/dashboard/favourites/page.tsx``` - The favourites page uses `PokemonGrid` component with an empty array, preparing for global state integration
+- ```1:32:src/components/SimpleWidget.tsx``` - A reusable widget component that displays information cards with icons, titles, and subtitles
+- ```24:29:src/components/Sidebar.tsx``` - The favourites menu item is added with `IoHeartOutline` icon and "Global State" subtitle, indicating future state management
+
+**Advantages:**
+- **Modular structure**: Separating concerns into reusable components makes the codebase more maintainable
+- **Server Components**: Using Server Components by default provides better performance and SEO
+- **Type safety**: TypeScript interfaces ensure type safety across components
+- **Scalability**: The widget pattern allows easy addition of more dashboard widgets
+
+**Disadvantages:**
+- **Placeholder content**: The favourites page currently shows an empty array, which might confuse users until global state is implemented
+- **Hardcoded values**: Widget content is hardcoded, limiting flexibility
+- **No state management**: Without global state, favorites functionality is not yet functional
+
+**When to consider alternatives:**
+- If you need immediate client-side interactivity, consider using Client Components (`'use client'`) instead of Server Components
+- For complex state management, consider using state management libraries (Redux, Zustand, Jotai) instead of React Context
+- If widgets need dynamic data, consider fetching data server-side or using API routes
+
+**Connection to practical implementation:**
+This lesson establishes the UI foundation that will be enhanced in subsequent lessons with Redux and LocalStorage for managing favorite Pokémons globally across the application. The empty `pokemons={[]}` prop in `PokemonGrid` is intentional, as it will be populated from global state in later lessons.
+
+### ⚙️ 01.2 Updating code according the context:
+
+
+#### 01.2.1 Create `favourites/page.tsx` file:
+```tsx
+/* src/app/dashboard/favourites/page.tsx */  // 👈🏽 ✅
+import PokemonGrid from "../../../pokemons/components/PokemonGrid";
+export const metadata = {
+  title: "Favourites",
+  description: "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+export default async function PokemonsPage() {
+  return (
+    <div className="flex flex-col">
+      <span className="text-5xl my-2 text-center">
+        Favourites Pokémons & <span className="text-blue-500">Global State</span>
+      </span>
+
+      <PokemonGrid pokemons={[]} />
+    </div>
+  );
+}
+```
+
+#### 01.2.2 Add the `favourites` in `Sidebar`:
+```tsx
+/* src/components/Sidebar.tsx */
+import Image from "next/image";
+import { IoBrowsersOutline, IoCalculator, IoFootball, IoHeartOutline, IoLogoReact } from "react-icons/io5";
+import SidebarMenuItem from "./SidebarMenuItem";
+
+const menuItems = [
+  {
+    path: "/dashboard/main",
+    icon: <IoBrowsersOutline size={40} />,
+    title: "Dashboard",
+    subTitle: "Visualization",
+  },
+  {
+    path: "/dashboard/counter",
+    icon: <IoCalculator size={40} />,
+    title: "Counter",
+    subTitle: "Counter Client Side",
+  },
+  {
+    path: "/dashboard/pokemons",
+    icon: <IoFootball size={40} />,
+    title: "Pokemons",
+    subTitle: "Static Generation",
+  },
+  {
+    path: "/dashboard/favourites",        // 👈🏽 ✅
+    icon: <IoHeartOutline size={40} />,   // 👈🏽 ✅
+    title: "Favourites",                  // 👈🏽 ✅
+    subTitle: "Global State",             // 👈🏽 ✅
+  },
+];
+
+export const Sidebar = () => {
+  return (
+    <div
+      id="menu"
+      style={{ width: "400px" }}
+      className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 overflow-y-scroll"
+    >
+      <div id="logo" className="my-4 px-6">
+        <h1 className="flex items-center text-lg md:text-2xl font-bold text-white">
+          <IoLogoReact className="mr-2" />
+          <span>Dash-67</span>
+          <span className="text-blue-500">8</span>.
+        </h1>
+        <p className="text-slate-500 text-sm">Manage your actions and activities</p>
+      </div>
+      <div id="profile" className="px-6 py-10">
+        <p className="text-slate-500">Welcome back,</p>
+        <a href="#" className="inline-flex space-x-2 items-center">
+          <span>
+            <Image
+              className="rounded-full w-8 h-8"
+              src="https://avatars.githubusercontent.com/u/22944665?s=400&u=8a534a97c6ab962dce06133516a46f3bf38fd5e0&v=4"
+              alt="User avatar"
+              width={50}
+              height={50}
+            />
+          </span>
+          <span className="text-sm md:text-base font-bold">Luis Medina Coca</span>
+        </a>
+      </div>
+      <div id="nav" className="w-full px-6">
+        {menuItems.map((item) => (
+          <SidebarMenuItem key={item.path} {...item} />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+#### 01.2.3 Update or add some code to `main` or `MainPage`:
+```tsx
+/* src/app/dashboard/main/page.tsx */
+export default function MainPage() {
+  return (
+    <div className="text-black p-2">
+      <h1 className="mt-2 text-3xl">Dashboard</h1>
+      <span className="text-xl">General Information</span>
+
+      <div className="flex flex-wrap p-2">....</div>
+    </div>
+  );
+}
+```
+
+#### 01.2.4 Create `SimpleWidget.tsx` file:
+```tsx
+/* src/components/SimpleWidget.tsx */
+import { IoCafeOutline } from "react-icons/io5";
+
+export const SimpleWidget = () => {
+  return (
+    <div className="bg-white shadow-xl p-3 sm:min-w-[25%] min-w-full  rounded-2xl border-1 border-gray-50 mx-2">
+      <div className="flex flex-col">
+        <div>
+          <h2 className="font-bold text-gray-600 text-center">Contador</h2>
+        </div>
+        <div className="my-3">
+          <div className="flex flex-row items-center justify-center space-x-1 ">
+            <div id="icon">
+              {/* Icono irá aquí */}
+              <IoCafeOutline size={50} className="text-blue-500" />
+            </div>
+            <div id="temp" className="text-center">
+              <h4 className="text-4xl">Titulo</h4>
+              <p className="text-xs text-gray-500">Subtitulo</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full place-items-end text-right border-t-2 border-gray-100 mt-2">
+          <a href="#" className="text-indigo-600 text-xs font-medium">
+            Más
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+Import this `SimpleWidget` into the barrel file:
+```ts
+/* src/components/index.ts */
+export { Sidebar } from "./Sidebar";
+export { SimpleWidget } from "./SimpleWidget";  // 👈🏽 ✅
+```
+
+#### 01.2.5 Import `SimpleWidget` into `MainPage`:
+```tsx
+/* src/app/dashboard/main/page.tsx */
+import { SimpleWidget } from "../../../components";
+export default function MainPage() {
+  return (
+    <div className="text-black p-2">
+      <h1 className="mt-2 text-3xl">Dashboard</h1>
+      <span className="text-xl">General Information</span>
+
+      <div className="flex flex-wrap p-2 items-center justify-center">
+        <SimpleWidget />
+      </div>
+    </div>
+  );
+}
+```
+
+![](../img/section07_lecture079-001.png)
+
+### 🐞 01.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Incorrect function name in favourites page** | ⚠️ Identified | The function in `src/app/dashboard/favourites/page.tsx` is named `PokemonsPage` instead of `FavouritesPage`, which is misleading and inconsistent with the page purpose. Location: ```8:8:src/app/dashboard/favourites/page.tsx``` |
+| **Placeholder metadata description** | ⚠️ Identified | The metadata description contains placeholder text "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos." instead of a meaningful description for SEO and accessibility. Location: ```5:5:src/app/dashboard/favourites/page.tsx``` |
+| **Empty pokemons array without user feedback** | ⚠️ Identified | The `PokemonGrid` component receives an empty array `pokemons={[]}` without any loading state or empty state message, which may confuse users. Location: ```15:15:src/app/dashboard/favourites/page.tsx``` |
+| **Hardcoded Spanish text in SimpleWidget** | ⚠️ Identified | The `SimpleWidget` component contains hardcoded Spanish text ("Contador", "Titulo", "Subtitulo", "Más") instead of using props or internationalization. This limits reusability and makes it difficult to use in different contexts. Location: ```8:26:src/components/SimpleWidget.tsx``` |
+| **Static widget content** | ⚠️ Identified | The `SimpleWidget` component doesn't accept props for dynamic content, making it inflexible. The title, subtitle, icon, and link are all hardcoded. Location: ```3:31:src/components/SimpleWidget.tsx``` |
+| **Incorrect link in PokemonCard** | ⚠️ Identified | The favorites link in `PokemonCard` component points to `/dashboard/main` instead of handling favorite state or linking to the favourites page. Location: ```31:31:src/pokemons/components/PokemonCard.tsx``` |
+| **Missing accessibility attributes** | ⚠️ Identified | The `SimpleWidget` component's "Más" link uses an `<a>` tag with `href="#"` without proper accessibility attributes like `aria-label` or `role`. Location: ```24:24:src/components/SimpleWidget.tsx``` |
+
+### 🧱 01.4 Pending Fixes (TODO)
+
+```md
+- [ ] Rename `PokemonsPage` function to `FavouritesPage` in `src/app/dashboard/favourites/page.tsx` for consistency and clarity
+- [ ] Replace placeholder metadata description with meaningful text describing the favourites page functionality
+- [ ] Add empty state message or loading indicator when `pokemons` array is empty in favourites page to improve UX
+- [ ] Refactor `SimpleWidget` component to accept props (title, subtitle, icon, href) instead of hardcoded values for better reusability
+- [ ] Replace hardcoded Spanish text in `SimpleWidget` with English or implement internationalization (i18n)
+- [ ] Update `PokemonCard` component to properly handle favorites functionality - link should toggle favorite state or navigate to favourites page
+- [ ] Add accessibility attributes (`aria-label`, `role`, `tabindex`) to interactive elements in `SimpleWidget` component
+- [ ] Consider creating a TypeScript interface for `SimpleWidget` props to ensure type safety
+- [ ] Add error boundary or fallback UI for `PokemonGrid` component when pokemons array is empty or undefined
+```
+
+
+
+<br>
+
+## 📚 02. Lesson 080 - *Redux Toolkit: Installation and Configuration*
+
+
+### 🧠 02.1 Context:
+
+**Redux Toolkit (RTK)** is the official, opinionated, batteries-included toolset for efficient Redux development. It simplifies Redux usage by providing utilities that reduce boilerplate code and follow Redux best practices.
+
+#### What is Redux Toolkit?
+
+Redux Toolkit is a package that provides:
+- **`configureStore()`**: A simplified store setup with good defaults (includes Redux DevTools, thunk middleware, etc.)
+- **`createSlice()`**: A function that generates action creators and action types automatically
+- **`createAsyncThunk()`**: Handles async logic in Redux
+- **`createEntityAdapter()`**: Manages normalized state for collections
+- Built-in **Immer** for immutable updates
+- Built-in **Redux Thunk** middleware for async actions
+
+#### When and Why It's Used
+
+**When to use Redux Toolkit:**
+- Managing complex application state that needs to be shared across multiple components
+- When you need predictable state management with time-travel debugging
+- Applications with complex data flows and state dependencies
+- When you need middleware support (logging, async actions, etc.)
+- Large applications where prop drilling becomes problematic
+
+**Why use Redux Toolkit over plain Redux:**
+- **Less boilerplate**: Reduces the amount of code needed significantly
+- **Better defaults**: Includes Redux DevTools and thunk middleware by default
+- **Immutability helpers**: Uses Immer under the hood, allowing "mutating" syntax
+- **TypeScript support**: Excellent TypeScript support out of the box
+- **Best practices**: Enforces Redux best practices automatically
+
+#### Example from This Project
+
+In this project, Redux Toolkit is configured in ```1:11:src/store/index.ts```:
+
+```typescript
+import { configureStore } from "@reduxjs/toolkit";
+
+export const store = configureStore({
+  reducer: {},
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+The store is then provided to the React application through a `Providers` component (```1:14:src/store/Providers.tsx```) that wraps the application in the root layout, ensuring all components have access to the Redux store.
+
+#### Advantages
+
+1. **Reduced Boilerplate**: Less code to write and maintain
+2. **Better Developer Experience**: Redux DevTools integration by default
+3. **Type Safety**: Excellent TypeScript support with inferred types
+4. **Performance**: Optimized for performance with built-in optimizations
+5. **Community Standard**: Official Redux recommendation, widely adopted
+6. **Immutability Made Easy**: Immer integration allows writing "mutating" logic
+7. **Middleware Included**: Redux Thunk included by default for async actions
+
+#### Disadvantages
+
+1. **Learning Curve**: Still requires understanding Redux concepts (actions, reducers, selectors)
+2. **Bundle Size**: Adds ~13KB (minified + gzipped) to your bundle
+3. **Overkill for Simple Apps**: May be unnecessary for small applications with simple state
+4. **Abstraction Layer**: Hides some Redux internals, which can be confusing when debugging
+5. **Next.js Considerations**: Requires "use client" directive in Next.js App Router for client components
+
+#### When to Consider Alternatives
+
+Consider alternatives when:
+- **Simple state**: Use React's `useState` or `useReducer` for component-local state
+- **Server state**: Use React Query, SWR, or Apollo Client for server data fetching
+- **Form state**: Use React Hook Form or Formik for form-specific state
+- **Small apps**: Context API might be sufficient for simple global state
+- **Real-time data**: Consider Zustand, Jotai, or Recoil for lighter-weight solutions
+
+#### Next.js App Router Specific Considerations
+
+In Next.js 13+ with App Router:
+- Redux store must be provided in a **Client Component** (marked with `"use client"`)
+- Cannot use Redux Provider directly in Server Components (like root `layout.tsx`)
+- Solution: Create a separate `Providers.tsx` client component that wraps the Provider
+- This allows keeping metadata and other server-side features in the root layout
+
+This project follows this pattern by creating ```1:14:src/store/Providers.tsx``` as a client component that wraps the Redux Provider, which is then imported into the server component layout.
+
+
+### ⚙️ 02.2 Updating code according the context:
+
+
+#### 02.2.1 Install redux tollkit:
+
+[Quick Start | Redux Toolkit](https://redux-toolkit.js.org/tutorials/quick-start)
+```bash
+npm install @reduxjs/toolkit react-redux
+```
+
+#### 02.2.2 Create `store/index.ts` file:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from '@reduxjs/toolkit';
+
+export const store = configureStore({
+  reducer: {
+
+  }
+})
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch
+```
+
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   ├── LECTURE_STEPS.md
+│   └── LECTURE_STEPS_v01.md
+├── 📁 img/                               # Course reference images
+│   └── ...
+├── 📁 public/                            # Public static files
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+└── 📁 src/                               # Main source code
+    ├── 📁 app/                           # Next.js App Router
+    │   └── 📄 ....
+    ├── 📁 components/                    # Shared components
+    │   └── 📄 ....
+    ├── 📁 pokemons/ 
+    │   └── 📁 ....
+    ├── 📁 shopping-cart/ 
+    │   └── 📁 ....
+    └── 📁 store/                         # Store
+        └── 📄 index.ts                   # Barrel export
+```
+
+
+#### 02.2.3 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file:
+
+> According [Provide the Redux Store to React](https://redux-toolkit.js.org/tutorials/quick-start#provide-the-redux-store-to-react) documentation
+
+```tsx
+/* src/app/layout.tsx */
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Provider } from "react-redux";   // 👈🏽 ✅
+import { store } from "@/store";          // 👈🏽 ✅
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Provider store={store}>{children}</Provider>  {/* 👈🏽 ✅ */}
+      </body>
+    </html>
+  );
+}
+```
+![Error found in server side](../img/section07-lecture080-001.png)
+
+* This function is not supported in React Server Components.
+
+```tsx
+/* src/app/layout.tsx */
+'use client'     // 👈🏽 ✅
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Provider } from "react-redux";
+import { store } from "@/store"; 
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+export const metadata: Metadata = {  // 👈🏽 🔥 🚀
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Provider store={store}>{children}</Provider>  {/* 👈🏽 ✅ */}
+      </body>
+    </html>
+  );
+}
+```
+![Error found in server side](../img/section07-lecture080-002.png)
+
+
+#### 02.2.4 Restore its previous state in `layout.tsx` file:
+```tsx
+/* src/app/layout.tsx */
+//"use client";  // 👈🏽 ✅
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+//import { Provider } from "react-redux";  // 👈🏽 ✅
+//import { store } from "@/store";  // 👈🏽 ✅
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* <Provider store={store}>{children}</Provider> */}  {/* 👈🏽 ✅ */}
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+#### 02.2.4 Create `Providers.tsx` file:
+```tsx
+/* src/store/Providers.tsx */  // 👈🏽 ✅
+"use client";
+import { Provider } from "react-redux";
+import { store } from "./";
+
+interface Props {
+  children: React.ReactNode;
+}
+
+const Providers = ({ children }: Props) => {
+  return <Provider store={store}>{children}</Provider>;
+};
+
+export default Providers;
+```
+
+#### 02.2.5 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file again:
+```tsx
+/* src/app/layout.tsx */
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import Providers from "@/store/Providers";  // 👈🏽 ✅
+//import { store } from "@/store";    // 👈🏽 ✅
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Providers>{children}</Providers>  {/* 👈🏽 ✅*/}
+      </body>
+    </html>
+  );
+}
+```
+
+* Updated Project Tree
+
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   ├── LECTURE_STEPS.md
+│   └── LECTURE_STEPS_v01.md
+├── 📁 img/                               # Course reference images
+│   └── ...
+├── 📁 public/                            # Public static files
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+└── 📁 src/                               # Main source code
+    ├── 📁 app/                           # Next.js App Router
+    │   └── 📄 ....
+    ├── 📁 components/                    # Shared components
+    │   └── 📄 ....
+    ├── 📁 pokemons/ 
+    │   └── 📁 ....
+    ├── 📁 shopping-cart/ 
+    │   └── 📁 ....
+    └── 📁 store/                         # Store
+        ├── 📄 index.ts                   # Barrel export
+        └── 📄 Providers.tsx              # client Providers component
+```
+
+
+### 🐞 02.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Typo in documentation code example** | ⚠️ Identified | Line 6154 uses `configureState` instead of `configureStore`. The correct function name is `configureStore` from `@reduxjs/toolkit`. Location: ```6154:6154:docs/LECTURE_STEPS.md``` |
+| **Empty reducer object in store configuration** | ℹ️ Low Priority | The store is configured with an empty reducer object `{}`. While this is valid for initial setup, it means no state management is currently active. Location: ```4:4:src/store/index.ts``` |
+| **Missing export in barrel file** | ℹ️ Low Priority | The `Providers` component is not exported from `src/store/index.ts` barrel file, requiring direct imports. Consider adding `export { default as Providers } from './Providers'` for consistency. Location: ```1:11:src/store/index.ts``` |
+| **Commented import in layout.tsx** | ℹ️ Low Priority | There's a commented import statement `//import { store } from "@/store";` in the layout file. While not breaking, it's better to remove commented code for cleanliness. Location: ```5:5:src/app/layout.tsx``` |
+
+
+### 🧱 02.4 Pending Fixes (TODO)
+
+```md
+- [ ] Remove commented import statement from `src/app/layout.tsx` (line 5) to keep code clean
+- [ ] Consider adding `Providers` export to `src/store/index.ts` barrel file for consistent import patterns
+- [ ] Add initial reducer(s) to the store configuration when implementing state management features (e.g., counter, favorites, shopping cart)
+- [ ] Consider adding Redux DevTools configuration for production builds if needed
+- [ ] Add typed hooks (`useAppDispatch`, `useAppSelector`) to `src/store/index.ts` for better TypeScript support in components
+```
+
+---
+
+
+<br>
+
+## 📚 03. Lesson 081 - *Counter Slice*
+
+### 🧠 03.1 Context:
+
+A **Redux Slice** is a collection of Redux reducer logic and actions for a single feature in your app, typically defined together in one file. The `createSlice` function from Redux Toolkit is a higher-order function that automatically generates action creators and action types that correspond to the reducers and state.
+
+**When it occurs/is used:**
+- When you need to manage state for a specific feature (e.g., counter, shopping cart, user authentication)
+- When you want to centralize state management logic instead of using local component state
+- When multiple components need to share and update the same state
+- When you need predictable state updates with a clear history of changes
+
+**How it works:**
+The `createSlice` function takes an object with three main properties:
+- `name`: A string that will be used as the prefix for generated action types
+- `initialState`: The initial state value for this slice
+- `reducers`: An object of reducer functions, where each function handles a specific action
+
+Redux Toolkit automatically generates:
+- Action creators for each reducer function
+- Action types based on the slice name and reducer name
+- A reducer function that combines all the reducers
+
+**Example from the project:**
+```1:19:src/store/counter/counterSlice.ts
+import { createSlice } from "@reduxjs/toolkit";
+
+interface CounterState {
+  count: number;
+}
+
+const initialState: CounterState = {
+  count: 5,
+};
+
+const counterSlice = createSlice({
+  // always an object
+  name: "counter",
+  initialState,
+  reducers: {},
+});
+
+export const {} = counterSlice.actions;
+export default counterSlice.reducer;
+```
+
+The slice is then integrated into the Redux store:
+```1:13:src/store/index.ts
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+```
+
+**Advantages:**
+- **Less boilerplate**: Automatically generates action creators and types
+- **Immutability**: Uses Immer under the hood, allowing "mutating" logic in reducers
+- **Type safety**: Works seamlessly with TypeScript when properly typed
+- **Organization**: Keeps related reducer logic and actions together
+- **DevTools integration**: Automatically works with Redux DevTools for debugging
+- **Predictable state updates**: All state changes go through defined reducers
+
+**Disadvantages:**
+- **Learning curve**: Requires understanding Redux concepts and patterns
+- **Overhead**: May be overkill for simple local component state
+- **Bundle size**: Adds Redux Toolkit to your bundle size
+- **Complexity**: Can add complexity for small applications that don't need global state
+
+**When to consider alternatives:**
+- **Local state (`useState`)**: For component-specific state that doesn't need to be shared
+- **Context API**: For simple global state that doesn't require complex updates or middleware
+- **Zustand/Jotai**: For lighter-weight state management solutions
+- **Server state libraries (React Query, SWR)**: For server data fetching and caching
+
+**Connection to the lesson's practical implementation:**
+This lesson establishes the foundation for Redux state management in the dashboard. The counter slice will be used to manage the shopping cart counter state across multiple components, replacing local `useState` implementations. The slice is currently set up with an initial state of `count: 5`, but reducers are empty and need to be implemented in subsequent lessons to handle increment/decrement actions.
+
+### ⚙️ 03.2 Updating code according the context:
+
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Favicon
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favourites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Barrel export
+    │   ├── 📄 Sidebar.tsx                # Sidebar component
+    │   ├── 📄 SidebarMenuItem.tsx        # Sidebar menu item component
+    │   └── 📄 SimpleWidget.tsx           # Simple widget component
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   ├── 📁 components/                # Pokemon components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # Pokemon TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simple pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component
+    │
+    └── 📁 store/                         # Redux/State management store
+        ├── 📄 index.ts                   # Store configuration
+        ├── 📄 Providers.tsx              # Store providers wrapper
+        │
+        └── 📁 counter/                   # 👈🏽 ✅ Counter slice
+            └── 📄 counterSlice.ts        # 👈🏽 ✅ Counter Redux slice
+```
+
+#### 03.2.1 Create `counter/counterSlice.ts` file:
+```tsx
+/* src/store/counter/counterSlice.ts */   // 👈🏽 ✅
+import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  // ....
+}
+
+const counterSlice = createSlice({    // 👈🏽 always an object
+  name: 'counter',
+  initialState,
+  reducers: {}
+});
+
+export const {} = counterSlice.actions;
+export default counterSlice.reducer;
+```
+
+#### 03.2.2 Adding the `CounterState` as `interface`:
+> Giving a data type to `initialState`: `CounterState`.
+
+Defining `CounterState` as interface.
+```ts
+/* src/store/counter/counterSlice.ts */
+import { createSlice } from '@reduxjs/toolkit';
+interface CounterState {  // 👈🏽 ✅
+  count: number;
+}
+const initialState: CounterState = {
+  count: 5,   // 👈🏽 ✅
+}
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {}
+});
+export const {} = counterSlice.actions;
+export default counterSlice.reducer;```
+```
+
+
+#### 03.2.3 Import `counterSlice` as ***`counterReducer`*** in `store/counter/index.ts` file:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";  // 👈🏽 ✅
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,  // 👈🏽 ✅
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+```
+
+![missing reducer warning is not anymore](../img/section07-lecture081-001.png)
+![using Redux from Devtools](../img/section07-lecture081-002.png)
+
+### 🐞 03.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Empty reducers object** | ⚠️ Identified | The `counterSlice` has an empty `reducers` object, meaning no actions are available. The slice cannot modify state without reducer functions. Location: ```15:15:src/store/counter/counterSlice.ts``` |
+| **No actions exported** | ⚠️ Identified | The actions export is empty (`export const {} = counterSlice.actions`), so components cannot dispatch actions to update the counter state. Location: ```18:18:src/store/counter/counterSlice.ts``` |
+| **CartCounter not using Redux** | ⚠️ Identified | The `CartCounter` component still uses local `useState` instead of Redux state, defeating the purpose of the counter slice. The component should use `useAppSelector` and `useAppDispatch` to interact with Redux. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
+| **Missing typed hooks** | ⚠️ Identified | The store exports `RootState` and `AppDispatch` types but doesn't provide typed hooks (`useAppDispatch`, `useAppSelector`) for components. This leads to less type-safe Redux usage. Location: ```11:13:src/store/index.ts``` |
+| **Counter state not connected** | ⚠️ Identified | The counter slice is configured in the store but not being used by any component. The `CartCounter` component should be refactored to use Redux state instead of local state. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
+| **Initial state hardcoded** | ℹ️ Low Priority | The initial state has `count: 5` hardcoded. Consider making it configurable or using a more meaningful default value (e.g., 0 for a shopping cart). Location: ```7:9:src/store/counter/counterSlice.ts``` |
+
+
+### 🧱 03.4 Pending Fixes (TODO)
+
+```md
+- [ ] Implement reducer functions in `counterSlice` for increment and decrement actions (e.g., `increment`, `decrement`, `reset`) in `src/store/counter/counterSlice.ts`
+- [ ] Export action creators from `counterSlice.actions` (e.g., `increment`, `decrement`) in `src/store/counter/counterSlice.ts`
+- [ ] Create typed hooks (`useAppDispatch`, `useAppSelector`) in `src/store/index.ts` for type-safe Redux usage in components
+- [ ] Refactor `CartCounter` component to use Redux state instead of local `useState` in `src/shopping-cart/components/CartCounter.tsx`
+- [ ] Remove `value` prop from `CartCounter` component since state will come from Redux store
+- [ ] Update `CounterPage` to remove the `value` prop being passed to `CartCounter` in `src/app/dashboard/counter/page.tsx`
+- [ ] Consider adding a `reset` action to the counter slice for resetting the count to initial state
+- [ ] Add validation in reducers to prevent negative count values (if business logic requires it)
+```
+
+
+<br>
+
+## 📚 04. Lesson 082 - *Exporting Redux Toolkit Hooks*
+
+
+### 🧠 04.1 Context:
+
+**Typed Redux Hooks** are custom wrappers around React-Redux's `useDispatch` and `useSelector` hooks that provide full TypeScript type safety. Instead of using the plain hooks directly, you export typed versions from your store configuration that automatically infer the correct types for your application's state and dispatch functions.
+
+**When it occurs/is used:**
+- When you want type-safe access to Redux state in React components
+- When you need to dispatch actions with proper TypeScript autocomplete and type checking
+- When working with TypeScript in Redux applications to prevent runtime errors
+- When you want better developer experience with IDE autocomplete for state properties
+- When you need to ensure type consistency across your entire Redux application
+
+**How it works:**
+The typed hooks are created by binding the generic types (`RootState` and `AppDispatch`) to the base React-Redux hooks using the `.withTypes<T>()` method (introduced in React-Redux v9). This creates new hook instances that:
+- Automatically infer the correct state type when using `useAppSelector`
+- Provide properly typed dispatch function when using `useAppDispatch`
+- Give full TypeScript IntelliSense support in your IDE
+- Catch type errors at compile time instead of runtime
+
+**Examples from the project:**
+In ```17:18:src/store/index.ts```, the typed hooks are exported:
+```tsx
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+
+These hooks should be used throughout the application instead of the plain `useDispatch` and `useSelector` hooks from `react-redux`. For example, in a component:
+```tsx
+// ✅ Correct usage
+import { useAppDispatch, useAppSelector } from "@/store";
+
+const MyComponent = () => {
+  const dispatch = useAppDispatch(); // Typed as AppDispatch
+  const count = useAppSelector((state) => state.counterReducer.count); // state is RootState
+  // ...
+};
+
+// ❌ Avoid using plain hooks
+import { useDispatch, useSelector } from "react-redux";
+```
+
+**Advantages:**
+1. **Type Safety**: Prevents accessing non-existent state properties or dispatching invalid actions
+2. **Better DX**: Full autocomplete and IntelliSense support in IDEs
+3. **Compile-time Errors**: Catches type mismatches during development, not production
+4. **Refactoring Safety**: TypeScript will catch breaking changes when you modify the store structure
+5. **Self-documenting**: Types serve as documentation for available state and actions
+6. **Less Boilerplate**: The `withTypes` approach is cleaner than explicit type annotations
+7. **Consistency**: Ensures all components use the same typed store interface
+
+**Disadvantages:**
+1. **Requires TypeScript**: Only beneficial in TypeScript projects (not needed in JavaScript)
+2. **Initial Setup**: Requires defining `RootState` and `AppDispatch` types
+3. **Learning Curve**: Developers need to understand TypeScript generics and Redux types
+4. **Migration Effort**: Existing code using plain hooks needs to be updated
+5. **Type Complexity**: Can become complex with deeply nested state structures
+
+**When to Consider Alternatives:**
+- **JavaScript Projects**: Typed hooks are unnecessary in plain JavaScript projects
+- **Small Projects**: For very small apps, the type safety might be overkill
+- **Non-Redux State**: For local component state, use React's `useState` or `useReducer`
+- **Server State**: For server data, consider React Query or SWR which have their own typing
+
+**Connection to the lesson's practical implementation:**
+This lesson focuses on exporting these typed hooks from the store configuration file so they can be imported and used consistently across all components. The implementation uses the modern `withTypes<T>()` approach which is the recommended pattern in Redux Toolkit v2 and React-Redux v9+, replacing the older explicit typing pattern that required importing `TypedUseSelectorHook` from `react-redux`.
+
+
+### ⚙️ 04.2 Updating code according the context:
+
+#### 04.2.1 Current version:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();     // 👈🏽 ✅
+export const useAppSelector = useSelector.withTypes<RootState>();       // 👈🏽 ✅
+```
+
+#### 04.2.2 Legacy version
+```tsx
+/*  */
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+export const store = configureStore({
+  reducer: {
+    counterReducer,
+  },
+});
+
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch: () => AppDispatch = useDispatch;                 // 👈🏽 ✅
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;   // 👈🏽 ✅
+```
+
+#### 04.2.3 `withTypes` approach vs Explicit typing approach:
+```ts
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+vs
+```ts
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+```
+
+| Aspect | `withTypes` approach | Explicit typing approach |
+|------|----------------------|--------------------------|
+| Introduced in | Redux Toolkit v2 / React-Redux v9 | Older / classic pattern |
+| Typing mechanism | Uses generic helpers built into React-Redux | Uses TypeScript type annotations |
+| Boilerplate | ✅ Less boilerplate | ❌ Slightly more verbose |
+| Type inference | ✅ Fully inferred automatically | ✅ Correct but more manual |
+| Dispatch typing | `dispatch` automatically knows thunks, async actions, etc. | Same result, but defined explicitly |
+| Selector typing | `state` is inferred as `RootState` | `state` is typed via `TypedUseSelectorHook` |
+| Risk of mismatch | ✅ Very low (types are bound at creation) | ⚠️ Possible if you mistype the signature |
+| Refactor safety | ✅ Safer during refactors | ⚠️ Needs manual updates |
+| Learning curve | ✅ Easier for new Redux users | ❌ Requires understanding TS utility types |
+| Official recommendation | ⭐ Recommended going forward | Legacy but still supported |
+| Runtime behavior | 🟰 Identical | 🟰 Identical |
+| Type-only or runtime? | Type-only (erased at runtime) | Type-only (erased at runtime) |
+
+
+### 🐞 04.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Typed hooks not being used in components** | ⚠️ Identified | The typed hooks (`useAppDispatch`, `useAppSelector`) are exported from the store but not being used anywhere in the codebase. Components should import and use these hooks instead of the plain `useDispatch` and `useSelector` from `react-redux`. Current state: No components are using Redux hooks yet. Location: ```17:18:src/store/index.ts``` |
+| **CartCounter component not using Redux hooks** | ⚠️ Identified | The `CartCounter` component still uses local `useState` instead of Redux state management. It should be refactored to use `useAppSelector` to read state and `useAppDispatch` to dispatch actions. This prevents the typed hooks from being utilized. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
+| **Missing import examples in documentation** | ℹ️ Low Priority | While the hooks are properly exported, there are no examples in the codebase showing how to import and use them in components. Consider adding usage examples or updating components to demonstrate proper usage patterns. |
+| **No validation that hooks are used correctly** | ℹ️ Low Priority | Since no components are using the hooks yet, there's no way to verify that the type inference is working correctly. Once components start using the hooks, TypeScript will validate the types automatically. |
+
+### 🧱 04.4 Pending Fixes (TODO)
+
+```md
+- [ ] Refactor `CartCounter` component to use `useAppSelector` and `useAppDispatch` hooks instead of local `useState` in `src/shopping-cart/components/CartCounter.tsx`
+- [ ] Update all future components to import typed hooks from `@/store` instead of using plain hooks from `react-redux`
+- [ ] Add example usage comments or documentation showing how to use `useAppDispatch` and `useAppSelector` in components
+- [ ] Verify TypeScript type inference is working correctly by using the hooks in at least one component
+- [ ] Consider adding ESLint rules to enforce usage of typed hooks (`useAppDispatch`/`useAppSelector`) instead of plain hooks (`useDispatch`/`useSelector`)
+- [ ] Update any existing components that might use Redux hooks to use the typed versions for consistency
+```
+
+
+<br>
+
+## 📚 05. Lesson 083 - *Counter Reducer & Actions*
+
+
+### 🧠 05.1 Context:
+
+**Counter Reducer & Actions** in Redux Toolkit represent the core pattern for managing state changes in a Redux application. This lesson focuses on implementing reducer functions and their corresponding actions for a counter feature.
+
+#### Definition and Explanation
+
+A **reducer** is a pure function that takes the current state and an action, then returns a new state. In Redux Toolkit, reducers are defined within a `createSlice`, which automatically generates action creators and action types.
+
+**Actions** are plain JavaScript objects that describe what happened in the application. Redux Toolkit's `createSlice` automatically creates action creators for each reducer function, eliminating the need to manually define action types and creators.
+
+#### When It Occurs/Is Used
+
+Reducers and actions are used when:
+- **State needs to be updated**: Any time application state must change, it goes through a reducer
+- **Predictable state management**: When you need a single source of truth for state
+- **Complex state logic**: When state updates involve validation, conditional logic, or multiple steps
+- **Shared state**: When multiple components need to access and modify the same state
+- **Debugging**: When you need time-travel debugging and state history (via Redux DevTools)
+
+#### Examples from This Project
+
+In this project, the counter reducer is implemented in ```11:28:src/store/counter/counterSlice.ts```:
+
+```11:28:src/store/counter/counterSlice.ts
+const counterSlice = createSlice({
+  // always an object
+  name: "counter",
+  initialState,
+  reducers: {
+    addOne(state) {
+      state.count++;
+    },
+    substractOne(state) {
+      if (state.count === 0) return;
+      state.count--;
+    },
+    resetCount(state, action: PayloadAction<number>) {
+      if (action.payload < 0) action.payload = 0;
+      state.count = action.payload;
+    },
+  },
+});
+```
+
+The actions are exported and used in the `CartCounter` component (```1:38:src/shopping-cart/components/CartCounter.tsx```):
+
+```1:38:src/shopping-cart/components/CartCounter.tsx
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, substractOne } from "@/store/counter/counterSlice";
+
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+
+const CartCounter = ({ value = 10 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+
+export default CartCounter;
+```
+
+#### Advantages
+
+1. **Automatic Action Creation**: Redux Toolkit automatically generates action creators, reducing boilerplate
+2. **Immutability Made Easy**: Uses Immer under the hood, allowing "mutating" syntax in reducers
+3. **Type Safety**: Full TypeScript support with `PayloadAction<T>` for typed actions
+4. **Validation Logic**: Can include validation and conditional logic directly in reducers
+5. **Predictable Updates**: All state changes go through defined reducers, making debugging easier
+6. **DevTools Integration**: Works seamlessly with Redux DevTools for time-travel debugging
+7. **Single Source of Truth**: Centralized state management prevents inconsistencies
+
+#### Disadvantages
+
+1. **Learning Curve**: Requires understanding Redux concepts (reducers, actions, dispatch)
+2. **Boilerplate**: Still requires setup (store, slices, providers) even with reduced boilerplate
+3. **Overkill for Simple State**: May be unnecessary for component-local state
+4. **Bundle Size**: Adds Redux Toolkit to bundle size (~13KB minified + gzipped)
+5. **Next.js Considerations**: Requires "use client" directive in Next.js App Router
+6. **Action Payload Mutation**: Can accidentally mutate payloads if not careful (as seen in `resetCount`)
+
+#### When to Consider Alternatives
+
+Consider alternatives when:
+- **Local Component State**: Use `useState` or `useReducer` for component-specific state
+- **Simple State**: Context API might be sufficient for simple global state
+- **Server State**: Use React Query, SWR, or Apollo Client for server data
+- **Form State**: Use React Hook Form or Formik for form-specific state
+- **Lightweight Solutions**: Consider Zustand, Jotai, or Recoil for smaller apps
+- **Real-time Data**: Consider specialized libraries for WebSocket/real-time updates
+
+#### Connection to the Lesson's Practical Implementation
+
+This lesson demonstrates the complete flow from defining reducers and actions in a slice to dispatching those actions from React components. It shows how Redux Toolkit simplifies the traditional Redux pattern by:
+- Automatically generating action creators (`addOne`, `substractOne`, `resetCount`)
+- Using Immer for immutable updates (allowing direct state mutations)
+- Integrating with TypeScript for type safety
+- Connecting client components to the Redux store through typed hooks (`useAppDispatch`, `useAppSelector`)
+
+The implementation also highlights the Server/Client Component boundary in Next.js, where the counter page is a Server Component (for metadata) but uses a Client Component (`CartCounter`) to interact with Redux.
+
+### ⚙️ 05.2 Updating code according the context:
+
+
+#### 05.2.1 Add some actions into `CounterSlice.ts` with their validations:
+```tsx
+/* src/store/counter/counterSlice.ts */
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";  // 👈🏽 ✅
+interface CounterState {
+  count: number;
+}
+const initialState: CounterState = {
+  count: 5,
+};
+const counterSlice = createSlice({
+  name: "counter",
+  initialState,
+  reducers: {
+    addOne(state) {  // 👈🏽 ✅
+      state.count++;
+    },
+    substractOne(state) {  // 👈🏽 ✅
+      if (state.count === 0) return;
+      state.count--;
+    },
+    resetCount(state, action: PayloadAction<number>) {  // 👈🏽 ✅
+      if (action.payload < 0) action.payload = 0;
+      state.count = action.payload;
+    },
+  },
+});
+export const { addOne, substractOne, resetCount } = counterSlice.actions;  // 👈🏽 ✅
+export default counterSlice.reducer;
+```
+
+#### 05.2.2 Applying actions CounterReducer into Counter from page/dashboard:
+```tsx
+/* src/app/dashboard/counter/page.tsx */
+import { CartCounter } from "../../../shopping-cart";
+import { Metadata } from "next/types";
+// 👉🏽 ✅ 'use client' is omitted because this component relies on metadata.
+export const metadata: Metadata = {
+  title: "𝌰 Shopping Cart",
+  description: "Simple Counter Page",
+};
+// i.e a value generated from the server
+const value = 20;
+export default function CounterPage() {
+  return (
+    <div className="flex flex-col items-center justify-center w-full h-full">
+      <span>Products in shopping cart</span>
+      <CartCounter value={value} />
+    </div>
+  );
+}
+```
+
+Go to `CartCounter` component which is `'use-client'`:
+```ts
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppSelector } from "@/store";
+interface Props {
+  value?: number;
+}
+const CartCounter = ({ value = 10 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);  // 👈🏽 ✅ (1)
+  const count = useAppSelector((state) => state.counter.count);           // 👈🏽 ✅ (2)
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count - 1)}    {/* 👈🏽 🔥 ⚠️ */}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => setCounts(count + 1)}    {/* 👈🏽 🔥 ⚠️ */}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+In `store/index.ts`:
+```ts
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+export const store = configureStore({
+  reducer: {
+    counter: counterReducer,  // 👈🏽 ✅
+  },
+});
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+
+Meanwhile the app when click on `-1` or `+1` buttons:
+![setCount errors](../img/sectio07-lecture083-001.png)
+
+
+#### 05.2.3 Fixing those `-1` button & `+1` button errors:
+```ts
+/* src/shopping-cart/components/CartCounter.tsx */
+ "use client";
+import { useAppDispatch, useAppSelector } from "@/store";  // 👈🏽 ✅
+import { addOne, substractOne } from "@/store/counter/counterSlice";  // 👈🏽 ✅
+interface Props {
+  value?: number;
+}
+const CartCounter = ({ value = 10 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();  // 👈🏽 ✅
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}    {/* 👈🏽 ✅ */}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}    {/* 👈🏽 ✅ */}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+```mermaid
+sequenceDiagram
+    participant CounterPage as CounterPage<br/>(Server Component)
+    participant CartCounter as CartCounter<br/>("👨🏾‍💻 use client")
+    participant useAppSelector as useAppSelector<br/>(Redux Hook)
+    participant useAppDispatch as useAppDispatch<br/>(Redux Hook)
+    participant Store as store/index.ts<br/>(Redux Store)
+    participant CounterSlice as counterSlice<br/>(Redux Slice)
+    participant Provider as Providers<br/>("👨🏾‍💻 use client")
+
+    Note over CounterPage: Server Component<br/>No "use client"<br/>(⚙️ uses metadata)
+    
+    CounterPage->>CartCounter: Renders with value={20}<br/> 🔥⚠️ (server side)
+    
+    Note over CartCounter: Client Component<br/>"use client"
+    
+    CartCounter->>useAppSelector: useAppSelector((state) => state.counter.count)
+    Note left of useAppSelector: previous looks '((state) => state.counterReducer.count)'
+    useAppSelector->>Store: Gets state from store
+    Note over Store: previous looks<br/>reducer: {<br/>counter: counterReducer,<br/>},
+    Store->>CounterSlice: Reads counter.count (initial: 5)<br/> 🔥🤔 (client side)
+    CounterSlice-->>Store: Returns count: 5
+    Store-->>useAppSelector: count: 5
+    useAppSelector-->>CartCounter: count: 5
+    
+    CartCounter->>useAppDispatch: useAppDispatch()
+    useAppDispatch->>Provider: Connects with Redux Provider
+    Provider->>Store: Access to store
+    Store-->>useAppDispatch: dispatch function
+    useAppDispatch-->>CartCounter: dispatch function
+    
+    Note over CartCounter: User clicks on "+1" button
+    
+    CartCounter->>useAppDispatch: dispatch(addOne())
+    useAppDispatch->>Store: Dispatch action addOne
+    Store->>CounterSlice: Executes reducer addOne
+    CounterSlice->>CounterSlice: state.count++ (5 -> 6)
+    CounterSlice-->>Store: Updated state: count: 6
+    Store-->>CartCounter: Notifies state change
+    CartCounter->>CartCounter: Re-renders with count: 6
+    
+    Note over CartCounter: User clicks on "-1" button
+    
+    CartCounter->>useAppDispatch: dispatch(substractOne())
+    useAppDispatch->>Store: Dispatch action substractOne
+    Store->>CounterSlice: Executes reducer substractOne
+    CounterSlice->>CounterSlice: if (count === 0) return<br/>else state.count-- (6 -> 5)
+    CounterSlice-->>Store: Updated state: count: 5
+    Store-->>CartCounter: Notifies state change
+    CartCounter->>CartCounter: Re-renders with count: 5
+    
+    Note over CounterPage,CartCounter: Complete interaction flow<br/>Server Component → Client Component → Redux Store
+```
+
+### 🐞 05.3 Issues:
+
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Unused `value` prop in CartCounter** | ⚠️ Identified | The `value` prop in `CartCounter` component (```10:10:src/shopping-cart/components/CartCounter.tsx```) is assigned but never used. The component receives `value={20}` from `CounterPage` but ignores it, using Redux state instead. ESLint warning: `'value' is assigned a value but never used.` |
+| **Direct payload mutation in resetCount reducer** | ⚠️ Identified | In ```23:26:src/store/counter/counterSlice.ts```, the `resetCount` reducer directly mutates `action.payload` (`if (action.payload < 0) action.payload = 0;`). While this works, it's not a best practice as actions should be immutable. Should validate and use a new value instead. |
+| **Typo in action name: `substractOne`** | ℹ️ Low Priority | The action is named `substractOne` (```19:22:src/store/counter/counterSlice.ts```) which is a common misspelling. The correct spelling is `subtractOne`. However, if this is intentional for consistency, it's acceptable. |
+| **Missing resetCount action usage** | ℹ️ Low Priority | The `resetCount` action is exported (```30:30:src/store/counter/counterSlice.ts```) but never used in any component. Consider adding a reset button to the UI or removing the unused action if not needed. |
+| **No error handling for edge cases** | ℹ️ Low Priority | The reducers don't handle edge cases like `NaN`, `Infinity`, or extremely large numbers. While `resetCount` validates negative numbers, it doesn't validate other invalid inputs. |
+
+
+### 🧱 05.4 Pending Fixes (TODO)
+
+```md
+- [ ] Remove unused `value` prop from `CartCounter` component or implement logic to use it (e.g., initialize Redux state with it). File: `src/shopping-cart/components/CartCounter.tsx:10`
+- [ ] Fix `resetCount` reducer to avoid mutating `action.payload`. Instead, validate and use a new value: `state.count = action.payload < 0 ? 0 : action.payload;`. File: `src/store/counter/counterSlice.ts:23-26`
+- [ ] Consider renaming `substractOne` to `subtractOne` for correct spelling, or document the intentional misspelling. Files: `src/store/counter/counterSlice.ts:19,30` and `src/shopping-cart/components/CartCounter.tsx:3,21`
+- [ ] Add reset button to `CartCounter` component to utilize the `resetCount` action, or remove the unused action if not needed. File: `src/shopping-cart/components/CartCounter.tsx`
+- [ ] Add input validation in `resetCount` reducer to handle `NaN`, `Infinity`, and other edge cases. File: `src/store/counter/counterSlice.ts:23-26`
+- [ ] Add unit tests for counter reducers to ensure all actions work correctly and handle edge cases properly
+```
+
+<br>
+
+
+<br>
+
+## 📚 06. Lesson 084 - *Server to Client State*
+
+🔥 ⚠️ Issue 🤔: 
+- value from `dashboard/counter/page.tsx` server side component: `20`.
+  * from `src/app/dashboard/counter/page.tsx`
+    ```jsx
+    // i.e a value generated from the server
+    const value = 20;
+    ```
+  * calling the `CartCounter` component:
+      ```jsx
+      <div className="flex flex-col items-center justify-center w-full h-full">
+        <span>Products in shopping cart</span>
+        <CartCounter value={value} />
+    </div>
+      ```
+
+- Initial value: `5`.
+  * from `src/shopping-cart/components/CartCounter.tsx` calling `const count = useAppSelector((state) => state.counter.count);`
+  * and from `src/store/counter/counterSlice.ts` calling 
+    ```tsx
+    const initialState: CounterState = {
+      count: 5,
+    };
+    ```
+![](../img/section07-lecture084-001.png)
+
+### 🧠 06.1 Context:
+
+In the **Next.js App Router**, components are **Server Components by default**. That means they run on the server, can access server-only APIs, and can generate the initial HTML for a route. In contrast, **Client Components** (those that include `"use client"`) run in the browser and can use React client-only features like `useState`, `useEffect`, and global state libraries (Redux, Zustand, etc).
+
+**Server to Client State** is the pattern of taking a value that is **created/derived on the server** (e.g. fetched data, cookies/session, feature flags, route params, computed values) and using it to **initialize client-side state** so interactive UI starts with the “correct” value.
+
+There are two key concepts behind this lesson:
+
+- **Passing server values as props**: Server Components can render Client Components and pass them **serializable props**.
+- **Hydration timing**: The server HTML is shown first, then the client “hydrates” it. If client state is initialized *after* the first paint (e.g. inside `useEffect`), the user can briefly see a “wrong” default value, causing **UI flicker** (or even hydration warnings if markup differs).
+
+#### How this project applies it
+
+- A Server Component defines a server-generated value and passes it to a Client Component:
+  - `src/app/dashboard/counter/page.tsx`:
+    - `const value = 20;` (server-side value)
+    - `<CartCounter value={value} />` (prop passed to client)
+- The Client Component uses Redux for state:
+  - `src/shopping-cart/components/CartCounter.tsx` dispatches an initialization action using the prop:
+    - `dispatch(initCounterState(value))`
+- The Redux slice uses a guard flag to avoid re-initializing on remount:
+  - `src/store/counter/counterSlice.ts`:
+    - `isReady: false`
+    - `initCounterState(...)` exits early when `isReady` is already `true`
+
+#### Advantages
+
+- **No extra client fetch** for the initial value (server is the source of truth).
+- **Cleaner separation**: server computes, client interacts.
+- **Works well with App Router**: Server → Client boundaries are explicit via props.
+
+#### Disadvantages / trade-offs
+
+- **First-paint flicker** if the client shows default state first and only later applies the server value (common when using `useEffect`).
+- **Two sources of truth risk**: server prop and client store must be kept aligned.
+- **Serialization constraints**: only serializable data can cross Server → Client as props.
+
+#### Alternatives to consider
+
+- **Local state instead of Redux**: `useState(value)` in the Client Component if the state is truly local.
+- **Preload state before first render**: create the Redux store with `preloadedState` so the first client render already matches the server-provided value (avoids flicker).
+- **Persist state**: use cookies/localStorage (carefully) if you want state to survive reloads, not just navigations.
+
+### ⚙️ 06.2 Updating code according the context:
+
+
+#### 06.2.1 Add `useEffect` hook in `CartCounter` component:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, resetCount, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";  // 👈🏽 ✅
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+const CartCounter = ({ value = 0 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+  useEffect(() => {  // 👈🏽 ✅
+    dispatch(resetCount(value));
+  }, [dispatch, value]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+> Issues:
+* Visible changing from 5 to 20:
+![5 as initial value](../img/section07-lecture084-002.png)
+![20 appears later](../img/section07-lecture084-003.png)
+
+* When change from Counter to Any other sidebar option then go back to Counter, the value is 20 even you've changed it before. (The `CartCounter` component is being recreated.)
+
+#### 06.2.2 Add `isReady` value in the `counterSlice`:
+
+```tsx
+/* src/store/counter/counterSlice.ts */
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+interface CounterState {
+  count: number;
+  isReady: boolean;  // 👈🏽 ✅
+}
+const initialState: CounterState = {
+  count: 5,
+  isReady: false,  // 👈🏽 ✅
+};
+const counterSlice = createSlice({
+  // always an object
+  name: "counter",
+  initialState,
+  reducers: {
+    initCounterState(state, action: PayloadAction<number>) {  // 👈🏽 ✅
+      if (state.isReady) return;
+      state.count = action.payload;
+      state.isReady = true;
+    },
+    addOne(state) {
+      state.count++;
+    },
+    substractOne(state) {
+      if (state.count === 0) return;
+      state.count--;
+    },
+    resetCount(state, action: PayloadAction<number>) {
+      if (action.payload < 0) action.payload = 0;
+      state.count = action.payload;
+    },
+  },
+});
+export const { initCounterState, addOne, substractOne, resetCount } = counterSlice.actions;  // 👈🏽 ✅
+export default counterSlice.reducer;
+```
+
+#### 06.2.3 Fixing the second issue from `CartCounter`:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";  // 👈🏽 ✅
+import { useEffect } from "react";
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+const CartCounter = ({ value = 0 }: Props) => {
+  //const [count, setCounts] = useState(value);
+  //const count = useAppSelector((state) => state.counterReducer.count);
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(initCounterState(value));  // 👈🏽 ✅
+  }, [dispatch, value]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter; 
+``` 
+
+
+### 🐞 06.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Initial UI flicker (5 → 20) on first paint** | ⚠️ Identified | Redux initial state renders `count: 5` first (`src/store/counter/counterSlice.ts:8-11`), then `CartCounter` updates it after mount via `useEffect` (`src/shopping-cart/components/CartCounter.tsx:17-19`). This causes a visible change (see screenshots in 06.2.1). |
+| **Counter resets to server value on remount (naive initialization)** | ✅ Fixed | When using `resetCount(value)` inside `useEffect`, navigating away and back remounts `CartCounter` and overwrites any user changes with the server value again. The `isReady` guard + `initCounterState` prevents repeated initialization (`src/store/counter/counterSlice.ts:18-22`). |
+| **Initialization depends on effect timing (state not ready at first render)** | ℹ️ Low Priority | Even with `initCounterState`, the first render still uses the Redux default (`count: 5`), because effects run after paint. For a no-flicker UX, the initial rendered value should match the server value (e.g. show `value` until `isReady`, or preload store state). |
+| **Reducer mutates `action.payload` in `resetCount`** | ℹ️ Low Priority | `resetCount` does `action.payload = 0` (`src/store/counter/counterSlice.ts:30-33`). While it works, mutating action payloads is an anti-pattern and can make debugging harder. |
+| **Spelling: `substractOne`** | ℹ️ Low Priority | Action name is misspelled (`substractOne` instead of `subtractOne`) across the slice and component imports, which can reduce readability. |
+
+
+### 🧱 06.4 Pending Fixes (TODO)
+
+```md
+- [ ] (UX) Avoid first-paint flicker by ensuring the first rendered value matches the server value. Options:
+  - Update `CartCounter` to read `isReady` from Redux and render `value` until ready.
+  - Or preload Redux store state with a server-provided `preloadedState` before the first client render.
+  Files: `src/shopping-cart/components/CartCounter.tsx`, `src/store/Providers.tsx`, `src/store/index.ts`
+- [ ] (Code quality) Refactor `resetCount` to avoid mutating `action.payload` (use a new validated value instead). File: `src/store/counter/counterSlice.ts:30-33`
+- [ ] (Consistency) Decide whether `resetCount` should also update `isReady` (or document why it should not). File: `src/store/counter/counterSlice.ts`
+- [ ] (Naming) Rename `substractOne` → `subtractOne` and update all imports/usages. Files: `src/store/counter/counterSlice.ts`, `src/shopping-cart/components/CartCounter.tsx`
+```
+
+
+<br>
+
+## 📚 07. Lesson 085 - *Task - Store, Props & Links*
+
+
+### 🧠 07.1 Context:
+
+This lesson connects three fundamentals you’ll use constantly in a Next.js (App Router) dashboard:
+
+- **Store (global state)**: A centralized place to keep state that must be shared across routes/components (e.g. cart count, favourites). In this project we use **Redux Toolkit** + **react-redux**:
+  - The Redux store is created with `configureStore` and a feature reducer (`counter`) in `src/store/index.ts`.
+  - The app is wrapped with a client-side `Provider` in `src/store/Providers.tsx`, and mounted at the root layout (`src/app/layout.tsx`) so *any* client component can access the store.
+  - Typed hooks (`useAppSelector`, `useAppDispatch`) are exported from `src/store/index.ts` to avoid repeating `RootState`/`AppDispatch` typing across the app.
+
+- **Props (component inputs)**: The primary way to pass data/configuration from a parent component to a child component. In a component-driven UI, props keep components reusable and predictable:
+  - `SimpleWidget` is a “presentational” component parameterized via props (title, subtitle, label, icon, href) in `src/components/dashboard/SimpleWidget.tsx`.
+  - `SidebarMenuItem` receives `path`, `icon`, `title`, and `subTitle` as props and renders a navigation link (`src/components/sidebar/SidebarMenuItem.tsx`).
+  - `CartCounter` receives a `value` prop (server-generated value) and initializes the store from it (`src/shopping-cart/components/CartCounter.tsx:7-19`).
+
+- **Links (navigation)**: In Next.js, navigation is performed with `next/link` to enable client-side transitions (no full page reload) and prefetching. Links are a key part of dashboard UX:
+  - The sidebar uses `Link` and `usePathname()` to highlight the active route (`src/components/sidebar/SidebarMenuItem.tsx:14-20`).
+  - Widgets can link to related pages (e.g. a “Counter” widget that navigates to `/dashboard/counter`) using a `href` prop (`src/components/dashboard/WidgetsGrid.tsx:10-16` and `src/components/dashboard/SimpleWidget.tsx:31-35`).
+
+#### When to use each
+
+- **Use the store** when state must be shared across routes/siblings, or needs to survive navigation (e.g. cart count across `/dashboard/*`). Avoid overusing it for purely local UI state.
+- **Use props** for local composition and reuse: parent owns the data, child renders it. Prefer props over global state when the data only matters to a small subtree.
+- **Use `Link`** for internal navigation. For “active link” UX, derive current route from `usePathname()` and expose the state via classnames and accessibility attributes (like `aria-current="page"`).
+
+#### Pros / cons and alternatives
+
+- **Store (Redux)**:
+  - **Pros**: global access, predictable updates, great devtools, good for cross-route state.
+  - **Cons**: extra boilerplate, can be overkill for small/local state, requires client components for reading/updating.
+  - **Alternatives**: React Context (small global state), URL/search params (state in the route), server state libraries (TanStack Query), or colocated local state.
+
+- **Props**:
+  - **Pros**: explicit API, easy to test, reusable components.
+  - **Cons**: prop drilling when many levels need the same value.
+  - **Alternatives**: context for shared subtree state, or a store for cross-route/sibling state.
+
+- **Links**:
+  - **Pros**: fast client-side navigation, prefetching, better UX.
+  - **Cons**: “active” matching can be tricky with nested routes and dynamic segments.
+  - **Alternatives**: programmatic navigation (`useRouter().push`) for imperative flows, but prefer `Link` for standard navigation.
+
+
+### ⚙️ 07.2 Updating code according the context:
+
+
+#### 07.2.1 Restructuring the project:
+
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Favicon
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favourites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Barrel export
+    │   ├── 📁 dashboard/                 # 👈🏽 ✅ Dashboard folder  
+    │   │   └── 📄 SimpleWidget.tsx       # 👈🏽 ✅ Simple widget component
+    │   └── 📁 sidebar/                   # 👈🏽 ✅ Sidebar folder  
+    │       ├── 📄 Sidebar.tsx            # 👈🏽 ✅ Sidebar component
+    │       └── 📄 SidebarMenuItem.tsx    # 👈🏽 ✅ Sidebar menu item component
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   ├── 📁 components/                # Pokemon components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # Pokemon TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simple pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Barrel export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component
+    │
+    └── 📁 store/                         # Redux/State management store
+        ├── 📄 index.ts                   # Store configuration
+        ├── 📄 Providers.tsx              # Store providers wrapper
+        │
+        └── 📁 counter/                   # Counter slice
+            └── 📄 counterSlice.ts        # Counter Redux slice
+```
+
+#### 07.2.2 Turning SimpleWidget as `use client` mode:
+
+1. Create `WidgetGrid.tsx` component:
+
+```
+02-my-dashboard/
+├── 📁 components/                    # Shared components
+│   ├── 📄 index.ts                   # Barrel export
+│   ├── 📁 dashboard/                 # Dashboard folder  
+│       ├── 📄 WidgetsGrid.tsx        # 👈🏽 ✅ Widgets component
+│   │   └── 📄 SimpleWidget.tsx       # Simple widget component
+│   └── 📁 sidebar/                   # Sidebar folder  
+│       ├── 📄 Sidebar.tsx            # Sidebar component
+│       └── 📄 SidebarMenuItem.tsx    # Sidebar menu item component
+```
+
+2. Replace the `SimpleWidget` code in `src/app/dashboard/main/page.tsx` by `WidgeetsGrid`:
+```tsx
+/* src/app/dashboard/main/page.tsx */
+import { Metadata } from "next/types";
+import { WidgetsGrid } from "../../../components/dashboard/WidgetsGrid";  // 👈🏽 ✅
+// import { SimpleWidget } from "../../../components";  // 👈🏽 ✅
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Dashboard page",
+};
+
+export default function MainPage() {
+  return (
+    <div className="text-black p-2">
+      <h1 className="mt-2 text-3xl">Dashboard</h1>
+      <span className="text-xl">General Information</span>
+
+      {/* <div className="flex flex-wrap p-2 items-center justify-center">
+        <SimpleWidget />
+      </div> */}  {/* 👈🏽 ✅ */}
+      <WidgetsGrid /> {/* 👈🏽 ✅ */}
+    </div>
+  );
+}
+```
+
+3. `WidgetsGrid` component:
+```tsx
+/* src/components/dashboard/WidgetsGrid.tsx */
+import { SimpleWidget } from "./SimpleWidget";
+export const WidgetsGrid = () => {  // 👈🏽 ✅ 
+  return (
+    <div className="flex flex-wrap p-2 items-center justify-center">
+      <SimpleWidget />  {/* 👈🏽 ✅ */}
+    </div>
+  );
+};
+```
+
+4. Updating the barrel `src/components/index.ts` file:
+```tsx
+/* src/components/index.ts */
+export { Sidebar } from "./sidebar/Sidebar";
+export { SimpleWidget } from "./dashboard/SimpleWidget";
+export { WidgetsGrid } from "./dashboard/WidgetsGrid";  // 👈🏽 ✅
+```
+
+#### 07.2.3 Parameterize the `SimpleWidget.tsx` component:
+```tsx
+/* src/components/dashboard/SimpleWidget.tsx */
+import Link from "next/link";
+interface Props {
+  title: string;
+  subtitle?: string;
+  label?: string;
+  icon?: React.ReactNode;
+  href?: string;
+}
+export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
+  return (
+    <div className="bg-white shadow-xl p-3 sm:min-w-[25%] min-w-full  rounded-2xl border-1 border-gray-50 m-2">
+      <div className="flex flex-col">
+        <div>
+          <h2 className="font-bold text-gray-600 text-center">{label}</h2>
+        </div>
+        <div className="my-3">
+          <div className="flex flex-row items-center justify-center space-x-1 ">
+            <div id="icon">
+              {/* Icono irá aquí */}
+              {icon}
+            </div>
+            <div id="temp" className="text-center">
+              <h4 className="text-4xl">{title}</h4>
+              <p className="text-xs text-gray-500">{subtitle}</p>
+            </div>
+          </div>
+        </div>
+        <div className="w-full place-items-end text-right border-t-2 border-gray-100 mt-2">
+          <Link href={href || "/"} className="text-indigo-600 text-xs font-medium">
+            Más
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### 🐞 07.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Active link highlight fails on nested/dynamic routes** | ⚠️ Identified | `SidebarMenuItem` checks `currentPath === path` (`src/components/sidebar/SidebarMenuItem.tsx:18-20`). This won’t mark `/dashboard/pokemons/pikachu` as active for the base `/dashboard/pokemons` item. Consider `startsWith`, route groups, or a dedicated matcher. |
+| **Missing `aria-current` for active navigation item** | ⚠️ Identified | The active sidebar link is styled visually but does not expose active state to assistive tech. Add `aria-current="page"` when active (`src/components/sidebar/SidebarMenuItem.tsx:16-27`). |
+| **Profile “link” is a dead `href="#"` anchor** | ⚠️ Identified | `Sidebar` uses `<a href="#">` around the profile (`src/components/sidebar/Sidebar.tsx:49-60`), which can jump to top and is not meaningful navigation. Replace with a real route (`Link`) or a `<button>` if it triggers an action. |
+| **Redundant and dead code in `WidgetsGrid`** | ℹ️ Low Priority | `counter.toString() || "0"` is redundant because `"0"` is truthy, and there is a large commented-out block at the bottom (`src/components/dashboard/WidgetsGrid.tsx:11-31`). |
+| **`SimpleWidget` renders headings even when optional props are missing** | ℹ️ Low Priority | `label` is optional but always rendered inside `<h2>` (`src/components/dashboard/SimpleWidget.tsx:3-17`). It works (renders nothing for `undefined`) but may produce empty headings and inconsistent semantics. Decide whether `label` should be required or conditionally render it. |
+
+### 🧱 07.4 Pending Fixes (TODO)
+
+```md
+- [ ] (P1 - Navigation) Improve active route matching for sidebar items to support nested/dynamic routes.
+  - Update the equality check to a safer matcher (e.g. `startsWith`) or a dedicated route matcher.
+  - File: `src/components/sidebar/SidebarMenuItem.tsx:14-27`
+
+- [ ] (P1 - Accessibility) Add `aria-current="page"` to the active sidebar link and ensure focus styles are visible.
+  - File: `src/components/sidebar/SidebarMenuItem.tsx`
+
+- [ ] (P2 - UX/Correctness) Replace the profile `<a href="#">` with a real `Link` to a profile page or a `<button>` (if it triggers an action).
+  - Add an accessible label if needed.
+  - File: `src/components/sidebar/Sidebar.tsx:49-60`
+
+- [ ] (P3 - Cleanup) Remove the commented-out block and simplify redundant `counter.toString() || "0"` logic.
+  - File: `src/components/dashboard/WidgetsGrid.tsx:10-31`
+
+- [ ] (P3 - Component API) Decide whether `SimpleWidget.label` should be required or conditionally rendered to avoid empty headings.
+  - File: `src/components/dashboard/SimpleWidget.tsx:3-17`
+```
+
+
+
+<br>
+
+## 📚 08. Lesson 086 - *Task solution*
+
+
+### 🧠 08.1 Context:
+
+This lesson serves as the solution for the previously assigned task: building a dynamic dashboard overview using information from the Redux store. It demonstrates the implementation of a reusable `SimpleWidget` component and a `WidgetsGrid` container that subscribes to the global state.
+
+**Definition & Explanation:**
+The task involved creating a modular UI where individual "widgets" can display different types of data. In this specific case, the widget reflects the state of the shopping cart counter managed by Redux Toolkit. This pattern is essential for creating data-driven dashboards where multiple components need to react to state changes without being tightly coupled to each other.
+
+**When it occurs/is used:**
+- When building dashboard layouts that require summary cards (widgets).
+- When data from a global state (like Redux) needs to be visualized in a different route or section than where it's modified.
+- When creating a consistent UI/UX for displaying various metrics or links.
+
+**Examples from the project:**
+- `WidgetsGrid` uses the `useAppSelector` custom hook to access `state.counter.count`.
+- `SimpleWidget` takes props like `title`, `subtitle`, `label`, `icon`, and `href` to render a standardized card.
+- The `MainPage` in `src/app/dashboard/main/page.tsx` integrates these components to build the overview.
+
+**Advantages:**
+- **Encapsulation**: UI logic for the widget is isolated in `SimpleWidget.tsx`.
+- **Reusability**: The grid can easily be expanded with more widgets by passing different props.
+- **Real-time Updates**: Since it's connected to Redux, the dashboard updates immediately when the counter changes elsewhere in the app.
+
+**Disadvantages:**
+- **Component Specificity**: The current `SimpleWidget` implementation has some hardcoded strings ("Counter page"), which slightly reduces its "generic" nature.
+
+**Alternatives:**
+- If the data only needs to be used in one place and doesn't change frequently, Server Components fetching data directly from a database or API could be a more performant alternative to reduce client-side JS.
+
+**Connection to Practical Implementation:**
+The lesson shows how to bridge the gap between "dumb" presentational components and "smart" container components that are connected to the Redux store, following best practices for state management in React.
+
+
+### ⚙️ 08.2 Updating code according the context:
+
+
+#### 08.2.1 Update `WidgetsGrid` component:
+```tsx
+/* src/components/dashboard/WidgetsGrid.tsx */
+"use client";
+import { useAppSelector } from "@/store";
+import { SimpleWidget } from "./SimpleWidget";
+import { IoCartOutline } from "react-icons/io5";
+
+export const WidgetsGrid = () => {
+  const counter = useAppSelector((state) => state.counter.count);
+  return (
+    <div className="flex flex-wrap p-2 items-center justify-center">
+      <SimpleWidget
+        title={`${counter}`}
+        subtitle=" Products in shopping cart"
+        label="Counter"
+        icon={<IoCartOutline size={70} className="text-blue-500" />}
+        href="/dashboard/counter"
+      />
+    </div>
+  );
+};
+```
+
+#### 08.2.2 Considering those optionnal props:
+```tsx
+/* src/components/dashboard/SimpleWidget.tsx */
+import Link from "next/link";
+interface Props {
+  title: string;
+  subtitle?: string;
+  label?: string;
+  icon?: React.ReactNode;
+  href?: string;
+}
+export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
+  return (
+    <div className="bg-white shadow-xl p-3 sm:min-w-[25%] min-w-full  rounded-2xl border-1 border-gray-50 m-2">
+      <div className="flex flex-col">
+        <div>{label && <h2 className="font-bold text-gray-600 text-center">{label}</h2>}</div> {/* 👈🏽 ✅ */}
+        <div className="my-3">
+          <div className="flex flex-row items-center justify-center space-x-1 ">
+            {icon && <div id="icon">{icon}</div>} {/* 👈🏽 ✅ */}
+            <div id="temp" className="text-center">
+              <h4 className="text-4xl">{title}</h4>
+              {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>} {/* 👈🏽 ✅ */}
+            </div>
+          </div>
+        </div>
+        {href && (
+          <div className="w-full place-items-end text-right border-t-2 border-gray-100 mt-2">
+            <Link href={href || "/"} className="text-indigo-600 text-xs font-medium">
+              Counter page
+            </Link>
+          </div>
+        )} {/* 👈🏽 ✅ */}
+      </div>
+    </div>
+  );
+};
+```
+### 🐞 08.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Hardcoded Link Text** | ⚠️ Identified | The `SimpleWidget` component has a hardcoded string "Counter page" in its link, limiting its reuse for other types of widgets. |
+| **Dead Code in WidgetsGrid** | ⚠️ Identified | `src/components/dashboard/WidgetsGrid.tsx` contains commented-out code outside the component body (lines 20-30). |
+| **Invalid Tailwind Class** | ⚠️ Identified | `SimpleWidget.tsx` uses `border-1`, which is not a standard Tailwind class (standard is `border` or `border-2`). |
+
+### 🧱 08.4 Pending Fixes (TODO)
+
+- [ ] Refactor `SimpleWidget` to accept a `labelLink` prop to remove hardcoded "Counter page" text. (src/components/dashboard/SimpleWidget.tsx:28)
+- [ ] Remove unused commented code in `src/components/dashboard/WidgetsGrid.tsx`. (lines 20-30)
+- [ ] Correct the CSS class `border-1` to `border` in `SimpleWidget.tsx`. (line 13)
+
+
+<br>
+
+## 📚 09. Lesson 087 - *RESTful Api - Get Counter*
+
+
+### 🧠 09.1 Context:
+RESTful APIs in Next.js are implemented using **Route Handlers**, which allow you to create custom request handlers for a given route using the Web [Request](https://developer.mozilla.org/docs/Web/API/Request) and [Response](https://developer.mozilla.org/docs/Web/API/Response) APIs. They are the successor to API Routes from the Pages Router and provide a powerful way to handle various HTTP methods (GET, POST, PUT, DELETE, etc.) within the App Router directory structure.
+
+**When to use Route Handlers:**
+- When building a public API for external consumption.
+- When you need to handle webhooks from third-party services.
+- When you need full control over response headers, status codes, or cookies.
+- As a proxy to hide API keys or transform data before it reaches the client.
+
+**Examples in this project:**
+- `src/app/api/counter/route.ts`: A basic implementation handling multiple HTTP verbs to demonstrate endpoint creation.
+
+**Advantages:**
+- **Standardized**: Uses standard Web APIs.
+- **Versatile**: Supports all HTTP methods and streaming.
+- **Isolated**: Backend logic is kept separate from the frontend components.
+
+**Disadvantages:**
+- **Complexity**: For internal state mutations within the same app, **Server Actions** are often a simpler and more efficient alternative.
+- **Boilerplate**: Requires manual parsing of bodies and query parameters compared to more integrated solutions.
+
+**Alternatives:**
+- **Server Actions**: Preferred for most internal data mutations and form submissions in Next.js.
+- **Server Components**: For data fetching that doesn't need to be exposed as an endpoint.
+
+
+### ⚙️ 09.2 Updating code according the context:
+
+#### 09.2.1 Verify the api:
+1. Run the app
+```bash
+$ npm run dev
+```
+
+2. Open the app at [localhost:3000](http://localhost:3000/api/counter)
+
+3. Do some testing in Postman or Requestly:
+    - Method: `GET``
+    - Url: `http://localhost:3000/api/counter`
+    - Status code: `404 Not Found`
+    - Expected Result:
+    ```json
+    <!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/chunks/%5Broot-of-the-server%5D__0f0ba101._.css" 
+    ....
+    ```
+
+
+#### 09.2.2 Add/create `route.ts` file:
+
+```tsx
+/* src/app/api/counter/route.ts */
+export async function GET(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    count: 100,
+    method: "GET",
+  });
+}
+
+export async function POST(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "POST",
+  });
+}
+
+export async function PUT(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "PUT",
+  });
+}
+
+export async function DELETE(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "DELETE",
+  });
+}
+
+export async function PATCH(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "PATCH",
+  });
+}
+```
+
+#### 08.2.3 Structure Project (Visual)
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Site favicon
+    │   │
+    │   ├── 📁 api/                       # 👈🏽 ✅ API Routes (Route Handlers)
+    │   │   └── 📁 counter/
+    │   │       └── 📄 route.ts           # 👈🏽 ✅ Counter API endpoint
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favorites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route by name
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Central export file (Barrel)
+    │   ├── 📁 dashboard/                 # Dashboard specific components
+    │   │   ├── 📄 SimpleWidget.tsx       # Simple widget component
+    │   │   └── 📄 WidgetsGrid.tsx        # Grid for organizing widgets
+    │   └── 📁 sidebar/                   # Sidebar components
+    │       ├── 📄 Sidebar.tsx            # Main Sidebar component
+    │       └── 📄 SidebarMenuItem.tsx    # Individual menu item
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Module central export
+    │   │
+    │   ├── 📁 components/                # Pokemon-specific components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Detailed Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simplified Pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Central export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component (Client Component)
+    │
+    └── 📁 store/                         # State management with Redux (RTK)
+        ├── 📄 index.ts                   # Store configuration
+        ├── 📄 Providers.tsx              # Store provider wrapper
+        │
+        └── 📁 counter/                   # Counter slice
+            └── 📄 counterSlice.ts        # Redux logic for the counter
+```
+
+
+### 🐞 09.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Hardcoded API Response** | ⚠️ Identified | The `GET` method in `src/app/api/counter/route.ts` returns a static object `{ count: 100 }` instead of dynamic data. |
+| **Lack of Request Validation** | ⚠️ Identified | POST, PUT, and PATCH methods do not validate the incoming request body, which could lead to errors if data is missing or malformed. |
+| **Missing Error Handling** | ⚠️ Identified | There are no `try-catch` blocks or conditional status codes to handle potential server-side failures in the API route. |
+
+### 🧱 09.4 Pending Fixes (TODO)
+
+- [ ] Implement dynamic data fetching for the counter instead of hardcoded 100 in `src/app/api/counter/route.ts`.
+- [ ] Add validation logic for incoming request bodies in POST/PUT/PATCH methods.
+- [ ] Implement robust error handling with appropriate HTTP status codes (e.g., 201 for success, 400 for bad requests, 500 for server errors).
+
+
+<br>
+
+## 📚 10. Lesson 088 - *counter value from an API*
+
+
+### 🧠 10.1 Context:
+In Next.js, Route Handlers (API Routes) allow you to create custom request handlers for a given route using the Web Request and Response APIs. This lesson focuses on fetching dynamic data from an internal API endpoint (`/api/counter`) to initialize the global state in a Redux store. 
+
+Instead of relying on static props passed from a parent component, the `CartCounter` component now independently fetches its initial state upon mounting. This is achieved using the `useEffect` hook, which triggers an asynchronous call to the API and then dispatches the retrieved value to the Redux store via `initCounterState`.
+
+**When and why it's used:**
+- When data needs to be synchronized with a database or external service that isn't available at build time.
+- When you want to decouple the data fetching logic from the component hierarchy.
+- To ensure the client-side state is consistent with the server-side source of truth.
+
+**Advantages:**
+- **Dynamic Data**: Ensures the UI reflects the most recent state from the server.
+- **Decoupling**: The component doesn't need to know where the data comes from, just how to fetch it from the endpoint.
+
+**Disadvantages:**
+- **Client-Side Fetching**: Can lead to "flicker" or Cumulative Layout Shift (CLS) if loading states aren't handled correctly.
+- **Complexity**: Adds more moving parts (API routes, async functions, loading/error states).
+
+**Alternatives:**
+- **Server Actions**: For mutations or more direct server-side interactions in Next.js.
+- **React Query/SWR**: For more advanced data fetching features like caching, revalidation, and automatic loading/error states.
+
+### ⚙️ 10.2 Updating code according the context:
+
+
+#### 10.2.1 Create in `CartCunter.tsx` the `CounterResponse` interface:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+// Counter response from the API
+export interface CounterResponse {  // 👈🏽 ✅
+  method: string;
+  count: number;
+}
+const CartCounter = ({ value = 0 }: Props) => {
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(initCounterState(value));
+  }, [dispatch, value]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+#### 10.2.2 Create a new function in order to read from the API:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";
+//Interface for Props:
+interface Props {
+  value?: number;
+}
+// Counter response from the API
+export interface CounterResponse {
+  method: string;
+  count: number;
+}
+// Function to get the counter from the API
+const getApiCounter = async (): Promise<CounterResponse> => {  // ✅ 👈🏽
+  const data = await fetch("/api/counter");
+  const dataJson = await data.json();
+  console.log({ dataJson }); // ✅ 👈🏽
+  return dataJson;
+};
+const CartCounter = ({ value = 0 }: Props) => {
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(initCounterState(value));
+  }, [dispatch, value]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+
+#### 10.2.3 Using the `getApiCounter` function inside a new `useEffect` hook definition:
+```tsx
+/* src/shopping-cart/components/CartCounter.tsx */
+"use client";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addOne, initCounterState, substractOne } from "@/store/counter/counterSlice";
+import { useEffect } from "react";
+//Interface for Props:
+// interface Props {  // 👈🏽 ✅. No argument (1)
+//   value?: number;
+// }
+// Counter response from the API
+export interface CounterResponse {
+  method: string;
+  count: number;
+}
+// Function to get the counter from the API
+const getApiCounter = async (): Promise<CounterResponse> => {
+  const data = await fetch("/api/counter");
+  const dataJson = await data.json();
+  console.log({ dataJson });
+
+  return dataJson;
+};
+//const CartCounter = ({ value = 0 }: Props) => {
+const CartCounter = () => {  // 👈🏽 ✅. No argument (1)
+  const count = useAppSelector((state) => state.counter.count);
+  const dispatch = useAppDispatch();
+
+  // useEffect(() => {  👈🏽 ✅ (1)
+  //   dispatch(initCounterState(value));  👈🏽 ✅
+  // }, [dispatch, value]);  👈🏽 ✅
+
+  useEffect(() => {  // 👈🏽 ✅ (2)
+    getApiCounter()
+      // .then((data) => { dispatch(initCounterState(data.count));}) either this line or the next one
+      .then(({ count }) => dispatch(initCounterState(count)));  // object destructuring 🥳
+  }, [dispatch]);
+  return (
+    <>
+      <span className="text-9xl">{count}</span>
+      <div className="flex">
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(substractOne())}
+          disabled={count === 0}
+        >
+          -1
+        </button>
+        <button
+          className="flex items-center justify-center p-2 rounded-xl bg-gray-900 text-white hover:bg-gray-600 transition-all w-[100px] mr-2"
+          onClick={() => dispatch(addOne())}
+        >
+          +1
+        </button>
+      </div>
+    </>
+  );
+};
+export default CartCounter;
+```
+![](../img/section07-lecture088-001.png)
+
+### 🐞 10.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| Stability of `dispatch` in `useEffect` | ✅ Answered | `dispatch` is a stable function provided by Redux. It does not change between renders, so including it in the dependency array ensures the effect runs only once on mount. |
+| Missing error handling in `getApiCounter` | ⚠️ Identified | If the fetch to `/api/counter` fails, the error is not caught, which could crash the component or leave it in an undefined state. |
+| Lack of loading state in UI | ⚠️ Identified | There is no visual feedback to the user while the API request is pending, leading to a potentially confusing UX. |
+
+### 🧱 10.4 Pending Fixes (TODO)
+
+- [ ] Add `try-catch` error handling to the `getApiCounter` function in `src/shopping-cart/components/CartCounter.tsx`.
+- [ ] Implement a loading indicator (e.g., a spinner or skeleton) in `CartCounter` while `getApiCounter` is fetching.
+- [ ] Move `CounterResponse` and `getApiCounter` to a separate utility or service file to improve maintainability.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ---
@@ -5890,33 +8410,34 @@ fetch('https://...', { next: { revalidate: 3600 } })
 
 [TEMPLATE]
 
-## 📚 X. Lesson YYY - *{{TITLE_NAME}}*
+
+<br>
+
+## 📚 XX. Lesson YYY - *{{TITLE_NAME}}*
 
 
-### 🧠 X.1 Context:
+### 🧠 XX.1 Context:
 
 
-### ⚙️ X.2 Updating code according the context:
+### ⚙️ XX.2 Updating code according the context:
 
 
-#### X.2.1
+#### XX.2.1
 ```tsx
 /*  */
 
 ```
 
-#### X.2.2
+#### XX.2.2
 ```tsx
 /*  */
 
 ```
 
-### 🐞 X.3 Issues:
-- **first issue**: something..
+### 🐞 XX.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
 
+### 🧱 XX.4 Pending Fixes (TODO)
 
-### 🧱 X.4 Pending Fixes (TODO)
-
-```md
 - [ ]
-```
