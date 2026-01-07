@@ -1,6 +1,8 @@
 import { CartCounter } from "../../../shopping-cart";
 import { Metadata } from "next/types";
 
+// `use client` is omitted because this component relies on metadata.
+
 export const metadata: Metadata = {
   title: "𝌰 Shopping Cart",
   description: "Simple Counter Page",
