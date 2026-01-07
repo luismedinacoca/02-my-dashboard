@@ -7946,7 +7946,6 @@ export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
   );
 };
 ```
-
 ### 🐞 08.3 Issues:
 | Issue | Status | Log/Error |
 |---|---|---|
@@ -7960,6 +7959,213 @@ export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
 - [ ] Remove unused commented code in `src/components/dashboard/WidgetsGrid.tsx`. (lines 20-30)
 - [ ] Correct the CSS class `border-1` to `border` in `SimpleWidget.tsx`. (line 13)
 
+
+<br>
+
+## 📚 09. Lesson 087 - *RESTful Api - Get Counter*
+
+
+### 🧠 09.1 Context:
+RESTful APIs in Next.js are implemented using **Route Handlers**, which allow you to create custom request handlers for a given route using the Web [Request](https://developer.mozilla.org/docs/Web/API/Request) and [Response](https://developer.mozilla.org/docs/Web/API/Response) APIs. They are the successor to API Routes from the Pages Router and provide a powerful way to handle various HTTP methods (GET, POST, PUT, DELETE, etc.) within the App Router directory structure.
+
+**When to use Route Handlers:**
+- When building a public API for external consumption.
+- When you need to handle webhooks from third-party services.
+- When you need full control over response headers, status codes, or cookies.
+- As a proxy to hide API keys or transform data before it reaches the client.
+
+**Examples in this project:**
+- `src/app/api/counter/route.ts`: A basic implementation handling multiple HTTP verbs to demonstrate endpoint creation.
+
+**Advantages:**
+- **Standardized**: Uses standard Web APIs.
+- **Versatile**: Supports all HTTP methods and streaming.
+- **Isolated**: Backend logic is kept separate from the frontend components.
+
+**Disadvantages:**
+- **Complexity**: For internal state mutations within the same app, **Server Actions** are often a simpler and more efficient alternative.
+- **Boilerplate**: Requires manual parsing of bodies and query parameters compared to more integrated solutions.
+
+**Alternatives:**
+- **Server Actions**: Preferred for most internal data mutations and form submissions in Next.js.
+- **Server Components**: For data fetching that doesn't need to be exposed as an endpoint.
+
+
+### ⚙️ 09.2 Updating code according the context:
+
+#### 09.2.1 Verify the api:
+1. Run the app
+```bash
+$ npm run dev
+```
+
+2. Open the app at [localhost:3000](http://localhost:3000/api/counter)
+
+3. Do some testing in Postman or Requestly:
+    - Method: `GET``
+    - Url: `http://localhost:3000/api/counter`
+    - Status code: `404 Not Found`
+    - Expected Result:
+    ```json
+    <!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/chunks/%5Broot-of-the-server%5D__0f0ba101._.css" 
+    ....
+    ```
+
+
+#### 09.2.2 Add/create `route.ts` file:
+
+```tsx
+/* src/app/api/counter/route.ts */
+export async function GET(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    count: 100,
+    method: "GET",
+  });
+}
+
+export async function POST(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "POST",
+  });
+}
+
+export async function PUT(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "PUT",
+  });
+}
+
+export async function DELETE(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "DELETE",
+  });
+}
+
+export async function PATCH(request: Request) {
+  console.log({ method: request.method });
+  return Response.json({
+    method: "PATCH",
+  });
+}
+```
+
+#### 08.2.3 Structure Project (Visual)
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Site favicon
+    │   │
+    │   ├── 📁 api/                       # 👈🏽 ✅ API Routes (Route Handlers)
+    │   │   └── 📁 counter/
+    │   │       └── 📄 route.ts           # 👈🏽 ✅ Counter API endpoint
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favorites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route by name
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Central export file (Barrel)
+    │   ├── 📁 dashboard/                 # Dashboard specific components
+    │   │   ├── 📄 SimpleWidget.tsx       # Simple widget component
+    │   │   └── 📄 WidgetsGrid.tsx        # Grid for organizing widgets
+    │   └── 📁 sidebar/                   # Sidebar components
+    │       ├── 📄 Sidebar.tsx            # Main Sidebar component
+    │       └── 📄 SidebarMenuItem.tsx    # Individual menu item
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Module central export
+    │   │
+    │   ├── 📁 components/                # Pokemon-specific components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Detailed Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simplified Pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Central export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component (Client Component)
+    │
+    └── 📁 store/                         # State management with Redux (RTK)
+        ├── 📄 index.ts                   # Store configuration
+        ├── 📄 Providers.tsx              # Store provider wrapper
+        │
+        └── 📁 counter/                   # Counter slice
+            └── 📄 counterSlice.ts        # Redux logic for the counter
+```
+
+
+### 🐞 09.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Hardcoded API Response** | ⚠️ Identified | The `GET` method in `src/app/api/counter/route.ts` returns a static object `{ count: 100 }` instead of dynamic data. |
+| **Lack of Request Validation** | ⚠️ Identified | POST, PUT, and PATCH methods do not validate the incoming request body, which could lead to errors if data is missing or malformed. |
+| **Missing Error Handling** | ⚠️ Identified | There are no `try-catch` blocks or conditional status codes to handle potential server-side failures in the API route. |
+
+### 🧱 09.4 Pending Fixes (TODO)
+
+- [ ] Implement dynamic data fetching for the counter instead of hardcoded 100 in `src/app/api/counter/route.ts`.
+- [ ] Add validation logic for incoming request bodies in POST/PUT/PATCH methods.
+- [ ] Implement robust error handling with appropriate HTTP status codes (e.g., 201 for success, 400 for bad requests, 500 for server errors).
 
 
 
