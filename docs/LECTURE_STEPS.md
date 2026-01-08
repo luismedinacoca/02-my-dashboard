@@ -1,19 +1,85 @@
-# 👨🏾‍💻 Section 04: Server Side + Client side rendenring
+# 👨🏾‍💻 Project: MyDashboard - Next.js App Router
+
+## 📋 Project Overview
+This project is a comprehensive dashboard built with Next.js 15+ and the App Router. It serves as a learning platform for mastering modern web development concepts including Server and Client Components, state management with Redux Toolkit, and dynamic data fetching from external APIs like PokeAPI.
+
+### What This Project Does
+- **Dashboard Interface**: A modern, responsive sidebar-based layout using Tailwind CSS.
+- **State Management**: Implements a global shopping cart counter using Redux Toolkit.
+- **Dynamic Content**: Fetches and displays Pokemon data with static and dynamic generation.
+- **Interactive UI**: Client-side interactivity with optimized image loading and active route tracking.
+- **API Integration**: Demonstrates both external API consumption and internal Route Handlers.
+
+### Technology Stack
+- **Framework**: Next.js 15 (App Router)
+- **Library**: React 19
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Redux Toolkit & React Redux
+- **Icons**: React Icons (Io5)
+- **Data Source**: PokeAPI
+
+### Key Components
+- `Sidebar`: Navigation system with active route detection.
+- `CartCounter`: Interactive counter synchronized between local and global state.
+- `PokemonGrid`: Optimized grid for displaying Pokemon lists.
+- `SimpleWidget`: Reusable dashboard card for metrics and summaries.
+- `Providers`: Client-side wrapper for Redux and other providers.
 
 ## 📑 Table of Contents
-
-- [⚙️ Section: Server Side + Client side rendenring](#️-section-server-side--client-side-rendenring)
+- [👨🏾‍💻 Project: MyDashboard - Next.js App Router](#-project-mydashboard---nextjs-app-router)
+  - [📋 Project Overview](#-project-overview)
+    - [What This Project Does](#what-this-project-does)
+    - [Technology Stack](#technology-stack)
+    - [Key Components](#key-components)
   - [📑 Table of Contents](#-table-of-contents)
-  - [🔧 Lesson 037](#-lesson-037)
-  - [🔧 Lesson 038](#-lesson-038)
-  - [🔧 Lesson 039](#-lesson-039)
-  - [🔧 Lesson 040](#-lesson-040)
-  - [🔧 Lesson 041](#-lesson-041)
-  - [🔧 Lesson 042](#-lesson-042)
-  - [🔧 Lesson 043](#-lesson-043)
-  - [🔧 Lesson 044](#-lesson-044)
-  - [📎 Related Files](#-related-files)
-  - [🔗 References](#-references)
+  - [📁 Visual Project Tree](#-visual-project-tree)
+  - [🧳 Section 04: Server Side + Client side rendering](#-section-04-server-side--client-side-rendering)
+  - [🧳 Section 05: Dynamic Generation – SSR](#-section-05-dynamic-generation--ssr)
+  - [🧳 Section 06: Incremental and Static Generation](#-section-06-incremental-and-static-generation)
+  - [🧳 Section 07: Global State - Redux & LocalStorage](#-section-07-global-state---redux--localstorage)
+
+## 📁 Visual Project Tree
+```text
+02-my-dashboard/
+├── 📁 docs/                             # 📄 Project documentation
+├── 📁 img/                              # 📄 Reference images
+├── 📁 public/                           # 📁 Static assets
+└── 📁 src/                              # 📁 Main application source
+    ├── 📁 app/                          # 📁 Next.js App Router routes
+    │   ├── 📁 api/                      # 📄 Route Handlers (Internal APIs)
+    │   ├── 📁 dashboard/                # 📁 Protected dashboard routes
+    │   │   ├── 📁 counter/              # 📄 Client-side counter page
+    │   │   ├── 📁 favourites/           # 📄 Favourites management
+    │   │   ├── 📁 main/                 # 📄 Dashboard overview
+    │   │   ├── 📁 pokemon/              # 📄 Dynamic pokemon details (ID)
+    │   │   └── 📁 pokemons/             # 📄 Pokemon list & details (Name)
+    │   ├── 📄 globals.css               # 📄 Global Tailwind styles
+    │   └── 📄 layout.tsx                # 📄 Root application layout
+    ├── 📁 components/                   # 📁 Shared UI components
+    │   ├── 📁 dashboard/                # 📄 Widgets and grids
+    │   └── 📁 sidebar/                  # 📄 Sidebar and menu items
+    ├── 📁 pokemons/                     # 📁 Pokemon feature module
+    │   ├── 📁 components/               # 📄 Feature-specific components
+    │   ├── 📁 interfaces/               # 📄 TypeScript definitions
+    │   └── 📄 index.ts                  # 📄 Module barrel export
+    ├── 📁 shopping-cart/                # 📁 Cart feature module
+    └── 📁 store/                        # 📁 Redux Toolkit configuration
+```
+
+---
+
+## 🧳 Section 04: Server Side + Client side rendering
+
+- [📑 Table of Contents](#-table-of-contents-1)
+    - [📚 Lecture 037: MyDashboard](#-lecture-037-mydashboard)
+    - [📚 Lecture 038: My Dashboard Structure](#-lecture-038-my-dashboard-structure)
+    - [📚 Lecture 039: Sidebar & main content](#-lecture-039-sidebar--main-content)
+    - [📚 Lecture 040: Next/Image](#-lecture-040-nextimage)
+    - [📚 Lecture 041: Icons and active route](#-lecture-041-icons-and-active-route)
+    - [📚 Lecture 042: Task solution](#-lecture-042-task-solution)
+    - [📚 Lecture 043: state management - useState](#-lecture-043-state-management---usestate)
+    - [📚 Lecture 044: Let's think in terms of folders and small components](#-lecture-044-lets-think-in-terms-of-folders-and-small-components)
 
 ---
 
@@ -52,12 +118,15 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🔧 1. Lesson 037 — *MyDashboard*
+### 📚 Lecture 037: MyDashboard
 
-### 🧠 1.1 Context  
+### 🧠 037.1 Context
 _This lesson covers the initial setup of the MyDashboard project. It establishes the basic Next.js project structure by configuring global styles with Tailwind CSS, creating the main page and the first dashboard page (counter). It also implements a redirect from the homepage to the counter page to facilitate access during development._
 
-### 1. Open **`globals.css`** file:
+
+### ⚙️ 037.2 Updating code according the context
+
+#### 037.2.1 Open **`globals.css`** file:
 
 ```css
 /* src/app/globals.css */
@@ -89,7 +158,7 @@ body {
 }
 ```
 
-### 2. Open **`src/app/page.tsx`** file:
+#### 037.2.2 Open **`src/app/page.tsx`** file:
 
 ```tsx
 export default function HomePage() {
@@ -101,7 +170,7 @@ export default function HomePage() {
 }
 ```
 
-### 3. Create **`dashboard/counter/page.tsx`** file:
+#### 037.2.3 Create **`dashboard/counter/page.tsx`** file:
 
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
@@ -116,7 +185,7 @@ export default function CounterPage() {
 
 > Go to [counter page](http://localhost:3000/dashboard/counter)
 
-### 4. Renavigate rom homepage directly to counter page:
+#### 037.2.4 Renavigate rom homepage directly to counter page:
 
 ```tsx
 /* src/app/page.tsx */
@@ -128,16 +197,19 @@ export default function HomePage() {
 
 > Go to [Home page](http://localhost:3000)
 
-## 🔧 2. Lesson 038 — *My Dashboard Structure*
+### 📚 Lecture 038: My Dashboard Structure
 
-### 🧠 2.1 Context  
+### 🧠 038.1 Context
 _This lesson establishes the visual structure of the dashboard. It obtains a dark navigation component from Tailwind CSS and integrates it into the dashboard layout. The `layout.tsx` file is created for the dashboard, including a sidebar navigation with logo, user profile, and navigation menu with multiple options (Dashboard, Database, Cloud Storage, Reports, Security, Extensions, Settings). HTML code is adapted to React by converting attributes like `class` to `className` and adjusting SVG elements._
 
-### 1. Get the dashboard component code
+
+### ⚙️ 038.2 Updating code according the context
+
+#### 038.2.1 Get the dashboard component code
 
 [Dark dashboard navigation system made using Tailwind CSS](https://www.creative-tim.com/twcomponents/component/dashboard-navigation)
 
-### 2. Add the **`src/app/dashboard/layout.tsx`** file:
+#### 038.2.2 Add the **`src/app/dashboard/layout.tsx`** file:
 
 ```tsx
 /* src/app/dashboard/layout.tsx */
@@ -154,7 +226,7 @@ export default function DashboardLayout({
 }
 ```
 
-### 3. Add the Dashboard code from the Tailwind URL into this Layout:
+#### 038.2.3 Add the Dashboard code from the Tailwind URL into this Layout:
 
 ```tsx
 /* src/app/dashboard/layout.tsx */
@@ -413,12 +485,15 @@ export default function DashboardLayout({
 - Replace each `stroke-linejoin` by `strokeLinejoin`.
 - Replace each `stroke-width` by `strokeWidth`.
 
-## 🔧 3. Lesson 039 — *Sidebar & main content*
+### 📚 Lecture 039: Sidebar & main content
 
-### 🧠 3.1 Context  
+### 🧠 039.1 Context
 _This lesson focuses on separation of concerns and code organization. The dashboard layout is refactored to separate the sidebar into an independent component (`Sidebar.tsx`). The layout is adjusted to properly display the sidebar alongside the main content using the `children` prop. The `fixed` positioning is removed from the sidebar and a flexible layout is configured that allows the main content to display next to the sidebar. A barrel file (`index.ts`) is also created to facilitate imports._
 
-### 1. Add the `{ children }` prop in this `layout.tsx`:
+
+### ⚙️ 039.2 Updating code according the context
+
+#### 039.2.1 Add the `{ children }` prop in this `layout.tsx`:
 
 - Replace `<div className="flex flex-col relative w-screen">` by `<div className="flex">`
 - Delete `fixed` in `<div id="menu" className="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 fixed left-0 h-screen overflow-y-scroll">`
@@ -448,14 +523,14 @@ export default function DashboardLayout({
 }
 ```
 
-### 2. Creaate **`Sidebar.tsx`** component:
+#### 039.2.2 Creaate **`Sidebar.tsx`** component:
 
-#### 1. From **`Layout.tsx`**, Cut/Remove the content between:
+#### 039.2.1 From **`Layout.tsx`**, Cut/Remove the content between:
 
 - `<div className="flex">` and
 - `<div className="p-2 w-full text-slate-900">`
 
-#### 2. Paste this content in **`Sidebar`** component:
+#### 039.2.2 Paste this content in **`Sidebar`** component:
 
 ```tsx
 /* src/app/components/Sidebar.tsx */
@@ -696,14 +771,14 @@ export const Sidebar = () => {
 };
 ```
 
-#### 3. Create **`index.ts`** file:
+#### 039.2.3 Create **`index.ts`** file:
 
 ```ts
 /* src/app/components/index.ts */
 export { Sidebar } from "./Sidebar";
 ```
 
-### 3. Import **`Sidebar`** component in **`Layout`**:
+#### 039.2.3 Import **`Sidebar`** component in **`Layout`**:
 
 ```tsx
 /* src/app/dashboard/layout.tsx */
@@ -724,7 +799,7 @@ export default function DashboardLayout({
 }
 ```
 
-### 4. Update the **`Sidebar`** component:
+#### 039.2.4 Update the **`Sidebar`** component:
 
 - Add `style={{ width: '400px' }}` in `<div id="menu" className="...">`
 - Keep 2 `<a href="#"...>` from `<div id="nav" className="w-full px-6">` only and isolate them.
@@ -828,9 +903,9 @@ export const Sidebar = () => {
 };
 ```
 
-## 🔧 4. Lesson 040 — *Next/Image*
+### 📚 Lecture 040: Next/Image
 
-### 🧠 4.1 Context  
+### 🧠 040.1 Context
 _This lesson introduces the use of Next.js optimized `Image` component to replace traditional HTML `<img>` tags. It is implemented in the Sidebar component to display the user avatar. The Next.js Image component provides automatic image optimization, lazy loading, and better performance. It requires configuring allowed domains in `next.config.ts` through `remotePatterns` to load images from external sources like Unsplash._
 
 ### ⚡ 4.2 Incidents Found  
@@ -840,7 +915,10 @@ _This lesson introduces the use of Next.js optimized `Image` component to replac
 
 Check it out this URL: [Components | Image Componnt | Next.js](https://nextjs.org/docs/app/api-reference/components/image)
 
-### 1. Import `Image` from next/image`
+
+### ⚙️ 040.2 Updating code according the context
+
+#### 040.2.1 Import `Image` from next/image`
 
 ```tsx
 /* src/app/components/Sidebar.tsx */
@@ -948,7 +1026,7 @@ export const Sidebar = () => {
 
 - Hostname not allowed.
 
-### 2. Open **`next.config.ts`**
+#### 040.2.2 Open **`next.config.ts`**
 
 ```ts
 /* next.config.ts */
@@ -966,12 +1044,15 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-## 🔧 5. Lesson 041 — *Icons and active route*
+### 📚 Lecture 041: Icons and active route
 
-### 🧠 5.1 Context  
+### 🧠 041.1 Context
 _This lesson enhances the sidebar interface by adding icons using the `react-icons` library and creating a reusable `SidebarMenuItem` component for menu items. react-icons is installed and a React icon is added to the dashboard logo. A SidebarMenuItem component is created that accepts props like path, icon, title, and subTitle, allowing for a more maintainable and scalable structure. It sets the groundwork for implementing active navigation that will be completed in the next lesson._
 
-### 1. Install [React-icons](https://react-icons.github.io/react-icons/):
+
+### ⚙️ 041.2 Updating code according the context
+
+#### 041.2.1 Install [React-icons](https://react-icons.github.io/react-icons/):
 
 ```bash
 npm install react-icons --save
@@ -979,7 +1060,7 @@ npm install react-icons --save
 
 > reference Link [Ionicons: Premium Open Source Icon Pack for Ionic Framework](https://ionic.io/ionicons/)
 
-### 2. Import `IoLogoReact` in logo section:
+#### 041.2.2 Import `IoLogoReact` in logo section:
 
 ```tsx
 /* src/app/components/Sidebar.tsx */
@@ -1028,7 +1109,7 @@ export const Sidebar = () => {
 };
 ```
 
-### 3. Create `SidebarMenuItem.tsx` file:
+#### 041.2.3 Create `SidebarMenuItem.tsx` file:
 
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
@@ -1080,7 +1161,7 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
 export default SidebarMenuItem;
 ```
 
-### 4. Import `SidebarMenuItem` from `Sidebar.tsx`:
+#### 041.2.4 Import `SidebarMenuItem` from `Sidebar.tsx`:
 
 ```tsx
 /* src/app/components/Sidebar.tsx */
@@ -1228,9 +1309,9 @@ export const Sidebar = () => {
 };
 ```
 
-## 🔧 6. Lesson 042 — *Task solution*
+### 📚 Lecture 042: Task solution
 
-### 🧠 6.1 Context  
+### 🧠 042.1 Context
 _This lesson completes the implementation of active navigation in the sidebar. The `usePathname()` hook from Next.js is used to detect the current route and apply visual styles to the corresponding menu item. `<a>` links are replaced with Next.js `Link` component for more efficient navigation. A `menuItems` array is implemented containing the configuration for each menu item, allowing for a more maintainable structure. An error related to using client hooks in server components is resolved by adding the "use client" directive._
 
 ### ⚡ 6.2 Incidents Found  
@@ -1238,7 +1319,10 @@ _This lesson completes the implementation of active navigation in the sidebar. T
 |---|---|---|
 | usePathname hook error | Fixed | Added "use client" directive |
 
-### 1. Apply `usePathname()` hook:
+
+### ⚙️ 042.2 Updating code according the context
+
+#### 042.2.1 Apply `usePathname()` hook:
 
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
@@ -1341,7 +1425,7 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
 export default SidebarMenuItem;
 ```
 
-### 2. Update `SidebarMenuItem.tsx`:
+#### 042.2.2 Update `SidebarMenuItem.tsx`:
 
 ```tsx
 /* src/app/components/SidebarMenuItem.tsx */
@@ -1380,9 +1464,9 @@ const SidebarMenuItem = ({ path, icon, title, subTitle }: Props) => {
 export default SidebarMenuItem;
 ```
 
-## 🔧 7. Lesson 043 — *state management - useState*
+### 📚 Lecture 043: state management - useState
 
-### 🧠 7.1 Context  
+### 🧠 043.1 Context
 _This lesson introduces React state management using the `useState` hook. A counter component is created in the CounterPage that allows users to increment and decrement a value. The component demonstrates client-side interactivity by using the "use client" directive, which is necessary for using React hooks. The lesson also highlights an important limitation: metadata cannot be exported from client components, requiring a separation between server and client components in Next.js._
 
 ### ⚡ 7.2 Incidents Found  
@@ -1390,7 +1474,10 @@ _This lesson introduces React state management using the `useState` hook. A coun
 |---|---|---|
 | Metadata cannot be used with "use client" | Fixed | Separated client and server components |
 
-### 1. Adding style in CounterPage component:
+
+### ⚙️ 043.2 Updating code according the context
+
+#### 043.2.1 Adding style in CounterPage component:
 
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
@@ -1414,7 +1501,7 @@ export default function CounterPage() {
 
 ![CounterPage styled component](../img/section04-lecture042-002.png)
 
-### 2. Apply **`useState`** in this page:
+#### 043.2.2 Apply **`useState`** in this page:
 
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
@@ -1446,7 +1533,7 @@ export default function CounterPage() {
 }
 ```
 
-### 3. Add `metadata` in `Counter` component:
+#### 043.2.3 Add `metadata` in `Counter` component:
 
 ```tsx
 /*  */
@@ -1489,12 +1576,15 @@ export default function CounterPage() {
 
 ![Metadata cannot be used with use client error](../img/section04-lecture042-003.png)
 
-## 🔧 8. Lesson 044 — *Let's think in terms of folders and small components*
+### 📚 Lecture 044: Let's think in terms of folders and small components
 
-### 🧠 8.1 Context  
+### 🧠 044.1 Context
 _This lesson emphasizes component organization and the separation between server-side and client-side components in Next.js. The counter logic is extracted from the page component into a separate `CartCounter` component within a `shopping-cart` folder structure. This demonstrates best practices for organizing code by feature/domain. The lesson also introduces barrel exports (`index.ts`) for cleaner imports and explains how to pass server-side data (like initial values) to client components as props, illustrating the interaction between server and client components in Next.js App Router._
 
-### 1. Create **`shopping-cart/components/CartCounter.jsx`**:
+
+### ⚙️ 044.2 Updating code according the context
+
+#### 044.2.1 Create **`shopping-cart/components/CartCounter.jsx`**:
 
 ```
 02-my-dashboard
@@ -1526,7 +1616,7 @@ _This lesson emphasizes component organization and the separation between server
 ├── eslint.config.mjs
 ```
 
-### 2. Update **`src/app/dashboard/counter/page.tsx`**:
+#### 044.2.2 Update **`src/app/dashboard/counter/page.tsx`**:
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
 //"use-client"
@@ -1568,7 +1658,7 @@ export default function CounterPage() {
 }
 ```
 
-### 3. Update **`src/app/shopping-cart/components/CartCounter.jsx`** file:
+#### 044.2.3 Update **`src/app/shopping-cart/components/CartCounter.jsx`** file:
 ```tsx
 /* src/app/shopping-cart/components/CartCounter.jsx */
 'use client';
@@ -1620,7 +1710,7 @@ Import:
 import { CartCounter, CartItem, CartGrid } from '../../shopping-cart';
 ```
 
-### 4. Server side vs client side:
+#### 044.2.4 Server side vs client side:
 
 #### 1 Sever side from **`src/app/dashboard/counter/page.tsx`**:
 ```tsx
@@ -1645,7 +1735,7 @@ export default function CounterPage() {
 }
 ```
 
-#### 2. Client side **`src/app/shopping-cart/components/CartCounter.tsx`**:
+#### 044.2.2 Client side **`src/app/shopping-cart/components/CartCounter.tsx`**:
 ```tsx
 "use client";
 import { useState } from "react";
@@ -1697,37 +1787,81 @@ export default CartCounter;
 
 ---
 
-# 👨🏾‍💻 Section 05: Dynamic Generation – SSR
+## 🧳 Section 05: Dynamic Generation – SSR
 
 ## 📑 Table of Contents
 
-- [⚙️ Section: Dynamic Generation – SSR](#️-section-dynamic-generation--ssr)
-  - [📑 Table of Contents](#-table-of-contents-1)
-  - [🔧 Lesson 050 — *Following with the section*](#-1-lesson-050--following-with-the-section)
-  - [🔧 Lesson 051 — *Data Fetching - Next13+*](#-2-lesson-051--data-fetching---next13)
-  - [🔧 Lesson 052 — *Assign data type and displays images*](#-3-lesson-052--assign-data-type-and-displays-images)
-  - [🔧 Lesson 053 — *Task Solution*](#-4-lesson-053--task-solution)
-  - [🔧 Lesson 054 — *Let's think in small components*](#-5-lesson-054--lets-think-in-small-components)
-  - [🔧 Lesson 055 — *Image Priority - Loading Priority*](#-6-lesson-055--image-priority---loading-priority)
-  - [🔧 Lesson 056 — *Next - Error Page*](#-7-lesson-056--next---error-page)
-  - [🔧 Lesson 057 — *Dynamic Routes - URL arguments*](#-8-lesson-057--dynamic-routes---url-arguments)
-  - [🔧 Lesson 058 — *Loading Pokemon information by ID*](#-8-lesson-058--loading-pokemon-information-by-id)
-  - [🔧 Lesson 059 — *Dynamic Metadata*](#-10-lesson-059--dynamic-metadata)
-  - [🔧 Lesson 060 — *Pokemon screen*](#-11-lesson-060--pokemon-screen)
-  - [🔧 Lesson 061 — *Debugging code - Breakpoints*](#-12-lesson-061--debugging-code---breakpoints)
-  - [🔧 Lesson 062 — *Not found Page - 404*](#-13-lesson-062--not-found-page---404)
-  - [🔧 Lesson 063 — *Wrap-Up Notes*](#-14-lesson-063--wrap-up-notes)
-  - [📎 Related Files](#-related-files-1)
-  - [🔗 References](#-references-1)
+- [🧳 Section 05: Dynamic Generation – SSR](#section-05-dynamic-generation-ssr)
+  - [📚 Lecture 050: Following with the section](#lecture-050-following-with-the-section)
+    - [🧠 050.1 Context](#0501-context)
+    - [⚙️ 050.2 Updating code according the context](#0502-updating-code-according-the-context)
+    - [🧱 050.3 Pending Fixes (TODO)](#0503-pending-fixes-todo)
+  - [📚 Lecture 051: Data Fetching - Next13+](#lecture-051-data-fetching---next13)
+    - [🧠 051.1 Context](#0511-context)
+    - [⚙️ 051.2 Updating code according the context](#0512-updating-code-according-the-context)
+    - [🧱 051.3 Pending Fixes (TODO)](#0513-pending-fixes-todo)
+  - [📚 Lecture 052: Assign data type and displays images](#lecture-052-assign-data-type-and-displays-images)
+    - [🧠 052.1 Context](#0521-context)
+    - [⚙️ 052.2 Updating code according the context](#0522-updating-code-according-the-context)
+    - [🧱 052.3 Pending Fixes (TODO)](#0523-pending-fixes-todo)
+  - [📚 Lecture 053: Task Solution](#lecture-053-task-solution)
+    - [🧠 053.1 Context](#0531-context)
+    - [⚙️ 053.2 Updating code according the context](#0532-updating-code-according-the-context)
+    - [🧱 053.3 Pending Fixes (TODO)](#0533-pending-fixes-todo)
+  - [📚 Lecture 054: Let's think in small components](#lecture-054-lets-think-in-small-components)
+    - [🧠 054.1 Context](#0541-context)
+    - [⚙️ 054.2 Updating code according the context](#0542-updating-code-according-the-context)
+    - [🧱 054.3 Pending Fixes (TODO)](#0543-pending-fixes-todo)
+  - [📚 Lecture 055: Image Priority - Loading Priority](#lecture-055-image-priority---loading-priority)
+    - [🧠 055.1 Context](#0551-context)
+    - [⚙️ 055.2 Updating code according the context](#0552-updating-code-according-the-context)
+    - [🧱 055.3 Pending Fixes (TODO)](#0553-pending-fixes-todo)
+  - [📚 Lecture 056: Next - Error Page](#lecture-056-next---error-page)
+    - [🧠 056.1 Context](#0561-context)
+    - [⚙️ 056.2 Updating code according the context](#0562-updating-code-according-the-context)
+    - [🧱 056.3 Pending Fixes (TODO)](#0563-pending-fixes-todo)
+  - [📚 Lecture 057: Dynamic Routes - URL arguments](#lecture-057-dynamic-routes---url-arguments)
+    - [🧠 057.1 Context](#0571-context)
+    - [⚙️ 057.2 Updating code according the context](#0572-updating-code-according-the-context)
+    - [🧱 057.3 Pending Fixes (TODO)](#0573-pending-fixes-todo)
+  - [📚 Lecture 058: Loading Pokemon information by ID](#lecture-058-loading-pokemon-information-by-id)
+    - [🧠 058.1 Context](#0581-context)
+    - [⚙️ 058.2 Updating code according the context](#0582-updating-code-according-the-context)
+    - [🧱 058.3 Pending Fixes (TODO)](#0583-pending-fixes-todo)
+  - [📚 Lecture 059: Dynamic Metadata](#lecture-059-dynamic-metadata)
+    - [🧠 059.1 Context](#0591-context)
+    - [⚙️ 059.2 Updating code according the context](#0592-updating-code-according-the-context)
+    - [🧱 059.3 Pending Fixes (TODO)](#0593-pending-fixes-todo)
+  - [📚 Lecture 060: Pokemon screen](#lecture-060-pokemon-screen)
+    - [🧠 060.1 Context](#0601-context)
+    - [⚙️ 060.2 Updating code according the context](#0602-updating-code-according-the-context)
+    - [🧱 060.3 Pending Fixes (TODO)](#0603-pending-fixes-todo)
+  - [📚 Lecture 061: Debugging code - Breakpoints](#lecture-061-debugging-code---breakpoints)
+    - [🧠 061.1 Context](#0611-context)
+    - [⚙️ 061.2 Updating code according the context](#0612-updating-code-according-the-context)
+    - [🧱 061.3 Pending Fixes (TODO)](#0613-pending-fixes-todo)
+  - [📚 Lecture 062: Not found Page - 404](#lecture-062-not-found-page---404)
+    - [🧠 062.1 Context](#0621-context)
+    - [⚙️ 062.2 Updating code according the context](#0622-updating-code-according-the-context)
+    - [🧱 062.3 Pending Fixes (TODO)](#0623-pending-fixes-todo)
+  - [📚 Lecture 063: Wrap-Up Notes](#lecture-063-wrap-up-notes)
+    - [🧠 063.1 Context](#0631-context)
+    - [⚙️ 063.2 Updating code according the context](#0632-updating-code-according-the-context)
+    - [🧱 063.3 Pending Fixes (TODO)](#0633-pending-fixes-todo)
+  - [📎 Related Files](#related-files)
+  - [🔗 References](#references)
 
 ---
 
-## 🔧 1. Lesson 050 — *Following with the section*
+### 📚 Lecture 050: Following with the section
 
-### 🧠 1.1 Context  
+### 🧠 050.1 Context
 _This lesson introduces the Pokemons section of the dashboard, marking the beginning of the Dynamic Generation section. A new page route is created at `src/app/dashboard/pokemons/page.tsx` with a basic structure. The Pokemons menu item is added to the sidebar navigation with an appropriate icon and subtitle indicating "Static Generation". This sets up the foundation for implementing server-side rendering and data fetching in subsequent lessons._
 
-### 1. Create **`src/app/dashboard/pokemons/page.tsx`** file:
+
+### ⚙️ 050.2 Updating code according the context
+
+#### 050.2.1 Create **`src/app/dashboard/pokemons/page.tsx`** file:
 ```
 02-my-dashboard
 ├── docs
@@ -1771,7 +1905,7 @@ export default function PokemonsPage() {
 }
 ```
 
-### 2. Add the **`Pokemon`** in sidebar menuItems:
+#### 050.2.2 Add the **`Pokemon`** in sidebar menuItems:
 ```tsx
 /*  */
 import Image from "next/image";
@@ -1841,9 +1975,9 @@ export const Sidebar = () => {
 ![Pokemons page in sidebar](../img/section05-lecture050-001.png)
 
 
-## 🔧 2. Lesson 051 — *Data Fetching - Next13+*
+### 📚 Lecture 051: Data Fetching - Next13+
 
-### 🧠 2.1 Context  
+### 🧠 051.1 Context
 _This lesson demonstrates server-side data fetching in Next.js 13+ using async/await in server components. The PokeAPI is used as the data source to fetch a list of 151 Pokemon. A `getPokemons` function is created that makes an HTTP request to the PokeAPI endpoint and returns the JSON response. The function is called directly in the page component, which runs on the server, showcasing Next.js App Router's ability to fetch data at request time without client-side JavaScript._
 
 ### 🔍 2.2 Testing (Postman)  
@@ -1855,7 +1989,10 @@ _This lesson demonstrates server-side data fetching in Next.js 13+ using async/a
 - Pre-request scripts:
 - Assertions:
 
-### 1. Test in POSTMAN:
+
+### ⚙️ 051.2 Updating code according the context
+
+#### 051.2.1 Test in POSTMAN:
 #### **GET /**  
 **URL:** `http://pokeapi.co/api/v2/pokemon?limit=151&offset=0`  
 **Description:** Check that the server is running.
@@ -2473,7 +2610,7 @@ _This lesson demonstrates server-side data fetching in Next.js 13+ using async/a
 }
 ```
 
-### 2. Update the `src/app/dashboard/pokemons/page.tsx` with the `fetch("http://pokeapi.co/api/v2/pokemon?limit=151&offset=0")`:
+#### 051.2.2 Update the `src/app/dashboard/pokemons/page.tsx` with the `fetch("http://pokeapi.co/api/v2/pokemon?limit=151&offset=0")`:
 
 ```tsx
 /* src/app/dashboard/pokemons/page.tsx */
@@ -2496,9 +2633,9 @@ export default async function PokemonsPage() {
 ![Pokemons list display in string](../img/section05-lecture051-001.png)
 
 
-## 🔧 3. Lesson 052 — *Assign data type and displays images*
+### 📚 Lecture 052: Assign data type and displays images
 
-### 🧠 3.1 Context  
+### 🧠 052.1 Context
 _This lesson focuses on TypeScript type safety and displaying Pokemon images. TypeScript interfaces are created for the API response (`PokemonsResponse`) and a simplified Pokemon model (`SimplePokemon`). The API response is transformed to extract Pokemon IDs from URLs and create a cleaner data structure. Next.js Image component is introduced to display Pokemon sprites from GitHub, requiring configuration of `remotePatterns` in `next.config.ts` to allow loading images from external domains. This demonstrates proper type handling and image optimization in Next.js._
 
 ### 🔍 3.2 Testing (Postman)  
@@ -2510,11 +2647,14 @@ _This lesson focuses on TypeScript type safety and displaying Pokemon images. Ty
 - Pre-request scripts:
 - Assertions:
 
-### 1. Go to Postman and copy pokemon response:
+
+### ⚙️ 052.2 Updating code according the context
+
+#### 052.2.1 Go to Postman and copy pokemon response:
 
 ![Pokemon response button](../img/section05-lecture052-001.png)
 
-### 2. Create **`src/app/dashboard/pokemons/interfaces/pokemon-response.ts`** file:
+#### 052.2.2 Create **`src/app/dashboard/pokemons/interfaces/pokemon-response.ts`** file:
 1. Open `Visual Studio Code`
 2. Open pokemon-response.ts file
 3. Click on `View` then select on `Command Palette`.
@@ -2536,7 +2676,7 @@ export interface Result {
 }
 ```
 
-### 3. Create/Add `simple-pokemon` file:
+#### 052.2.3 Create/Add `simple-pokemon` file:
 ```ts
 /* src/app/dashboard/pokemons/interfaces/simple-pokemon.ts */
 export interface SimplePokemon {
@@ -2545,7 +2685,7 @@ export interface SimplePokemon {
 }
 ```
 
-### 4. Go back to **`src/app/dashboard/pokemons/page.tsx`** and update it:
+#### 052.2.4 Go back to **`src/app/dashboard/pokemons/page.tsx`** and update it:
 ```tsx
 /* src/app/dashboard/pokemons/page.tsx */
 import Image from "next/image";
@@ -2580,7 +2720,7 @@ export default async function PokemonsPage() {
 }
 ```
 
-### 5. Update `next.config.ts` file:
+#### 052.2.5 Update `next.config.ts` file:
 ```ts
 /* next.config.ts */
 import type { NextConfig } from "next";
@@ -2602,12 +2742,15 @@ export default nextConfig;
 ```
 
 
-## 🔧 4. Lesson 053 — *Task Solution*
+### 📚 Lecture 053: Task Solution
 
-### 🧠 4.1 Context  
+### 🧠 053.1 Context
 _This lesson completes the Pokemon list display by mapping through the fetched Pokemon data and rendering each Pokemon's image using the Next.js Image component. The `map` method is used to iterate over the `pokemons` array and create an Image component for each Pokemon, using the Pokemon ID to construct the sprite URL. This demonstrates rendering dynamic lists in React/Next.js and showcases the server-side rendering capabilities where all 151 Pokemon images are fetched and rendered on the server before being sent to the client._
 
-### 1. Apply the `map` method in `pokemons` array:
+
+### ⚙️ 053.2 Updating code according the context
+
+#### 053.2.1 Apply the `map` method in `pokemons` array:
 
 ```tsx
 /* src/app/dashboard/pokemons/page.tsx */
@@ -2653,12 +2796,15 @@ export default async function PokemonsPage() {
 
 
 
-## 🔧 5. Lesson 054 — *Let's think in small components*
+### 📚 Lecture 054: Let's think in small components
 
-### 🧠 5.1 Context  
+### 🧠 054.1 Context
 _This lesson emphasizes component decomposition and reusability by breaking down the Pokemon display into smaller, focused components. A `PokemonGrid` component is created to handle the grid layout and mapping logic, while a `PokemonCard` component is designed to display individual Pokemon information in a card format. The lesson demonstrates best practices for component organization, creating a barrel export pattern for cleaner imports, and shows how to structure components for maintainability. Some performance considerations are noted, such as image size consistency and the need for optimization when loading many images._
 
-### 1. Add Pokemon List title:
+
+### ⚙️ 054.2 Updating code according the context
+
+#### 054.2.1 Add Pokemon List title:
 ```tsx
 /* src/app/dashboard/pokemons/page.tsx */
 import Image from "next/image";
@@ -2700,7 +2846,7 @@ export default async function PokemonsPage() {
 ```
 
 
-### 2. Create **`components/PokemonGrid.tsx`** file and cut/paste  pokeemons.map section in here:
+#### 054.2.2 Create **`components/PokemonGrid.tsx`** file and cut/paste  pokeemons.map section in here:
 
 #### 2.1 Comment in **`src/app/dashboard/pokemons/page.tsx`** the pokemon.maps(...) code:
 ```tsx
@@ -2930,7 +3076,7 @@ So you must change:
 </Link>
 ```
 
-### 3. Working on `PokemonGrid`:
+#### 054.2.3 Working on `PokemonGrid`:
 ```tsx
 /* src/app/dashboard/pokemons/components/PokemonGrid.tsx */
 import { SimplePokemon } from "../interfaces/simple-pokemon";
@@ -2953,7 +3099,7 @@ const PokemonGrid = ({ pokemons }: Props) => {
 export default PokemonGrid;
 ```
 
-### 4. Update `PokemonCard` component:
+#### 054.2.4 Update `PokemonCard` component:
 ```tsx
 /* src/app/dashboard/pokemons/components/PokemonCard.tsx */
 import Link from "next/link";
@@ -3029,16 +3175,16 @@ export default PokemonCard;
 | Different image size | Pending | Images have inconsistent dimensions |
 | Each 151 loaded images | Pending | Performance issue with loading all images |
 
-### 🧱 5.3 Pending Fixes (TODO)
+### 🧱 054.3 Pending Fixes (TODO)
 ```md
 - [ ] Fix image size consistency
 - [ ] Optimize image loading (lazy load or pagination)
 ```
 
 
-## 🔧 6. Lesson 055 — *Image Priority - Loading Priority*
+### 📚 Lecture 055: Image Priority - Loading Priority
 
-### 🧠 6.1 Context  
+### 🧠 055.1 Context
 
 In Next.js, the `Image` component provides a `priority` prop that controls how images are loaded and prioritized. By default, Next.js uses lazy loading for images, which means images are only loaded when they're about to enter the viewport. However, for images that are critical to the initial page load (like hero images or above-the-fold content), you can set `priority={true}` to preload them.
 
@@ -3116,7 +3262,10 @@ export default PokemonCard;
 ```
 
 
-#### 2. Testing the `Priority` property:
+
+### ⚙️ 055.2 Updating code according the context
+
+#### 055.2.2 Testing the `Priority` property:
 *Steps*:
 - Go to Network tab and clear it all
 - Click on `Reaload` button and select `Empty cache and hard reload`.
@@ -3125,7 +3274,7 @@ export default PokemonCard;
 *Expected Results*:
 - slowly loading for image.
 
-#### 3. References:
+#### 055.2.3 References:
   > [Components - Images Components | Nextjsß](https://nextjs.org/docs/app/api-reference/components/image#priority)
 
 
@@ -3135,16 +3284,16 @@ export default PokemonCard;
 | Different image size | Pending | Images have inconsistent dimensions |
 | Each 151 images page details| Pending | Loading each 151 image detail pages |
 
-### 🧱 6.4 Pending Fixes (TODO)
+### 🧱 055.3 Pending Fixes (TODO)
 ```md
 - [ ] Fix image size consistency
 - [ ] Image detail pagesß
 ```
 
 
-## 🔧 7. Lesson 056 — *Next - Error Page*
+### 📚 Lecture 056: Next - Error Page
 
-### 🧠 7.1 Context:   
+### 🧠 056.1 Context
 
 In Next.js, error boundaries are special components that catch JavaScript errors anywhere in the component tree and display a fallback UI instead of crashing the entire application. The `error.tsx` file is a special file in Next.js App Router that acts as an error boundary for the route segment and its children.
 
@@ -3159,7 +3308,10 @@ This lesson demonstrates how to:
 
 ### ⚙️ 7.2 Modification and Updating code:
 
-#### 1. Simulating an error from Server Side:
+
+### ⚙️ 056.2 Updating code according the context
+
+#### 056.2.1 Simulating an error from Server Side:
 ```tsx
 /* src/app/dashboard/pokemons/page.tsx */
 //import Image from "next/image";
@@ -3198,7 +3350,7 @@ export default async function PokemonsPage() {
 [Error Handling](https://nextjs.org/docs/app/getting-started/error-handling)
 ![Simulating an error from Server Side](../img/section05-lecture056-001.png)
 
-#### 2. Create `error.tsx` page:
+#### 056.2.2 Create `error.tsx` page:
 ```tsx
 /* src/app/dashboard/pokemons/error.tsx */
 "use client"; // Error boundaries must be Client Components
@@ -3228,7 +3380,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
 ![Handling with the error page](../img/section05-lecture056-002.png)
 
-#### 3. Copy & Paste the 500-error page from [Tailwind CSS 500 Server Error | Illustration - pages](https://www.creative-tim.com/twcomponents/component/tailwind-css-500-server-error-illustration) code in `error.tsx` component:
+#### 056.2.3 Copy & Paste the 500-error page from [Tailwind CSS 500 Server Error | Illustration - pages](https://www.creative-tim.com/twcomponents/component/tailwind-css-500-server-error-illustration) code in `error.tsx` component:
 ```tsx
 /* src/app/dashboard/pokemons/error.tsx */
 "use client"; // Error boundaries must be Client Components
@@ -3405,7 +3557,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
 ![500 Error page template](../img/section05-lecture056-003.png)
 
-#### 4. Updating Strokes' errors:
+#### 056.2.4 Updating Strokes' errors:
 ```tsx
 /* src/app/dashboard/pokemons/error.tsx */
 "use client"; // Error boundaries must be Client Components
@@ -3582,7 +3734,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 }
 ```
 
-### 🧱 7.3 Pending Fixes (TODO)
+### 🧱 056.3 Pending Fixes (TODO)
 ```md
 - [ ] Add a "Try again" button that calls the `reset()` function to allow users to retry the failed operation
 - [ ] Implement error logging to an external error reporting service (e.g., Sentry, LogRocket) instead of just console.error
@@ -3591,9 +3743,9 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 - [ ] Add accessibility improvements to the error page (ARIA labels, keyboard navigation)
 ```
 
-## 🔧 8. Lesson 057 — *Dynamic Routes - URL arguments*
+### 📚 Lecture 057: Dynamic Routes - URL arguments
 
-### 🧠 8.1 Context:
+### 🧠 057.1 Context
 
 In Next.js App Router, dynamic routes allow us to create pages that handle multiple paths based on URL parameters. This lesson focuses on implementing a dynamic route for individual Pokémon detail pages using the `[id]` folder structure.
 
@@ -3612,9 +3764,12 @@ When a user clicks on a Pokémon card from the list page (`/dashboard/pokemons`)
 3. Extract the `id` parameter from the URL
 4. Use the `id` to fetch and display Pokémon-specific data (to be implemented in future lessons)
 
-### ⚙️ 8.2 Updating code according the context:
+### ⚙️ 057.2 Updating code according the context
 
-#### 1. Refactor the project structure:
+
+### ⚙️ 057.2 Updating code according the context
+
+#### 057.2.1 Refactor the project structure:
 ```
 02-my-dashboard/
 │
@@ -3687,7 +3842,7 @@ When a user clicks on a Pokémon card from the list page (`/dashboard/pokemons`)
             └── 📄 CartCounter.tsx        # Cart counter
 ```
 
-#### 2. Create `/pokemon/[id]/page.tsx` file:
+#### 057.2.2 Create `/pokemon/[id]/page.tsx` file:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 export default function PokemonPage() {
@@ -3699,7 +3854,7 @@ export default function PokemonPage() {
 }
 ```
 
-#### 3. Adding the `props` in order to know how the `id` format is comming:
+#### 057.2.3 Adding the `props` in order to know how the `id` format is comming:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 export default function PokemonPage(props: any) {
@@ -3714,7 +3869,7 @@ export default function PokemonPage(props: any) {
 ![Getting the params for ID](../img/section05-lecture057-001.png)
 
 
-#### 4. Adding `Props` interface:
+#### 057.2.4 Adding `Props` interface:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 interface Props {
@@ -3751,7 +3906,7 @@ No critical incidents were found during the initial implementation. The dynamic 
 | No error handling | Pending | Invalid ID handling not yet implemented |
 | No loading state | Pending | Loading state for data fetching not yet implemented |
 
-### 🧱 8.4 Pending Fixes (TODO)
+### 🧱 057.3 Pending Fixes (TODO)
 ```md
 - [ ] Add metadata export for SEO and page title (using generateMetadata function)
 - [ ] Implement data fetching function to retrieve Pokémon details by ID from PokeAPI
@@ -3767,9 +3922,9 @@ No critical incidents were found during the initial implementation. The dynamic 
 
 
 
-## 🔧 9. Lesson 058 — *Loading Pokemon information by ID*
+### 📚 Lecture 058: Loading Pokemon information by ID
 
-### 🧠 9.1 Context:   
+### 🧠 058.1 Context
 
 Building on the dynamic route implementation from Lesson 057, this lesson focuses on fetching and displaying Pokémon data from the PokeAPI. The dynamic route structure (`pokemon/[id]/page.tsx`) is now ready to retrieve individual Pokémon details based on the ID parameter extracted from the URL.
 
@@ -3794,9 +3949,12 @@ Building on the dynamic route implementation from Lesson 057, this lesson focuse
 
 
 
-### ⚙️ 9.2 Updating code according the context:
+### ⚙️ 058.2 Updating code according the context
 
-#### 1. Create `getPokemon` function in `pokemon/[id]/page.tsx` file:
+
+### ⚙️ 058.2 Updating code according the context
+
+#### 058.2.1 Create `getPokemon` function in `pokemon/[id]/page.tsx` file:
 ```tsx
 /*  */
 interface Props {
@@ -3832,7 +3990,7 @@ export default async function PokemonPage({ params }: Props) {
 ![Server side - Terminal](../img/section05-lecture058-001.png)
 ![Client side - Web](../img/section05-lecture058-002.png)
 
-#### 2. Create Pokemon response Interface:
+#### 058.2.2 Create Pokemon response Interface:
 1. Go to Postman and make a request to this URL: `https://pokeapi.co/api/v2/pokemon/1`.
 2. Copy the response.
 3. Open **`VS Code`**
@@ -4029,7 +4187,7 @@ export default async function PokemonPage({ params }: Props) {
     }
     ```
 
-#### 3. Add the new `Pokemon` response interface into `index` barrel file:
+#### 058.2.3 Add the new `Pokemon` response interface into `index` barrel file:
 ```ts
 /* src/pokemons/index.ts */
 export type { PokemonsResponse } from "./interfaces/pokemon-response";
@@ -4039,7 +4197,7 @@ export type { Pokemon } from "./interfaces/pokemon";  // 👈🏽 ✅
 export { default as PokemonGrid } from "./components/PokemonGrid";
 ```
 
-#### 4. Import new `Pokemon` response interface into `pokemon/[id]/page.tsx` file:
+#### 058.2.4 Import new `Pokemon` response interface into `pokemon/[id]/page.tsx` file:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 import { Pokemon } from "@/pokemons";  // 👈🏽 ✅ (Real API Pokemon Response Interface)
@@ -4074,7 +4232,7 @@ export default async function PokemonPage({ params }: Props) {
 }
 ```
 
-#### 5. Display all Pokemon information:
+#### 058.2.5 Display all Pokemon information:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 import { Pokemon } from "@/pokemons";
@@ -4111,7 +4269,7 @@ export default async function PokemonPage({ params }: Props) {
 ![Client side - Web - All Pokemon info ](../img/section05-lecture058-003.png)
 
 
-### 🧱 9.3 Pending Fixes (TODO)
+### 🧱 058.3 Pending Fixes (TODO)
 ```md
 - [ ] Add Pokemon info inside the metadata using generateMetadata function
 - [ ] Replace JSON.stringify display with proper UI components for Pokemon details
@@ -4128,9 +4286,9 @@ export default async function PokemonPage({ params }: Props) {
 ```
 
 
-## 🔧 10. Lesson 059 — *Dynamic Metadata*
+### 📚 Lecture 059: Dynamic Metadata
 
-### 🧠 10.1 Context:
+### 🧠 059.1 Context
 
 In Next.js, static metadata exports (`export const metadata`) work perfectly for static pages, but they cannot be used for dynamic routes that require runtime data. When building a Pokemon detail page with dynamic routes like `/pokemon/[id]`, we need to generate metadata dynamically based on the Pokemon ID.
 
@@ -4142,9 +4300,12 @@ The `generateMetadata` function is a special Next.js function that allows us to:
 
 This function runs on the server side before rendering the page, ensuring that search engines and social media platforms receive proper metadata for each Pokemon page. However, since both `generateMetadata` and the page component need Pokemon data, we must be careful to avoid duplicate API calls.
 
-### ⚙️ 10.2 Updating code according the context:
+### ⚙️ 059.2 Updating code according the context
 
-#### 1. Impossible to have this `metadata` format for dynamic pages:
+
+### ⚙️ 059.2 Updating code according the context
+
+#### 059.2.1 Impossible to have this `metadata` format for dynamic pages:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 import { Pokemon } from "@/pokemons";
@@ -4184,7 +4345,7 @@ export default async function PokemonPage({ params }: Props) {
 }
 ```
 
-#### 2. Create a new function: **`generateMetadata()`**
+#### 059.2.2 Create a new function: **`generateMetadata()`**
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 import { Pokemon } from "@/pokemons";
@@ -4236,7 +4397,7 @@ export default async function PokemonPage({ params }: Props) {
 ![](../img/section05-lecture059-001.png)
 
 
-#### 3. Update this `generateMetadata` function:
+#### 059.2.3 Update this `generateMetadata` function:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 import { Pokemon } from "@/pokemons";
@@ -4299,7 +4460,7 @@ export default async function PokemonPage({ params }: Props) {
 - **Cache inefficiency**: While Next.js may deduplicate requests in some cases, explicitly handling this would be more reliable and performant.
 - **Missing fallback metadata**: If the Pokemon fetch fails in `generateMetadata`, there's no fallback metadata, which could result in broken SEO tags.
 
-### 🧱 10.4 Pending Fixes (TODO)
+### 🧱 059.3 Pending Fixes (TODO)
 
 ```md
 - [ ] Optimize duplicate API calls by implementing request deduplication or caching strategy
@@ -4317,9 +4478,9 @@ export default async function PokemonPage({ params }: Props) {
 ```
 
 
-## 🔧 11. Lesson 060 — *Pokemon screen*
+### 📚 Lecture 060: Pokemon screen
 
-### 🧠 11.1 Context:
+### 🧠 060.1 Context
 
 In this lesson, we create a detailed Pokemon information page that displays comprehensive information about a specific Pokemon. The page is designed as a profile card using Tailwind CSS, inspired by Horizon UI's Profile Information Card component.
 
@@ -4337,9 +4498,9 @@ The implementation uses Next.js Server Components with async data fetching from 
 Additionally, we need to configure Next.js to allow loading images from external domains (like `raw.githubusercontent.com`) by updating the `next.config.ts` file with the appropriate `remotePatterns` configuration.
 
 
-### ⚙️ 11.2 Updating code according the context:
+### ⚙️ 060.2 Updating code according the context
 
-#### 11.2.1 Replace the `gyst` link content in `src/app/dashboard/pokemon/[id]/page.tsx` file:
+#### 060.2.1 Replace the `gyst` link content in `src/app/dashboard/pokemon/[id]/page.tsx` file:
 
 - Link: [Tailwind CSS Profile Information Card - Horizon UI Tailwind | Cards](https://www.creative-tim.com/twcomponents/component/profile-information-card-horizon-ui-tailwind)
 - gist: [Pokemon screen](https://gist.github.com/Klerith/67e34298b2eb6e680514e8d16b44b328)
@@ -4459,7 +4620,7 @@ export default async function PokemonPage({ params }: Props) {. // 👈🏽 ✅
 }
 ```
 
-#### 11.2.2 Issue related to image hostname:
+#### 060.2.2 Issue related to image hostname:
 ```ts
 /* next.config.ts */
 import type { NextConfig } from "next";
@@ -4509,7 +4670,7 @@ export default nextConfig;
 ![Enter `abc` as pokemon ID](../img/section05-lecture060-002.png)
 ![Enter non existent Pokemon ID](../img/section05-lecture060-003.png)
 
-### 🧱 11.4 Pending Fixes (TODO)
+### 🧱 060.3 Pending Fixes (TODO)
 
 ```md
 - [ ] Add error handling for invalid Pokemon IDs (non-numeric strings like "abc" or IDs outside valid range like "1700")
@@ -4525,9 +4686,9 @@ export default nextConfig;
 
 
 
-## 🔧 12. Lesson 061 — *Debugging code - Breakpoints*
+### 📚 Lecture 061: Debugging code - Breakpoints
 
-### 🧠 12.1 Context:
+### 🧠 061.1 Context
 
 Debugging is an essential skill for developers, and breakpoints are one of the most powerful tools for understanding code execution flow and identifying bugs. In this lesson, we learn how to set up and use breakpoints in VS Code (or Cursor) to debug Next.js applications.
 
@@ -4561,7 +4722,7 @@ For Next.js Server Components and API routes, the debugger attaches to the Node.
 - Ability to modify variable values on the fly for testing
 
 
-### ⚙️ 12.2 Updating code according the context:
+### ⚙️ 061.2 Updating code according the context
 
 Add a breaking point at `console.log("🐼 Pokemon name:", pokemon.name);` line in `getPokemon()` method.
 ```tsx
@@ -4609,7 +4770,7 @@ export default async function PokemonPage({ params }: Props) {
 }
 
 ```
-#### 12.2.1 Go to `package.json` file:
+#### 061.2.1 Go to `package.json` file:
 1. Click on `Debug` button:
 
 ![Debug button in `package.json` file](../img/section05-lecture061-001.png)
@@ -4622,7 +4783,7 @@ export default async function PokemonPage({ params }: Props) {
 
 ![Expected result from IDE](../img/section05-lecture061-003.png)
 
-#### 12.2.2 Fastest mode:
+#### 061.2.2 Fastest mode:
 1. `CMD/Ctrl + P`:
 2. Write `> Debug`
 3. Click on `Debug: Debug npm Script`
@@ -4652,7 +4813,7 @@ export default async function PokemonPage({ params }: Props) {
 
 - **Breakpoints in multiple files simultaneously**: When debugging, you might need to set breakpoints in multiple files (e.g., both `page.tsx` and utility functions), but the lesson only demonstrates breakpoints in a single file.
 
-### 🧱 12.4 Pending Fixes (TODO)
+### 🧱 061.3 Pending Fixes (TODO)
 
 ```md
 - [ ] Create a proper `.vscode/launch.json` configuration file for Next.js debugging with explicit settings
@@ -4674,9 +4835,9 @@ export default async function PokemonPage({ params }: Props) {
 
 
 
-## 🔧 13. Lesson 062 — *Not found Page - 404*
+### 📚 Lecture 062: Not found Page - 404
 
-### 🧠 13.1 Context:
+### 🧠 062.1 Context
 
 In Next.js 13+ with the App Router, handling 404 errors is done through special `not-found.tsx` files. Next.js provides a built-in mechanism to display custom 404 pages when a route is not found or when `notFound()` function is called programmatically.
 
@@ -4692,13 +4853,13 @@ The implementation includes:
 - Styled 404 pages with consistent design matching the dashboard layout
 - Navigation links to help users return to valid pages
 
-### ⚙️ 13.2 Updating code according the context:
+### ⚙️ 062.2 Updating code according the context
 
 - Enter a URL searching for non-existent pokemon page.
 - Return a basic 404 page.
 ![basic page for 404](../img/section05-lecture062-001.png)
 
-#### 13.2.1 Create `not-found.tsx` file a global level:
+#### 062.2.1 Create `not-found.tsx` file a global level:
 ```tsx
 /* src/app/not-found.tsx */
 import Link from "next/link";
@@ -4715,7 +4876,7 @@ export default function NotFound() {
 ```
 ![Using the not-found file](../img/section05-lecture062-002.png)
 
-#### 13.2.2 Add style to `not-found.tsx` file:
+#### 062.2.2 Add style to `not-found.tsx` file:
 - using some code from `dashboard/layout.tsx`
 ```tsx
 /* src/app/dashboard/layout.tsx */
@@ -4732,7 +4893,7 @@ export default function NotFound() {
 [404 Page Not Found | Pages, Widget](https://www.creative-tim.com/twcomponents/component/404-page-not-found)
 
 
-#### 13.2.3 Finally `not-found` page looks like:
+#### 062.2.3 Finally `not-found` page looks like:
 ```tsx
 /* src/app/not-found.tsx */
 import { Sidebar } from "@/components/Sidebar";
@@ -4765,7 +4926,7 @@ export default function NotFound() {
 ![Not found page with final style](../img/section05-lecture062-003.png)
 
 
-#### 13.2.4 Adding `try-catch` in metadata pokemon ID page:
+#### 062.2.4 Adding `try-catch` in metadata pokemon ID page:
 ```tsx
 /* src/app/dashboard/pokemon/[id]/page.tsx */
 import { Pokemon } from "@/pokemons";
@@ -4874,7 +5035,7 @@ export default async function PokemonPage({ params }: Props) {
   );
 }
 ```
-#### 13.2.5 Copy/Paste the `not-found.tsx` file into `src/app/dashboard/pokemon/[id]` folder and update changes:
+#### 062.2.5 Copy/Paste the `not-found.tsx` file into `src/app/dashboard/pokemon/[id]` folder and update changes:
 ```tsx
 /*  */
 import Link from "next/link";
@@ -4909,7 +5070,7 @@ export default function NotFound() {
 
 - **Issue 5: Error handling in generateMetadata**: The try-catch in `generateMetadata` catches errors but doesn't call `notFound()`, which means if `getPokemon` fails, it will return default metadata instead of triggering the 404 page. This could lead to incorrect metadata being generated for non-existent Pokemon.
 
-### 🧱 13.4 Pending Fixes (TODO)
+### 🧱 062.3 Pending Fixes (TODO)
 
 ```md
 - [ ] Fix padding inconsistency in 404 Pokemon Not Found page (add proper padding or wrap with dashboard layout)
@@ -4923,9 +5084,9 @@ export default function NotFound() {
 ```
 
 
-## 🔧 14. Lesson 063 — *Wrap-Up Notes*
+### 📚 Lecture 063: Wrap-Up Notes
 
-### 🧠 14.1 Context:
+### 🧠 063.1 Context
 
 This lesson serves as a wrap-up for Section 05, focusing on understanding how Next.js determines which pages are statically generated at build time versus which pages are dynamically rendered on the server. Understanding this distinction is crucial for optimizing application performance and making informed decisions about caching strategies.
 
@@ -4946,9 +5107,9 @@ When running `npm run build`, Next.js analyzes each route and determines the opt
 - Whether the page uses `generateStaticParams()` to pre-generate specific routes
 - Cache configuration in fetch requests (`force-cache`, `no-store`, etc.)
 
-### ⚙️ 14.2 Updating code according the context:
+### ⚙️ 063.2 Updating code according the context
 
-#### 14.2.1 Verify which URL pages will be generated by server side or will be static:
+#### 063.2.1 Verify which URL pages will be generated by server side or will be static:
 
 1. Run from terminal:
 ```bash
@@ -4978,7 +5139,7 @@ Route (app)
 
 ![pages generated by server vs static pages](../img/section05-lecture063-001.png)
 
-#### 14.2.2 Understanding the Pokemon dynamic route:
+#### 063.2.2 Understanding the Pokemon dynamic route:
 
 The `/dashboard/pokemon/[id]` route is marked as dynamic (ƒ) because:
 
@@ -5035,7 +5196,7 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 
 - **Issue 4: Console.log in production code**: The `console.log("🐼 Pokemon name:", pokemon)` statement should be removed or replaced with proper logging for production builds.
 
-### 🧱 14.4 Pending Fixes (TODO)
+### 🧱 063.3 Pending Fixes (TODO)
 
 ```md
 - [ ] Fix missing await in getPokemon function for resp.json() call (already fixed in documentation)
@@ -5054,849 +5215,49 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
 ---
 
 
-# 👨🏾‍💻 Section 06: Incremental and Static Generation
+## 🧳 Section 06: Incremental and Static Generation
 
 ## 📑 Table of Contents
 
-- [⚙️ Section: Dynamic Generation – SSR](#️-section-dynamic-generation--ssr)
-  - [📑 Table of Contents](#-table-of-contents-1)
-  - [🔧 Lesson 069 — *Static generation and revalidation*](#-1-lesson-069--Static-generation-and-revalidation-)
-
-
-
-## 🔧 1. Lesson 069 — *Static generation and revalidation*
-
-### 🧠 1.1 Context:
-
-**Static Site Generation (SSG)** is a Next.js rendering strategy where pages are pre-rendered at build time into static HTML files. This approach provides optimal performance, SEO benefits, and reduces server load by serving pre-generated content.
-
-**When Static Generation Occurs:**
-- During the build process (`npm run build`)
-- Pages are generated once and served as static files
-- No server-side computation needed at request time
-- Content is determined at build time, not request time
-
-**`generateStaticParams()` Function:**
-This function allows you to specify which dynamic route parameters should be pre-rendered at build time. In this lesson, we use it to pre-generate pages for the first 151 Pokemon (IDs 1-151) instead of rendering them on-demand.
-
-**How It Works in This Project:**
-- The `generateStaticParams()` function returns an array of objects with route parameters
-- Each object represents a route that will be statically generated
-- For Pokemon pages: `[{ id: "1" }, { id: "2" }, ...]` generates `/pokemon/1`, `/pokemon/2`, etc.
-- Next.js pre-renders these pages during build time
-- Pages not in the list are still accessible but rendered on-demand (ISR fallback)
-
-**Revalidation:**
-Revalidation is the process of regenerating static pages after they've been built. While this lesson focuses on static generation, revalidation strategies (ISR - Incremental Static Regeneration) allow pages to be updated periodically without rebuilding the entire site.
-
-**Advantages:**
-- **Performance**: Fastest possible page load times (served as static files)
-- **SEO**: Search engines can easily crawl pre-rendered HTML
-- **Cost**: Reduced server costs (no server computation per request)
-- **Scalability**: Static files can be cached at CDN level
-- **Reliability**: No server failures affect static pages
-
-**Disadvantages:**
-- **Build Time**: All pages must be generated during build (can slow down builds)
-- **Stale Data**: Content is frozen at build time (unless using revalidation)
-- **Dynamic Content**: Not suitable for user-specific or real-time content
-- **Storage**: Requires storage for all generated static files
-
-**When to Consider Alternatives:**
-- **Server-Side Rendering (SSR)**: When content changes frequently or is user-specific
-- **Client-Side Rendering**: When content is highly dynamic and user-interactive
-- **ISR (Incremental Static Regeneration)**: When you need static performance but with periodic updates
-- **On-Demand Revalidation**: When you need to update specific pages after data changes
-
-**Project Implementation:**
-In this lesson, we implement static generation for Pokemon detail pages by:
-1. Using `Array.from({ length: 151 })` to create an array of 151 elements
-2. Mapping the array to generate Pokemon IDs from 1 to 151
-3. Returning these IDs in `generateStaticParams()` to pre-generate 151 Pokemon pages
-4. Using `cache: "force-cache"` to ensure data is cached during build time
-5. Pages are pre-built during `npm run build` and stored in `.next/server/app/dashboard/pokemon/`
-
-**Build Output Analysis:**
-After implementing `generateStaticParams()`, running `npm run build` shows:
-- The `/dashboard/pokemon/[id]` route changes from dynamic (ƒ) to static (○) for the 151 pre-generated pages
-- Additional Pokemon pages (beyond 151) are still rendered on-demand
-- Build time increases as 151 pages are generated, but runtime performance improves significantly
-
-### ⚙️ 1.2 Updating code according the context:
-
-#### 1.2.1 Remember - create an array:
-```tsx
-Array.from({ length: 151 })
-```
-> Expected Result:
-
-+ An array with 151 elements and each element is `undefined`.
-
-```tsx
-Array.from({ length: 151 }).map( (value, index) => index + 1);
-```
-
-> Expected Result:
-
-+ An array with 151 elements and each element is `index + 1`.
-
-![Create an array from length](../img/section06-lecture069-001.png)
-
-
-#### 1.2.2 Add the `generateStaticParams()` method with some static values:
-```tsx
-/* src/app/dashboard/pokemon/[id]/page.tsx */
-import { Pokemon } from "@/pokemons";
-import { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-interface Props {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export async function generateStaticParams() { // 👈🏽 ✅ 
-  return [
-    { id: "1" }, 
-    { id: "2" }, 
-    { id: "3" }, 
-    { id: "4" }
-  ];
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  try {
-    const pokemon = await getPokemon(id);
-    return {
-      title: `Pokemon #${id} - ${pokemon.name}`,
-      description: `${pokemon.name} page`,
-    };
-  } catch {
-    return {
-      title: "Pokemon page not found",
-      description: "Pokemon page not found",
-    };
-  }
-}
-const getPokemon = async (id: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-    cache: "force-cache", // TODO: change this in future steps
-  });
-  //.then((resp) => {
-  if (!resp.ok) {
-    notFound(); 
-  }
-  const pokemon = await resp.json();
-  console.log("🐼 Pokemon name:", pokemon);
-  return pokemon;
-};
-export default async function PokemonPage({ params }: Props) {
-  const { id } = await params;
-  const pokemon = await getPokemon(id);
-
-  return (....);
-}
-```
-
-#### 1.2.3 Go to the terminal and run:
-```bash
-npm run build
-```
-
-![4 pokemon pages prebuilt](../img/section06-lecture069-003.png)
-
-
-```bash
-npm run start
-```
-
-- Then go to `.next/server/app/dashboard/pokemon`
-- There are only 4 preloaded Pokémon pages
-
-![Only 4 pokemon pages are preloaded](../img/section06-lecture069-002.png)
-
-* In case user scrolls down, all data will be built and loaded on demand!
-
-![Pokemon page loaded on demand](../img/section06-lecture069-004.png)
-
-#### 1.2.4 Adding the algorithm to generate the 151 pokemons element in an array:
-```ts
-/* src/app/dashboard/pokemon/[id]/page.tsx */
-import { Pokemon } from "@/pokemons";
-import { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-interface Props {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export async function generateStaticParams() {
-  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
-  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
-
-  return static151Pokemons.map((id) => ({ // 👈🏽 ✅ 
-    id: id,
-  }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  try {
-    const pokemon = await getPokemon(id);
-    return {
-      title: `Pokemon #${id} - ${pokemon.name}`,
-      description: `${pokemon.name} page`,
-    };
-  } catch {
-    return {
-      title: "Pokemon page not found",
-      description: "Pokemon page not found",
-    };
-  }
-}
-
-const getPokemon = async (id: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-    cache: "force-cache", // TODO: change this in future steps
-  });
-  if (!resp.ok) {
-    notFound(); 
-  }
-  const pokemon = await resp.json();
-  console.log("🐼 Pokemon name:", pokemon);
-  return pokemon;
-};
-export default async function PokemonPage({ params }: Props) {
-  const { id } = await params;
-  const pokemon = await getPokemon(id);
-
-  return (....);
-}
-```
-
-
-### 🐞 1.3 Issues:
-
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Missing revalidation strategy** | ⚠️ Identified | No revalidation configured in `getPokemon()` function. Using `cache: "force-cache"` means Pokemon data will never update after build time. If Pokemon data changes in the API, pages will show stale content until next build. Location: `src/app/dashboard/pokemon/[id]/page.tsx:39-40` |
-| **Console.log in production code** | ⚠️ Identified | `console.log("🐼 Pokemon name:", pokemon)` statement should be removed or replaced with proper logging solution for production. Location: `src/app/dashboard/pokemon/[id]/page.tsx:49` |
-| **Hardcoded Pokemon count** | ℹ️ Low Priority | The number 151 is hardcoded in `generateStaticParams()`. Consider making it configurable or extracting to a constant. Location: `src/app/dashboard/pokemon/[id]/page.tsx:14` |
-| **No error handling in generateStaticParams** | ⚠️ Identified | If the API fails during build time for any Pokemon ID, the entire build could fail. Consider adding error handling or try-catch blocks. Location: `src/app/dashboard/pokemon/[id]/page.tsx:13-20` |
-| **Typo in documentation** | ✅ Fixed | Documentation shows `generateStaticPatams()` instead of `generateStaticParams()` in section 1.2.2. This is a typo in the docs, not in the actual code. |
-| **Missing ISR configuration** | ℹ️ Low Priority | No Incremental Static Regeneration (ISR) strategy implemented. If Pokemon data needs periodic updates, consider adding `revalidate` option to fetch or page configuration. |
-| **Build performance concern** | ℹ️ Low Priority | Generating 151 pages at build time increases build duration. For larger datasets, consider implementing ISR or on-demand generation for less popular Pokemon. |
-
-### 🧱 1.4 Pending Fixes (TODO)
-
-```md
-- [ ] Add revalidation strategy to `getPokemon()` function - consider using `revalidate` option in fetch or implementing ISR with `revalidate` export
-- [ ] Remove or replace `console.log("🐼 Pokemon name:", pokemon)` with proper logging solution (e.g., using a logging library or environment-based logging)
-- [ ] Extract hardcoded Pokemon count (151) to a configuration constant or environment variable for easier maintenance
-- [ ] Add error handling in `generateStaticParams()` to gracefully handle API failures during build time (e.g., try-catch or filtering out failed Pokemon IDs)
-- [ ] Consider implementing ISR (Incremental Static Regeneration) by adding `export const revalidate = 3600` to enable periodic page regeneration
-- [ ] Add on-demand revalidation endpoint for updating specific Pokemon pages when data changes in the API
-- [ ] Monitor build times and consider optimizing `generateStaticParams()` if build duration becomes problematic
-- [ ] Add TypeScript type safety for Pokemon ID range (1-151) to prevent invalid IDs
-- [ ] Consider implementing a fallback strategy for Pokemon IDs beyond 151 (currently handled on-demand, but could be optimized)
-- [ ] Document the static generation strategy and revalidation approach for future developers
-```
-
-
-
-<br>
-
-## 📚 2. Lesson 072 - *Task solution*
-
-### 🧠 2.1 Context:
-
-**Static Site Generation (SSG) with Dynamic Routes Using Names**
-
-In Next.js, `generateStaticParams()` is a powerful function that allows pre-generating static pages for dynamic routes at build time. This lesson focuses on implementing static generation for Pokemon pages using **names** instead of **IDs** as route parameters.
-
-**When and Why It's Used:**
-
-1. **Build-Time Pre-rendering**: When you want to generate static HTML pages for all possible route parameters during the build process, rather than on-demand at request time.
-
-2. **Performance Optimization**: Pre-generated pages are served instantly from the CDN, providing better performance and SEO benefits compared to server-side rendering or client-side rendering.
-
-3. **API Data Fetching**: Unlike the previous lesson (071) where we generated IDs numerically (1-151), this lesson demonstrates fetching actual Pokemon names from the PokeAPI and using them as route parameters.
-
-**How It Works in This Project:**
-
-The implementation in ```14:19:src/app/dashboard/pokemons/[name]/page.tsx``` shows:
-
-1. **Fetching Pokemon Names**: The `generateStaticParams()` function fetches the first 151 Pokemon from the PokeAPI endpoint (`http://pokeapi.co/api/v2/pokemon?limit=151`).
-
-2. **Mapping to Route Parameters**: Each Pokemon's name is extracted from the API response and mapped to the route parameter format `{ name: pokemon.name }`.
-
-3. **Static Generation**: Next.js uses these parameters to pre-generate 151 static pages at build time, one for each Pokemon name.
-
-4. **URL Structure**: Pages are accessible via URLs like `/dashboard/pokemons/bulbasaur`, `/dashboard/pokemons/charmander`, etc.
-
-**Advantages:**
-
-- ✅ **Better SEO**: Static pages are fully crawlable by search engines
-- ✅ **Faster Load Times**: Pre-rendered HTML is served immediately without server computation
-- ✅ **Lower Server Costs**: Static files can be served from CDN without server processing
-- ✅ **User-Friendly URLs**: Names are more readable and memorable than numeric IDs (e.g., `/pokemons/bulbasaur` vs `/pokemon/1`)
-- ✅ **Consistent Data**: All 151 Pokemon pages are generated with the same data snapshot at build time
-
-**Disadvantages:**
-
-- ⚠️ **Case Sensitivity**: Pokemon API is case-sensitive. URLs must match exactly (e.g., `bulbasaur` works, but `Bulbasaur` may fail)
-- ⚠️ **Build Time**: Generating 151 pages increases build time compared to on-demand rendering
-- ⚠️ **Data Freshness**: Static pages contain data from build time. Requires revalidation or rebuild to update content
-- ⚠️ **API Dependency**: Build process depends on external API availability. If PokeAPI is down during build, generation fails
-
-**When to Consider Alternatives:**
-
-- **Incremental Static Regeneration (ISR)**: Use `revalidate` option (as implemented in ```41:43:src/app/dashboard/pokemons/[name]/page.tsx```) when you need periodic updates without full rebuilds
-- **On-Demand Rendering**: For routes with frequently changing or user-specific content
-- **Server-Side Rendering (SSR)**: When you need real-time data on every request
-- **Client-Side Rendering**: For highly interactive pages that don't need SEO
-
-**Key Differences from ID-Based Approach:**
-
-| Aspect | ID-Based (`/pokemon/[id]`) | Name-Based (`/pokemons/[name]`) |
-|--------|---------------------------|--------------------------------|
-| Parameter Source | Generated numerically (1-151) | Fetched from API response |
-| URL Example | `/pokemon/1` | `/pokemons/bulbasaur` |
-| Readability | Less intuitive | More user-friendly |
-| Case Sensitivity | Not applicable | Must match API exactly |
-| Build Dependency | No external API call needed | Requires API call during build |
-
-**Connection to Practical Implementation:**
-
-This lesson demonstrates a real-world pattern where route parameters come from external API data rather than being programmatically generated. The implementation shows how to:
-- Fetch data during build time
-- Transform API responses into route parameters
-- Handle async operations in `generateStaticParams()`
-- Maintain consistency with existing ID-based routes while providing a more user-friendly alternative
-
-
-### ⚙️ 2.2 Updating code according the context:
-
-Generate the `pokemons/[name]` page so that it behaves very similarly to the existing `pokemon/[id]` page.
-
-#### 2.2.1 Create `/pokemons/[name]/page.tsx`  & `/pokemons/[name]/not-found.tsx`files:
-```tsx
-/* /pokemons/[name]/page.tsx */
-import { Pokemon } from "@/pokemons";
-import { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-
-interface Props {
-  params: Promise<{
-    name: string;  // 👈🏽 ✅
-  }>;
-}
-//TODO: Need to update
-export async function generateStaticParams() {
-  const static151Pokemons = Array.from({ length: 151 }).map((value, index) => `${index + 1}`);
-  //return [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
-
-  return static151Pokemons.map((id) => ({
-    id: id,
-  }));
-}
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { name } = await params;  // 👈🏽 ✅
-  try {
-    const pokemon = await getPokemon(name);  // 👈🏽 ✅
-    return {
-      title: `Pokemon #${name} - ${pokemon.name}`,
-      description: `${pokemon.name} page`,
-    };
-  } catch {
-    return {
-      title: "Pokemon page not found",
-      description: "Pokemon page not found",
-    };
-  }
-}
-const getPokemon = async (name: string): Promise<Pokemon> => {  // 👈🏽 ✅
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {  // 👈🏽 ✅
-    //cache: "force-cache", // TODO: change this in future steps
-    next: {  // 👈🏽 ✅
-      revalidate: 60 * 60 * 24 * 7, // 7 days
-    },
-  });
-  //.then((resp) => {
-  if (!resp.ok) {
-    notFound(); // Esto activará not-found.tsx
-  }
-  const pokemon = await resp.json();
-  console.log("🐼 Pokemon name:", pokemon);
-  return pokemon;
-};
-export default async function PokemonPage({ params }: Props) {
-  const { name } = await params;  // 👈🏽 ✅
-  const pokemon = await getPokemon(name);  // 👈🏽 ✅
-  return (
-    // ....more code
-  );
-}
-```
-
-Testing:
-- [search bulbasaur](localhost:3000/api/v2/pokemons/bulbasaur) ✅
-- [search charmeleon](localhost:3000/api/v2/pokemons/charmeleon) ✅
-- [search Charmeleon](localhost:3000/api/v2/pokemons/Charmeleon) 🔥 
-
-#### 2.2.2 Update `PokemonCard` href in Link:
-```tsx
-/* src/pokemons/components/PokemonCard.tsx */
-import Link from "next/link";
-import Image from "next/image";
-import { SimplePokemon } from "../interfaces/simple-pokemon";
-import { IoHeartOutline } from "react-icons/io5";
-interface Props {
-  pokemon: SimplePokemon;
-}
-const PokemonCard = ({ pokemon }: Props) => {
-  const { id, name } = pokemon;
-  if (!id) return null;
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
-  return (
-    <div className="mx-auto right-0 mt-2 w-60">
-      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
-        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
-          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
-          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
-          <div className="mt-5">
-            <Link
-              href={`/dashboard/pokemons/${name}`}  // 👈🏽 ✅
-              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
-            >
-              More Info
-            </Link>
-          </div>
-        </div>
-        <div className="border-b">
-          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
-            <div className="text-red-600">
-              <IoHeartOutline size={20} />
-            </div>
-            <div className="pl-3">
-              <p className="text-sm font-medium text-gray-800 leading-none">It&apos;s not favourite</p>
-              <p className="text-xs text-gray-500">View your campaigns</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default PokemonCard;
-```
-
-Testing:
-* Go to Dashboard
-* Click on `Pokemons` in sidebar.
-* Click on any `More Info` button
-* Verify URL: [Bulbasaur](http://loclahost:3000/dashboard/pokemon/bulbasaur)
-
-#### 2.2.3 Update `generateStaticParams()` function in `7dashboard/pokemons/[name]/page.jsx`
-```tsx
-/* src/app/dashboard/pokemons/[name]/page.tsx */
-import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
-import { Pokemon } from "@/pokemons";
-import { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-
-interface Props {
-  params: Promise<{
-    name: string;
-  }>;
-}
-
-//! Preload in Build time
-/*
-Following from `src/app/dashboard/pokemons/page.tsx` in `getPokemons()` method
-*/
-export async function generateStaticParams() {
-  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`)  // 👈🏽 ✅
-    .then((res) => res.json());
-  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));  // 👈🏽 ✅
-  
-  console.log("🤔 Static 151 Pokemons:", static151Pokemons);  // 👈🏽 ✅
-
-  return static151Pokemons.map(({ name }) => ({ name: name }));  // 👈🏽 ✅
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { name } = await params;
-  try {
-    const pokemon = await getPokemon(name);
-    return {
-      title: `Pokemon #${name} - ${pokemon.name}`,
-      description: `${pokemon.name} page`,
-    };
-  } catch {
-    return {
-      title: "Pokemon page not found",
-      description: "Pokemon page not found",
-    };
-  }
-}
-const getPokemon = async (name: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
-    //cache: "force-cache", // TODO: change this in future steps
-    next: {
-      revalidate: 60 * 60 * 24 * 7, // 7 days
-    },
-  });
-  if (!resp.ok) {
-    notFound(); // Esto activará not-found.tsx
-  }
-  const pokemon = await resp.json();
-  console.log("🐼 Pokemon name:", pokemon);
-  return pokemon;
-};
-export default async function PokemonPage({ params }: Props) {
-  const { name } = await params;
-  const pokemon = await getPokemon(name);
-
-  return (
-    // .... more code hidden
-  );
-}
-```
-
-Notes:
-* In `generateStaticParams()` method, the _return_ could be `return static151Pokemons;` only.
-* The `console.log("🤔 Static 151 Pokemons:", static151Pokemons);` is showing this static151Pokemons as an array with `{name: name}`.
-
-![useless second static151Pokemon mapping](../img/section06-lecture072-001.png)
-
-
-#### 2.2.4 Generate the build and the start:
-```bash
-npm run build
-```
-![IDs and NAMEs building](../img/section06-lecture072-002.png)
-
-```bash
-npm run start
-```
-
-
-
-
-### 🐞 2.3 Issues:
-
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Redundant mapping in generateStaticParams** | ⚠️ Identified | In ```14:19:src/app/dashboard/pokemons/[name]/page.tsx```, there's a double mapping operation. Line 16 creates `static151Pokemons` with `{name: pokemon.name}`, and line 19 maps again to `{name: pokemon.name}`. This is unnecessary and can be simplified to `return static151Pokemons;` directly. |
-| **Case sensitivity in Pokemon names** | ⚠️ Identified | The PokeAPI is case-sensitive. Testing shows that `charmeleon` works but `Charmeleon` fails (line 5383). URLs must match the exact lowercase format returned by the API. This can cause 404 errors if users type names with capital letters. |
-| **Incorrect metadata title format** | ⚠️ Identified | In ```27:27:src/app/dashboard/pokemons/[name]/page.tsx```, the metadata title uses `Pokemon #${name}` which displays the name parameter instead of the Pokemon's ID number. Should be `Pokemon #${pokemon.id} - ${pokemon.name}` for consistency with the ID-based route. |
-| **Missing URL normalization** | ⚠️ Identified | No normalization of Pokemon names to lowercase in URLs. The `PokemonCard` component (```23:23:src/pokemons/components/PokemonCard.tsx```) uses the raw `name` from the API, which should be lowercase, but there's no explicit normalization to prevent case-related issues. |
-| **Inconsistent cache strategy** | ℹ️ Low Priority | The `getPokemon` function uses `revalidate: 60 * 60 * 24 * 7` (7 days) instead of `cache: "force-cache"` like the ID-based route. While ISR is valid, the inconsistency between routes may cause confusion. The commented TODO suggests this was intentional for future steps. |
-
-### 🧱 2.4 Pending Fixes (TODO)
-
-```md
-- [ ] Remove redundant mapping in `generateStaticParams()` function at ```14:19:src/app/dashboard/pokemons/[name]/page.tsx``` - simplify to `return static151Pokemons;` instead of double mapping
-- [ ] Add URL normalization to ensure Pokemon names are always lowercase in routes - implement `.toLowerCase()` when generating links in `PokemonCard` component (```23:23:src/pokemons/components/PokemonCard.tsx```)
-- [ ] Fix metadata title format in `generateMetadata()` function (```27:27:src/app/dashboard/pokemons/[name]/page.tsx```) - change from `Pokemon #${name}` to `Pokemon #${pokemon.id} - ${pokemon.name}` for consistency
-- [ ] Add input validation/normalization in `getPokemon()` function to handle case-insensitive Pokemon name lookups or provide clear error messages for case mismatches
-- [ ] Consider adding a redirect or normalization middleware to handle capitalized Pokemon names (e.g., `/pokemons/Charmeleon` → `/pokemons/charmeleon`)
-- [ ] Document the case sensitivity requirement in the component or add TypeScript types to enforce lowercase Pokemon names
-- [ ] Review and align cache strategy between `/pokemon/[id]` and `/pokemons/[name]` routes for consistency (currently using different approaches: `force-cache` vs `revalidate`)
-```
-
-
-
-<br>
-
-## 📚 07. Lesson 073 - *Revalidation - no Fetch API*
-
-
-### 🧠 07.1 Context:
-
-**Time-based Revalidation in Next.js:**
-
-Time-based revalidation (also known as Incremental Static Regeneration or ISR) is a caching strategy in Next.js that allows you to automatically regenerate static pages at specified time intervals. Unlike `force-cache` which caches data indefinitely until the next build, time-based revalidation ensures that cached data is refreshed periodically without requiring a full rebuild of the application.
-
-**How It Works:**
-
-When you use `next: { revalidate: seconds }` in a fetch request, Next.js:
-1. Caches the response in the Data Cache during the initial request
-2. Serves the cached response for all subsequent requests within the revalidation period
-3. Automatically triggers a background revalidation after the specified time expires
-4. Updates the cache with fresh data while still serving the stale data to users (stale-while-revalidate pattern)
-5. Subsequent requests receive the newly cached data
-
-**When It Occurs:**
-
-- **During Build Time**: If `generateStaticParams()` is used, pages are pre-rendered with cached data
-- **On First Request**: After build, the first request to a page fetches and caches the data
-- **After Revalidation Period**: Once the revalidation time expires, Next.js fetches fresh data in the background
-- **On Subsequent Requests**: Users receive cached data immediately while revalidation happens in the background
-
-**Project Implementation:**
-
-In this lesson, we implement time-based revalidation for Pokemon data:
-
-```44:49:src/app/dashboard/pokemons/[name]/page.tsx
-const getPokemon = async (name: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
-    //cache: "force-cache", // TODO: change this in future steps
-    next: {
-      revalidate: 60 * 60 * 24 * 7, // 7 days
-    },
-  });
-```
-
-The `revalidate: 60 * 60 * 24 * 7` configuration means:
-- Cache lifetime: 7 days (604,800 seconds)
-- After 7 days, Next.js will automatically fetch fresh data from the PokeAPI
-- Users continue to see cached data during revalidation (no loading delays)
-
-**Key Difference from `force-cache`:**
-
-| Strategy | Cache Duration | Data Freshness | Use Case |
-|----------|---------------|----------------|----------|
-| `cache: "force-cache"` | Until next build | Frozen at build time | Static content that rarely changes |
-| `next: { revalidate: seconds }` | Specified time interval | Updated periodically | Content that changes occasionally |
-
-**Advantages:**
-
-- ✅ **Automatic Updates**: Data refreshes automatically without manual intervention or rebuilds
-- ✅ **Performance**: Users get instant responses from cache while revalidation happens in background
-- ✅ **Freshness Balance**: Ensures data doesn't become too stale while maintaining fast load times
-- ✅ **Cost Effective**: Reduces API calls compared to fetching on every request
-- ✅ **Scalability**: Works well with CDN caching strategies
-- ✅ **User Experience**: No loading delays for users during revalidation
-
-**Disadvantages:**
-
-- ⚠️ **Stale Data Window**: Users may see slightly outdated data during the revalidation period
-- ⚠️ **Time Configuration**: Requires careful consideration of the revalidation interval (too short = more API calls, too long = stale data)
-- ⚠️ **Not Real-time**: Not suitable for data that requires immediate updates (e.g., live chat, real-time scores)
-- ⚠️ **Build vs Runtime**: Different behavior during build time vs runtime can be confusing
-- ⚠️ **API Rate Limits**: Frequent revalidations might hit API rate limits if not configured properly
-
-**When to Consider Alternatives:**
-
-- **On-Demand Revalidation**: Use `revalidatePath()` or `revalidateTag()` when you need immediate updates after data changes (e.g., CMS content updates, user-generated content)
-- **Server-Side Rendering (SSR)**: When data must be fresh on every request (e.g., user-specific content, real-time data)
-- **Client-Side Fetching**: For highly dynamic, user-interactive content that doesn't need SEO
-- **`force-cache`**: For truly static content that never changes (e.g., historical data, documentation)
-- **`no-store`**: When you need to bypass caching entirely and always fetch fresh data
-
-**Connection to Lesson Implementation:**
-
-This lesson demonstrates moving from `force-cache` (which caches indefinitely) to time-based revalidation, providing a balance between performance and data freshness. The 7-day revalidation period is appropriate for Pokemon data, which changes infrequently but may have occasional updates (e.g., new sprites, corrected information).
-
-
-### ⚙️ 07.2 Updating code according the context:
-
-
-#### 07.2.1 Update the metadata:
-```tsx
-/*  */
-import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
-import { Pokemon } from "@/pokemons";
-import { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { metadata } from "../page";
-
-interface Props {
-  params: Promise<{
-    name: string;
-  }>;
-}
-
-//! Preload in Build time 🤔
-export async function generateStaticParams() {
-  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
-  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
-  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
-
-  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { name } = await params;
-  try {
-    const pokemon = await getPokemon(name);
-    return {
-      title: `Pokemon #${name} - ${pokemon.name}`,
-      description: `${pokemon.name} page`,
-    };
-  } catch {
-    return {
-      title: "Pokemon page not found",
-      description: "Pokemon page not found",
-    };
-  }
-}
-
-export const metadata = {  // 👈🏽 ✅
-  title: "151 Pokémons",
-  description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
-};
-
-const getPokemon = async (name: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-  //.then((resp) => {
-  if (!resp.ok) {
-    notFound(); // Esto activará not-found.tsx
-  }
-
-  const pokemon = await resp.json();
-
-  console.log("🐼 Pokemon name:", pokemon);
-  return pokemon;
-};
-
-export default async function PokemonPage({ params }: Props) {
-  const { name } = await params;
-  const pokemon = await getPokemon(name);
-
-  return (....);
-}
-```
-
-#### 07.2.2 Apply the `Revalidation`:
-```tsx
-/*  */
-import { PokemonsResponse } from "../../../../pokemons/interfaces/pokemon-response";
-import { Pokemon } from "@/pokemons";
-import { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { metadata } from "../page";
-
-interface Props {
-  params: Promise<{
-    name: string;
-  }>;
-}
-
-//! Preload in Build time
-export async function generateStaticParams() {
-  const data: PokemonsResponse = await fetch(`http://pokeapi.co/api/v2/pokemon?limit=151`).then((res) => res.json());
-  const static151Pokemons = data.results.map((pokemon) => ({ name: pokemon.name }));
-  console.log("🤔 Static 151 Pokemons:", static151Pokemons);
-
-  return static151Pokemons.map((pokemon) => ({ name: pokemon.name }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { name } = await params;
-  try {
-    const pokemon = await getPokemon(name);
-    return {
-      title: `Pokemon #${name} - ${pokemon.name}`,
-      description: `${pokemon.name} page`,
-    };
-  } catch {
-    return {
-      title: "Pokemon page not found",
-      description: "Pokemon page not found",
-    };
-  }
-}
-
-// export const metadata = {
-//   title: "151 Pokémons",
-//   description: "Lore ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
-// };
-
-const getPokemon = async (name: string): Promise<Pokemon> => {
-  const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`, {
-    next: {
-      revalidate: 60 * 60 * 24 * 7, // 7 days 👈🏽 ✅
-    },
-  });
-  //.then((resp) => {
-  if (!resp.ok) {
-    notFound(); // Esto activará not-found.tsx
-  }
-
-  const pokemon = await resp.json();
-
-  console.log("🐼 Pokemon name:", pokemon);
-  return pokemon;
-};
-
-export default async function PokemonPage({ params }: Props) {
-  const { name } = await params;
-  const pokemon = await getPokemon(name);
-
-  return (....);
-}
-```
-
-> [Data Fetching: Fetching, Caching, and Revalidating | Next.js](https://nextjs.org/docs/14/app/building-your-application/data-fetching/fetching-caching-and-revalidating)
-
-`Revalidating Data`:
-
-Revalidation is the process of purging the Data Cache and re-fetching the latest data. This is useful when your data changes and you want to ensure you show the latest information.
-
-
-Cached data can be revalidated in two ways:
-
-- Time-based revalidation: Automatically revalidate data after a certain amount of time has passed. This is useful for data that changes infrequently and freshness is not as critical.
-- On-demand revalidation: Manually revalidate data based on an event (e.g. form submission). On-demand revalidation can use a tag-based or path-based approach to revalidate groups of data at once. This is useful when you want to ensure the latest data is shown as soon as possible (e.g. when content from your headless CMS is updated).
-
-`Time-based Revalidation`:
-
-To revalidate data at a timed interval, you can use the next.revalidate option of fetch to set the cache lifetime of a resource (in seconds).
-
-```tsx
-fetch('https://...', { next: { revalidate: 3600 } })
-```
-
-### 🐞 07.3 Issues:
-
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Inconsistent cache strategy between routes** | ⚠️ Identified | The `/pokemon/[id]` route uses `cache: "force-cache"` (```39:41:src/app/dashboard/pokemon/[id]/page.tsx```) while `/pokemons/[name]` uses `next: { revalidate: 60 * 60 * 24 * 7 }` (```45:49:src/app/dashboard/pokemons/[name]/page.tsx```). This inconsistency may lead to different caching behaviors and data freshness between similar routes. |
-| **Hardcoded revalidation time calculation** | ℹ️ Low Priority | The revalidation time is calculated inline as `60 * 60 * 24 * 7` which is less readable than a named constant. Consider extracting to a constant like `const REVALIDATION_TIME_7_DAYS = 60 * 60 * 24 * 7`. Location: ```48:48:src/app/dashboard/pokemons/[name]/page.tsx``` |
-| **No revalidation strategy in generateStaticParams** | ⚠️ Identified | The `generateStaticParams()` function (```15:21:src/app/dashboard/pokemons/[name]/page.tsx```) fetches Pokemon list without any revalidation configuration. This means the list of 151 Pokemon is cached indefinitely until the next build, even though individual Pokemon data is revalidated every 7 days. |
-| **Commented TODO in code** | ℹ️ Low Priority | There's a commented TODO `//cache: "force-cache", // TODO: change this in future steps` (```46:46:src/app/dashboard/pokemons/[name]/page.tsx```) that should be removed since the change has been implemented. |
-| **Missing error handling for revalidation failures** | ⚠️ Identified | If the API fails during background revalidation, there's no error handling mechanism. The stale cache will continue to be served, but there's no logging or fallback strategy. This could lead to serving outdated data indefinitely if the API is consistently failing. |
-| **Revalidation time may not match Pokemon data update frequency** | ℹ️ Low Priority | The 7-day revalidation period is arbitrary and may not align with actual Pokemon data update frequency. Consider making this configurable via environment variables to allow different revalidation periods for different environments (e.g., shorter for development, longer for production). |
-
-
-### 🧱 07.4 Pending Fixes (TODO)
-
-```md
-- [ ] Align cache strategy between `/pokemon/[id]` and `/pokemons/[name]` routes - consider using the same revalidation approach (`next: { revalidate }`) for consistency. Update ```39:41:src/app/dashboard/pokemon/[id]/page.tsx``` to match the strategy in ```45:49:src/app/dashboard/pokemons/[name]/page.tsx```
-- [ ] Extract revalidation time to a named constant - create `const REVALIDATION_TIME_7_DAYS = 60 * 60 * 24 * 7` or similar constant for better readability and maintainability. Location: ```48:48:src/app/dashboard/pokemons/[name]/page.tsx```
-- [ ] Add revalidation configuration to `generateStaticParams()` fetch call - apply `next: { revalidate }` option to the Pokemon list fetch in ```16:16:src/app/dashboard/pokemons/[name]/page.tsx``` to ensure the list of Pokemon is also periodically refreshed
-- [ ] Remove commented TODO and old cache configuration - clean up the commented `//cache: "force-cache", // TODO: change this in future steps` line in ```46:46:src/app/dashboard/pokemons/[name]/page.tsx``` since the change has been implemented
-- [ ] Add error handling and logging for revalidation failures - implement try-catch or error monitoring for background revalidation failures to ensure stale data doesn't persist indefinitely if API fails
-- [ ] Make revalidation time configurable via environment variables - create `NEXT_PUBLIC_REVALIDATION_TIME` or `REVALIDATION_TIME_SECONDS` environment variable to allow different revalidation periods for different environments (development vs production)
-- [ ] Document revalidation strategy decision - add comments explaining why 7 days was chosen as the revalidation period and when it should be adjusted
-- [ ] Consider implementing on-demand revalidation endpoint - create an API route using `revalidatePath()` or `revalidateTag()` for manual cache invalidation when Pokemon data is known to have changed
-- [ ] Add monitoring/logging for revalidation events - implement logging to track when revalidations occur and if they succeed or fail, to help diagnose caching issues
-- [ ] Review and optimize revalidation time based on Pokemon API update frequency - research PokeAPI update patterns and adjust revalidation period accordingly to balance freshness and API call frequency
-```
+- [🧳 Section 06: Incremental and Static Generation](#section-06-incremental-and-static-generation)
+  - [📎 Related Files](#related-files)
+  - [🔗 References](#references)
 
 ---
 
-# 👨🏾‍💻 Section 07: Global State - Redux & LocalStorage
+## 🧳 Section 07: Global State - Redux & LocalStorage
+
+- [📑 Table of Contents](#-table-of-contents-4)
+    - [📚 Lecture 079: Continuing with the app](#-lecture-079-continuing-with-the-app)
+    - [📚 Lecture 080: Redux Toolkit: Installation and Configuration](#-lecture-080-redux-toolkit-installation-and-configuration)
+    - [📚 Lecture 081: Counter Slice](#-lecture-081-counter-slice)
+    - [📚 Lecture 082: Exporting Redux Toolkit Hooks](#-lecture-082-exporting-redux-toolkit-hooks)
+    - [📚 Lecture 083: Counter Reducer & Actions](#-lecture-083-counter-reducer--actions)
+    - [📚 Lecture 084: Server to Client State](#-lecture-084-server-to-client-state)
+    - [📚 Lecture 085: Task - Store, Props & Links](#-lecture-085-task---store-props--links)
+    - [📚 Lecture 086: Task solution](#-lecture-086-task-solution)
+    - [📚 Lecture 087: RESTful Api - Get Counter](#-lecture-087-restful-api---get-counter)
+    - [📚 Lecture 088: counter value from an API](#-lecture-088-counter-value-from-an-api)
+
+---
 
 
 
 <br>
 
-## 📚 01. Lesson 079 - *Continuing with the app*
+### 📚 Lecture 079: Continuing with the app
 
-### 🧠 01.1 Context:
+- [📚 Lecture 079: Continuing with the app](#-lecture-079-continuing-with-the-app)
+    - [079.1 Context](#-0791-context)
+    - [079.2 Updating code according the context](#-0792-updating-code-according-the-context)
+        - [079.2.1 Create favourites/page.tsx file](#-07921-create-favouritespagetsx-file)
+        - [079.2.2 Add the favourites in Sidebar](#-07922-add-the-favourites-in-sidebar)
+        - [079.2.3 Update or add some code to main or MainPage](#-07923-update-or-add-some-code-to-main-or-mainpage)
+        - [079.2.4 Create SimpleWidget.tsx component](#-07924-create-simplewidgettsx-component)
+        - [079.2.5 Import SimpleWidget into MainPage](#-07925-import-simplewidget-into-mainpage)
+    - [079.3 Pending Fixes (TODO)](#-0793-pending-fixes-todo)
+
+### 🧠 079.1 Context
 
 This lesson focuses on extending the dashboard application structure by adding a new "Favourites" page and enhancing the main dashboard page with reusable widget components. The lesson prepares the foundation for implementing global state management (which will be covered in subsequent lessons) by creating the necessary UI structure.
 
@@ -5935,10 +5296,10 @@ This lesson focuses on extending the dashboard application structure by adding a
 **Connection to practical implementation:**
 This lesson establishes the UI foundation that will be enhanced in subsequent lessons with Redux and LocalStorage for managing favorite Pokémons globally across the application. The empty `pokemons={[]}` prop in `PokemonGrid` is intentional, as it will be populated from global state in later lessons.
 
-### ⚙️ 01.2 Updating code according the context:
+### ⚙️ 079.2 Updating code according the context
 
 
-#### 01.2.1 Create `favourites/page.tsx` file:
+#### 079.2.1 Create `favourites/page.tsx` file:
 ```tsx
 /* src/app/dashboard/favourites/page.tsx */  // 👈🏽 ✅
 import PokemonGrid from "../../../pokemons/components/PokemonGrid";
@@ -5959,7 +5320,7 @@ export default async function PokemonsPage() {
 }
 ```
 
-#### 01.2.2 Add the `favourites` in `Sidebar`:
+#### 079.2.2 Add the `favourites` in `Sidebar`:
 ```tsx
 /* src/components/Sidebar.tsx */
 import Image from "next/image";
@@ -6033,7 +5394,7 @@ export const Sidebar = () => {
 };
 ```
 
-#### 01.2.3 Update or add some code to `main` or `MainPage`:
+#### 079.2.3 Update or add some code to `main` or `MainPage`:
 ```tsx
 /* src/app/dashboard/main/page.tsx */
 export default function MainPage() {
@@ -6048,7 +5409,7 @@ export default function MainPage() {
 }
 ```
 
-#### 01.2.4 Create `SimpleWidget.tsx` file:
+#### 079.2.4 Create `SimpleWidget.tsx` file:
 ```tsx
 /* src/components/SimpleWidget.tsx */
 import { IoCafeOutline } from "react-icons/io5";
@@ -6091,7 +5452,7 @@ export { Sidebar } from "./Sidebar";
 export { SimpleWidget } from "./SimpleWidget";  // 👈🏽 ✅
 ```
 
-#### 01.2.5 Import `SimpleWidget` into `MainPage`:
+#### 079.2.5 Import `SimpleWidget` into `MainPage`:
 ```tsx
 /* src/app/dashboard/main/page.tsx */
 import { SimpleWidget } from "../../../components";
@@ -6111,21 +5472,15 @@ export default function MainPage() {
 
 ![](../img/section07_lecture079-001.png)
 
-### 🐞 01.3 Issues:
+### 🧱 079.3 Pending Fixes (TODO)
 
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Incorrect function name in favourites page** | ⚠️ Identified | The function in `src/app/dashboard/favourites/page.tsx` is named `PokemonsPage` instead of `FavouritesPage`, which is misleading and inconsistent with the page purpose. Location: ```8:8:src/app/dashboard/favourites/page.tsx``` |
-| **Placeholder metadata description** | ⚠️ Identified | The metadata description contains placeholder text "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos." instead of a meaningful description for SEO and accessibility. Location: ```5:5:src/app/dashboard/favourites/page.tsx``` |
-| **Empty pokemons array without user feedback** | ⚠️ Identified | The `PokemonGrid` component receives an empty array `pokemons={[]}` without any loading state or empty state message, which may confuse users. Location: ```15:15:src/app/dashboard/favourites/page.tsx``` |
-| **Hardcoded Spanish text in SimpleWidget** | ⚠️ Identified | The `SimpleWidget` component contains hardcoded Spanish text ("Contador", "Titulo", "Subtitulo", "Más") instead of using props or internationalization. This limits reusability and makes it difficult to use in different contexts. Location: ```8:26:src/components/SimpleWidget.tsx``` |
-| **Static widget content** | ⚠️ Identified | The `SimpleWidget` component doesn't accept props for dynamic content, making it inflexible. The title, subtitle, icon, and link are all hardcoded. Location: ```3:31:src/components/SimpleWidget.tsx``` |
-| **Incorrect link in PokemonCard** | ⚠️ Identified | The favorites link in `PokemonCard` component points to `/dashboard/main` instead of handling favorite state or linking to the favourites page. Location: ```31:31:src/pokemons/components/PokemonCard.tsx``` |
-| **Missing accessibility attributes** | ⚠️ Identified | The `SimpleWidget` component's "Más" link uses an `<a>` tag with `href="#"` without proper accessibility attributes like `aria-label` or `role`. Location: ```24:24:src/components/SimpleWidget.tsx``` |
-
-### 🧱 01.4 Pending Fixes (TODO)
-
-```md
+- [ ] (Issue) **Incorrect function name in favourites page**: The function in `src/app/dashboard/favourites/page.tsx` is named `PokemonsPage` instead of `FavouritesPage`.
+- [ ] (Issue) **Placeholder metadata description**: The metadata description contains placeholder text "lorem ipsum dolor sit amet...".
+- [ ] (Issue) **Empty pokemons array without user feedback**: The `PokemonGrid` component receives an empty array without feedback.
+- [ ] (Issue) **Hardcoded Spanish text in SimpleWidget**: The `SimpleWidget` component contains hardcoded Spanish text.
+- [ ] (Issue) **Static widget content**: The `SimpleWidget` component doesn't accept props for dynamic content.
+- [ ] (Issue) **Incorrect link in PokemonCard**: The favorites link in `PokemonCard` component points to `/dashboard/main`.
+- [ ] (Issue) **Missing accessibility attributes**: The `SimpleWidget` component's "Más" link lacks proper accessibility attributes.
 - [ ] Rename `PokemonsPage` function to `FavouritesPage` in `src/app/dashboard/favourites/page.tsx` for consistency and clarity
 - [ ] Replace placeholder metadata description with meaningful text describing the favourites page functionality
 - [ ] Add empty state message or loading indicator when `pokemons` array is empty in favourites page to improve UX
@@ -6135,16 +5490,22 @@ export default function MainPage() {
 - [ ] Add accessibility attributes (`aria-label`, `role`, `tabindex`) to interactive elements in `SimpleWidget` component
 - [ ] Consider creating a TypeScript interface for `SimpleWidget` props to ensure type safety
 - [ ] Add error boundary or fallback UI for `PokemonGrid` component when pokemons array is empty or undefined
-```
-
-
 
 <br>
 
-## 📚 02. Lesson 080 - *Redux Toolkit: Installation and Configuration*
+### 📚 Lecture 080: Redux Toolkit: Installation and Configuration
 
+- [📚 Lecture 080: Redux Toolkit: Installation and Configuration](#-lecture-080-redux-toolkit-installation-and-configuration)
+    - [080.1 Context](#-0801-context)
+    - [080.2 Updating code according the context](#-0802-updating-code-according-the-context)
+        - [080.2.1 Installation](#-08021-installation)
+        - [080.2.2 Setup the Redux Store](#-08022-setup-the-redux-store)
+        - [080.2.3 Trying to add Provider in layout.tsx](#-08023-trying-to-add-provider-in-layouttsx)
+        - [080.2.4 Restore layout.tsx and create Providers.tsx](#-08024-restore-layouttsx-and-create-providerstsx)
+        - [080.2.5 Wrap layout with Providers](#-08025-wrap-layout-with-providers)
+    - [080.3 Pending Fixes (TODO)](#-0803-pending-fixes-todo)
 
-### 🧠 02.1 Context:
+### 🧠 080.1 Context
 
 **Redux Toolkit (RTK)** is the official, opinionated, batteries-included toolset for efficient Redux development. It simplifies Redux usage by providing utilities that reduce boilerplate code and follow Redux best practices.
 
@@ -6229,17 +5590,17 @@ In Next.js 13+ with App Router:
 This project follows this pattern by creating ```1:14:src/store/Providers.tsx``` as a client component that wraps the Redux Provider, which is then imported into the server component layout.
 
 
-### ⚙️ 02.2 Updating code according the context:
+### ⚙️ 080.2 Updating code according the context
 
 
-#### 02.2.1 Install redux tollkit:
+#### 080.2.1 Install redux tollkit:
 
 [Quick Start | Redux Toolkit](https://redux-toolkit.js.org/tutorials/quick-start)
 ```bash
 npm install @reduxjs/toolkit react-redux
 ```
 
-#### 02.2.2 Create `store/index.ts` file:
+#### 080.2.2 Create `store/index.ts` file:
 ```tsx
 /* src/store/index.ts */
 import { configureStore } from '@reduxjs/toolkit';
@@ -6294,7 +5655,7 @@ export type AppDispatch = typeof store.dispatch
 ```
 
 
-#### 02.2.3 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file:
+#### 080.2.3 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file:
 
 > According [Provide the Redux Store to React](https://redux-toolkit.js.org/tutorials/quick-start#provide-the-redux-store-to-react) documentation
 
@@ -6374,7 +5735,7 @@ export default function RootLayout({
 ![Error found in server side](../img/section07-lecture080-002.png)
 
 
-#### 02.2.4 Restore its previous state in `layout.tsx` file:
+#### 080.2.4 Restore its previous state in `layout.tsx` file:
 ```tsx
 /* src/app/layout.tsx */
 //"use client";  // 👈🏽 ✅
@@ -6414,7 +5775,7 @@ export default function RootLayout({
   );
 }
 ```
-#### 02.2.4 Create `Providers.tsx` file:
+#### 080.2.4 Create `Providers.tsx` file:
 ```tsx
 /* src/store/Providers.tsx */  // 👈🏽 ✅
 "use client";
@@ -6432,7 +5793,7 @@ const Providers = ({ children }: Props) => {
 export default Providers;
 ```
 
-#### 02.2.5 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file again:
+#### 080.2.5 Add `<Provider store={store}></Provider>` in `app/layout.tsx` file again:
 ```tsx
 /* src/app/layout.tsx */
 import type { Metadata } from "next";
@@ -6509,34 +5870,34 @@ export default function RootLayout({
 ```
 
 
-### 🐞 02.3 Issues:
+### 🧱 080.3 Pending Fixes (TODO)
 
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Typo in documentation code example** | ⚠️ Identified | Line 6154 uses `configureState` instead of `configureStore`. The correct function name is `configureStore` from `@reduxjs/toolkit`. Location: ```6154:6154:docs/LECTURE_STEPS.md``` |
-| **Empty reducer object in store configuration** | ℹ️ Low Priority | The store is configured with an empty reducer object `{}`. While this is valid for initial setup, it means no state management is currently active. Location: ```4:4:src/store/index.ts``` |
-| **Missing export in barrel file** | ℹ️ Low Priority | The `Providers` component is not exported from `src/store/index.ts` barrel file, requiring direct imports. Consider adding `export { default as Providers } from './Providers'` for consistency. Location: ```1:11:src/store/index.ts``` |
-| **Commented import in layout.tsx** | ℹ️ Low Priority | There's a commented import statement `//import { store } from "@/store";` in the layout file. While not breaking, it's better to remove commented code for cleanliness. Location: ```5:5:src/app/layout.tsx``` |
-
-
-### 🧱 02.4 Pending Fixes (TODO)
-
-```md
+- [ ] (Issue) **Typo in documentation code example**: Line 6154 uses `configureState` instead of `configureStore`.
+- [ ] (Issue) **Empty reducer object in store configuration**: The store is configured with an empty reducer object.
+- [ ] (Issue) **Missing export in barrel file**: The `Providers` component is not exported from `src/store/index.ts`.
+- [ ] (Issue) **Commented import in layout.tsx**: Commented import statement in the layout file.
 - [ ] Remove commented import statement from `src/app/layout.tsx` (line 5) to keep code clean
 - [ ] Consider adding `Providers` export to `src/store/index.ts` barrel file for consistent import patterns
 - [ ] Add initial reducer(s) to the store configuration when implementing state management features (e.g., counter, favorites, shopping cart)
 - [ ] Consider adding Redux DevTools configuration for production builds if needed
 - [ ] Add typed hooks (`useAppDispatch`, `useAppSelector`) to `src/store/index.ts` for better TypeScript support in components
-```
 
 ---
 
 
 <br>
 
-## 📚 03. Lesson 081 - *Counter Slice*
+### 📚 Lecture 081: Counter Slice
 
-### 🧠 03.1 Context:
+- [📚 Lecture 081: Counter Slice](#-lecture-081-counter-slice)
+    - [081.1 Context](#-0811-context)
+    - [081.2 Updating code according the context](#-0812-updating-code-according-the-context)
+        - [081.2.1 Create counterSlice.ts file](#-08121-create-counterslicets-file)
+        - [081.2.2 Adding the CounterState as interface](#-08122-adding-the-counterstate-as-interface)
+        - [081.2.3 Import counterSlice in the Store](#-08123-import-counterslice-in-the-store)
+    - [081.3 Pending Fixes (TODO)](#-0813-pending-fixes-todo)
+
+### 🧠 081.1 Context
 
 A **Redux Slice** is a collection of Redux reducer logic and actions for a single feature in your app, typically defined together in one file. The `createSlice` function from Redux Toolkit is a higher-order function that automatically generates action creators and action types that correspond to the reducers and state.
 
@@ -6620,7 +5981,7 @@ export type AppDispatch = typeof store.dispatch;
 **Connection to the lesson's practical implementation:**
 This lesson establishes the foundation for Redux state management in the dashboard. The counter slice will be used to manage the shopping cart counter state across multiple components, replacing local `useState` implementations. The slice is currently set up with an initial state of `count: 5`, but reducers are empty and need to be implemented in subsequent lessons to handle increment/decrement actions.
 
-### ⚙️ 03.2 Updating code according the context:
+### ⚙️ 081.2 Updating code according the context
 
 ```
 02-my-dashboard/
@@ -6714,7 +6075,7 @@ This lesson establishes the foundation for Redux state management in the dashboa
             └── 📄 counterSlice.ts        # 👈🏽 ✅ Counter Redux slice
 ```
 
-#### 03.2.1 Create `counter/counterSlice.ts` file:
+#### 081.2.1 Create `counter/counterSlice.ts` file:
 ```tsx
 /* src/store/counter/counterSlice.ts */   // 👈🏽 ✅
 import { createSlice } from '@reduxjs/toolkit';
@@ -6733,7 +6094,7 @@ export const {} = counterSlice.actions;
 export default counterSlice.reducer;
 ```
 
-#### 03.2.2 Adding the `CounterState` as `interface`:
+#### 081.2.2 Adding the `CounterState` as `interface`:
 > Giving a data type to `initialState`: `CounterState`.
 
 Defining `CounterState` as interface.
@@ -6756,7 +6117,7 @@ export default counterSlice.reducer;```
 ```
 
 
-#### 03.2.3 Import `counterSlice` as ***`counterReducer`*** in `store/counter/index.ts` file:
+#### 081.2.3 Import `counterSlice` as ***`counterReducer`*** in `store/counter/index.ts` file:
 ```tsx
 /* src/store/index.ts */
 import { configureStore } from "@reduxjs/toolkit";
@@ -6777,38 +6138,33 @@ export type AppDispatch = typeof store.dispatch;
 ![missing reducer warning is not anymore](../img/section07-lecture081-001.png)
 ![using Redux from Devtools](../img/section07-lecture081-002.png)
 
-### 🐞 03.3 Issues:
+### 🧱 081.3 Pending Fixes (TODO)
 
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Empty reducers object** | ⚠️ Identified | The `counterSlice` has an empty `reducers` object, meaning no actions are available. The slice cannot modify state without reducer functions. Location: ```15:15:src/store/counter/counterSlice.ts``` |
-| **No actions exported** | ⚠️ Identified | The actions export is empty (`export const {} = counterSlice.actions`), so components cannot dispatch actions to update the counter state. Location: ```18:18:src/store/counter/counterSlice.ts``` |
-| **CartCounter not using Redux** | ⚠️ Identified | The `CartCounter` component still uses local `useState` instead of Redux state, defeating the purpose of the counter slice. The component should use `useAppSelector` and `useAppDispatch` to interact with Redux. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
-| **Missing typed hooks** | ⚠️ Identified | The store exports `RootState` and `AppDispatch` types but doesn't provide typed hooks (`useAppDispatch`, `useAppSelector`) for components. This leads to less type-safe Redux usage. Location: ```11:13:src/store/index.ts``` |
-| **Counter state not connected** | ⚠️ Identified | The counter slice is configured in the store but not being used by any component. The `CartCounter` component should be refactored to use Redux state instead of local state. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
-| **Initial state hardcoded** | ℹ️ Low Priority | The initial state has `count: 5` hardcoded. Consider making it configurable or using a more meaningful default value (e.g., 0 for a shopping cart). Location: ```7:9:src/store/counter/counterSlice.ts``` |
-
-
-### 🧱 03.4 Pending Fixes (TODO)
-
-```md
-- [ ] Implement reducer functions in `counterSlice` for increment and decrement actions (e.g., `increment`, `decrement`, `reset`) in `src/store/counter/counterSlice.ts`
-- [ ] Export action creators from `counterSlice.actions` (e.g., `increment`, `decrement`) in `src/store/counter/counterSlice.ts`
-- [ ] Create typed hooks (`useAppDispatch`, `useAppSelector`) in `src/store/index.ts` for type-safe Redux usage in components
-- [ ] Refactor `CartCounter` component to use Redux state instead of local `useState` in `src/shopping-cart/components/CartCounter.tsx`
-- [ ] Remove `value` prop from `CartCounter` component since state will come from Redux store
-- [ ] Update `CounterPage` to remove the `value` prop being passed to `CartCounter` in `src/app/dashboard/counter/page.tsx`
-- [ ] Consider adding a `reset` action to the counter slice for resetting the count to initial state
-- [ ] Add validation in reducers to prevent negative count values (if business logic requires it)
-```
-
+- [ ] (Issue) **Empty reducers object**: The `counterSlice` has an empty `reducers` object.
+- [ ] (Issue) **No actions exported**: The actions export is empty.
+- [ ] (Issue) **CartCounter not using Redux**: The `CartCounter` component still uses local `useState`.
+- [ ] (Issue) **Missing typed hooks**: The store doesn't provide typed hooks.
+- [ ] (Issue) **Counter state not connected**: The counter slice is not being used by any component.
+- [ ] Implement reducer functions in `counterSlice` for increment and decrement actions.
+- [ ] Export action creators from `counterSlice.actions`.
+- [ ] Create typed hooks (`useAppDispatch`, `useAppSelector`) in `src/store/index.ts`.
+- [ ] Refactor `CartCounter` component to use Redux state instead of local `useState`.
+- [ ] Remove `value` prop from `CartCounter` component.
+- [ ] Update `CounterPage` to remove the `value` prop being passed to `CartCounter`.
+- [ ] Consider adding a `reset` action to the counter slice.
+- [ ] Add validation in reducers to prevent negative count values.
 
 <br>
 
-## 📚 04. Lesson 082 - *Exporting Redux Toolkit Hooks*
+### 📚 Lecture 082: Exporting Redux Toolkit Hooks
 
+- [📚 Lecture 082: Exporting Redux Toolkit Hooks](#-lecture-082-exporting-redux-toolkit-hooks)
+    - [082.1 Context](#-0821-context)
+    - [082.2 Updating code according the context](#-0822-updating-code-according-the-context)
+        - [082.2.1 Create typed hooks in store/index.ts](#-08221-create-typed-hooks-in-storeindexts)
+    - [082.3 Pending Fixes (TODO)](#-0823-pending-fixes-todo)
 
-### 🧠 04.1 Context:
+### 🧠 082.1 Context
 
 **Typed Redux Hooks** are custom wrappers around React-Redux's `useDispatch` and `useSelector` hooks that provide full TypeScript type safety. Instead of using the plain hooks directly, you export typed versions from your store configuration that automatically infer the correct types for your application's state and dispatch functions.
 
@@ -6874,9 +6230,9 @@ import { useDispatch, useSelector } from "react-redux";
 This lesson focuses on exporting these typed hooks from the store configuration file so they can be imported and used consistently across all components. The implementation uses the modern `withTypes<T>()` approach which is the recommended pattern in Redux Toolkit v2 and React-Redux v9+, replacing the older explicit typing pattern that required importing `TypedUseSelectorHook` from `react-redux`.
 
 
-### ⚙️ 04.2 Updating code according the context:
+### ⚙️ 082.2 Updating code according the context
 
-#### 04.2.1 Current version:
+#### 082.2.1 Current version:
 ```tsx
 /* src/store/index.ts */
 import { configureStore } from "@reduxjs/toolkit";
@@ -6899,7 +6255,7 @@ export const useAppDispatch = useDispatch.withTypes<AppDispatch>();     // 👈�
 export const useAppSelector = useSelector.withTypes<RootState>();       // 👈🏽 ✅
 ```
 
-#### 04.2.2 Legacy version
+#### 082.2.2 Legacy version
 ```tsx
 /*  */
 /* src/store/index.ts */
@@ -6923,7 +6279,7 @@ export const useAppDispatch: () => AppDispatch = useDispatch;                 //
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;   // 👈🏽 ✅
 ```
 
-#### 04.2.3 `withTypes` approach vs Explicit typing approach:
+#### 082.2.3 `withTypes` approach vs Explicit typing approach:
 ```ts
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 export const useAppSelector = useSelector.withTypes<RootState>();
@@ -6950,32 +6306,31 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 | Type-only or runtime? | Type-only (erased at runtime) | Type-only (erased at runtime) |
 
 
-### 🐞 04.3 Issues:
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Typed hooks not being used in components** | ⚠️ Identified | The typed hooks (`useAppDispatch`, `useAppSelector`) are exported from the store but not being used anywhere in the codebase. Components should import and use these hooks instead of the plain `useDispatch` and `useSelector` from `react-redux`. Current state: No components are using Redux hooks yet. Location: ```17:18:src/store/index.ts``` |
-| **CartCounter component not using Redux hooks** | ⚠️ Identified | The `CartCounter` component still uses local `useState` instead of Redux state management. It should be refactored to use `useAppSelector` to read state and `useAppDispatch` to dispatch actions. This prevents the typed hooks from being utilized. Location: ```9:10:src/shopping-cart/components/CartCounter.tsx``` |
-| **Missing import examples in documentation** | ℹ️ Low Priority | While the hooks are properly exported, there are no examples in the codebase showing how to import and use them in components. Consider adding usage examples or updating components to demonstrate proper usage patterns. |
-| **No validation that hooks are used correctly** | ℹ️ Low Priority | Since no components are using the hooks yet, there's no way to verify that the type inference is working correctly. Once components start using the hooks, TypeScript will validate the types automatically. |
+### 🧱 082.3 Pending Fixes (TODO)
 
-### 🧱 04.4 Pending Fixes (TODO)
-
-```md
-- [ ] Refactor `CartCounter` component to use `useAppSelector` and `useAppDispatch` hooks instead of local `useState` in `src/shopping-cart/components/CartCounter.tsx`
-- [ ] Update all future components to import typed hooks from `@/store` instead of using plain hooks from `react-redux`
-- [ ] Add example usage comments or documentation showing how to use `useAppDispatch` and `useAppSelector` in components
-- [ ] Verify TypeScript type inference is working correctly by using the hooks in at least one component
-- [ ] Consider adding ESLint rules to enforce usage of typed hooks (`useAppDispatch`/`useAppSelector`) instead of plain hooks (`useDispatch`/`useSelector`)
-- [ ] Update any existing components that might use Redux hooks to use the typed versions for consistency
-```
-
+- [ ] (Issue) **Typed hooks not being used in components**: The typed hooks are exported but not used.
+- [ ] (Issue) **CartCounter component not using Redux hooks**: `CartCounter` still uses local `useState`.
+- [ ] (Issue) **Missing import examples in documentation**: No examples showing how to import and use hooks.
+- [ ] (Issue) **No validation that hooks are used correctly**: Verify type inference in a component.
+- [ ] Refactor `CartCounter` component to use `useAppSelector` and `useAppDispatch` hooks.
+- [ ] Update all future components to import typed hooks from `@/store`.
+- [ ] Add example usage comments or documentation for `useAppDispatch` and `useAppSelector`.
+- [ ] Verify TypeScript type inference is working correctly.
+- [ ] Consider adding ESLint rules to enforce usage of typed hooks.
+- [ ] Update any existing components to use the typed versions for consistency.
 
 <br>
 
-## 📚 05. Lesson 083 - *Counter Reducer & Actions*
+### 📚 Lecture 083: Counter Reducer & Actions
 
+- [📚 Lecture 083: Counter Reducer & Actions](#-lecture-083-counter-reducer--actions)
+    - [083.1 Context](#-0831-context)
+    - [083.2 Updating code according the context](#-0832-updating-code-according-the-context)
+        - [083.2.1 Adding Reducers in counterSlice.ts](#-08321-adding-reducers-in-counterslicets)
+        - [083.2.2 Using Redux in CartCounter.tsx](#-08322-using-redux-in-cartcountertsx)
+    - [083.3 Pending Fixes (TODO)](#-0833-pending-fixes-todo)
 
-### 🧠 05.1 Context:
+### 🧠 083.1 Context
 
 **Counter Reducer & Actions** in Redux Toolkit represent the core pattern for managing state changes in a Redux application. This lesson focuses on implementing reducer functions and their corresponding actions for a counter feature.
 
@@ -7100,10 +6455,10 @@ This lesson demonstrates the complete flow from defining reducers and actions in
 
 The implementation also highlights the Server/Client Component boundary in Next.js, where the counter page is a Server Component (for metadata) but uses a Client Component (`CartCounter`) to interact with Redux.
 
-### ⚙️ 05.2 Updating code according the context:
+### ⚙️ 083.2 Updating code according the context
 
 
-#### 05.2.1 Add some actions into `CounterSlice.ts` with their validations:
+#### 083.2.1 Add some actions into `CounterSlice.ts` with their validations:
 ```tsx
 /* src/store/counter/counterSlice.ts */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";  // 👈🏽 ✅
@@ -7134,7 +6489,7 @@ export const { addOne, substractOne, resetCount } = counterSlice.actions;  // �
 export default counterSlice.reducer;
 ```
 
-#### 05.2.2 Applying actions CounterReducer into Counter from page/dashboard:
+#### 083.2.2 Applying actions CounterReducer into Counter from page/dashboard:
 ```tsx
 /* src/app/dashboard/counter/page.tsx */
 import { CartCounter } from "../../../shopping-cart";
@@ -7213,7 +6568,7 @@ Meanwhile the app when click on `-1` or `+1` buttons:
 ![setCount errors](../img/sectio07-lecture083-001.png)
 
 
-#### 05.2.3 Fixing those `-1` button & `+1` button errors:
+#### 083.2.3 Fixing those `-1` button & `+1` button errors:
 ```ts
 /* src/shopping-cart/components/CartCounter.tsx */
  "use client";
@@ -7316,7 +6671,7 @@ sequenceDiagram
 | **No error handling for edge cases** | ℹ️ Low Priority | The reducers don't handle edge cases like `NaN`, `Infinity`, or extremely large numbers. While `resetCount` validates negative numbers, it doesn't validate other invalid inputs. |
 
 
-### 🧱 05.4 Pending Fixes (TODO)
+### 🧱 083.3 Pending Fixes (TODO)
 
 ```md
 - [ ] Remove unused `value` prop from `CartCounter` component or implement logic to use it (e.g., initialize Redux state with it). File: `src/shopping-cart/components/CartCounter.tsx:10`
@@ -7332,34 +6687,16 @@ sequenceDiagram
 
 <br>
 
-## 📚 06. Lesson 084 - *Server to Client State*
+### 📚 Lecture 084: Server to Client State
 
-🔥 ⚠️ Issue 🤔: 
-- value from `dashboard/counter/page.tsx` server side component: `20`.
-  * from `src/app/dashboard/counter/page.tsx`
-    ```jsx
-    // i.e a value generated from the server
-    const value = 20;
-    ```
-  * calling the `CartCounter` component:
-      ```jsx
-      <div className="flex flex-col items-center justify-center w-full h-full">
-        <span>Products in shopping cart</span>
-        <CartCounter value={value} />
-    </div>
-      ```
+- [📚 Lecture 084: Server to Client State](#-lecture-084-server-to-client-state)
+    - [084.1 Context](#-0841-context)
+    - [084.2 Updating code according the context](#-0842-updating-code-according-the-context)
+        - [084.2.1 Initialization in counterSlice.ts](#-08421-initialization-in-counterslicets)
+        - [084.2.2 Using initialization in CartCounter.tsx](#-08422-using-initialization-in-cartcountertsx)
+    - [084.3 Pending Fixes (TODO)](#-0843-pending-fixes-todo)
 
-- Initial value: `5`.
-  * from `src/shopping-cart/components/CartCounter.tsx` calling `const count = useAppSelector((state) => state.counter.count);`
-  * and from `src/store/counter/counterSlice.ts` calling 
-    ```tsx
-    const initialState: CounterState = {
-      count: 5,
-    };
-    ```
-![](../img/section07-lecture084-001.png)
-
-### 🧠 06.1 Context:
+### 🧠 084.1 Context
 
 In the **Next.js App Router**, components are **Server Components by default**. That means they run on the server, can access server-only APIs, and can generate the initial HTML for a route. In contrast, **Client Components** (those that include `"use client"`) run in the browser and can use React client-only features like `useState`, `useEffect`, and global state libraries (Redux, Zustand, etc).
 
@@ -7402,10 +6739,10 @@ There are two key concepts behind this lesson:
 - **Preload state before first render**: create the Redux store with `preloadedState` so the first client render already matches the server-provided value (avoids flicker).
 - **Persist state**: use cookies/localStorage (carefully) if you want state to survive reloads, not just navigations.
 
-### ⚙️ 06.2 Updating code according the context:
+### ⚙️ 084.2 Updating code according the context
 
 
-#### 06.2.1 Add `useEffect` hook in `CartCounter` component:
+#### 084.2.1 Add `useEffect` hook in `CartCounter` component:
 ```tsx
 /* src/shopping-cart/components/CartCounter.tsx */
 "use client";
@@ -7455,7 +6792,7 @@ export default CartCounter;
 
 * When change from Counter to Any other sidebar option then go back to Counter, the value is 20 even you've changed it before. (The `CartCounter` component is being recreated.)
 
-#### 06.2.2 Add `isReady` value in the `counterSlice`:
+#### 084.2.2 Add `isReady` value in the `counterSlice`:
 
 ```tsx
 /* src/store/counter/counterSlice.ts */
@@ -7495,7 +6832,7 @@ export const { initCounterState, addOne, substractOne, resetCount } = counterSli
 export default counterSlice.reducer;
 ```
 
-#### 06.2.3 Fixing the second issue from `CartCounter`:
+#### 084.2.3 Fixing the second issue from `CartCounter`:
 ```tsx
 /* src/shopping-cart/components/CartCounter.tsx */
 "use client";
@@ -7539,35 +6876,30 @@ export default CartCounter;
 ``` 
 
 
-### 🐞 06.3 Issues:
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Initial UI flicker (5 → 20) on first paint** | ⚠️ Identified | Redux initial state renders `count: 5` first (`src/store/counter/counterSlice.ts:8-11`), then `CartCounter` updates it after mount via `useEffect` (`src/shopping-cart/components/CartCounter.tsx:17-19`). This causes a visible change (see screenshots in 06.2.1). |
-| **Counter resets to server value on remount (naive initialization)** | ✅ Fixed | When using `resetCount(value)` inside `useEffect`, navigating away and back remounts `CartCounter` and overwrites any user changes with the server value again. The `isReady` guard + `initCounterState` prevents repeated initialization (`src/store/counter/counterSlice.ts:18-22`). |
-| **Initialization depends on effect timing (state not ready at first render)** | ℹ️ Low Priority | Even with `initCounterState`, the first render still uses the Redux default (`count: 5`), because effects run after paint. For a no-flicker UX, the initial rendered value should match the server value (e.g. show `value` until `isReady`, or preload store state). |
-| **Reducer mutates `action.payload` in `resetCount`** | ℹ️ Low Priority | `resetCount` does `action.payload = 0` (`src/store/counter/counterSlice.ts:30-33`). While it works, mutating action payloads is an anti-pattern and can make debugging harder. |
-| **Spelling: `substractOne`** | ℹ️ Low Priority | Action name is misspelled (`substractOne` instead of `subtractOne`) across the slice and component imports, which can reduce readability. |
+### 🧱 084.3 Pending Fixes (TODO)
 
-
-### 🧱 06.4 Pending Fixes (TODO)
-
-```md
-- [ ] (UX) Avoid first-paint flicker by ensuring the first rendered value matches the server value. Options:
-  - Update `CartCounter` to read `isReady` from Redux and render `value` until ready.
-  - Or preload Redux store state with a server-provided `preloadedState` before the first client render.
-  Files: `src/shopping-cart/components/CartCounter.tsx`, `src/store/Providers.tsx`, `src/store/index.ts`
-- [ ] (Code quality) Refactor `resetCount` to avoid mutating `action.payload` (use a new validated value instead). File: `src/store/counter/counterSlice.ts:30-33`
-- [ ] (Consistency) Decide whether `resetCount` should also update `isReady` (or document why it should not). File: `src/store/counter/counterSlice.ts`
-- [ ] (Naming) Rename `substractOne` → `subtractOne` and update all imports/usages. Files: `src/store/counter/counterSlice.ts`, `src/shopping-cart/components/CartCounter.tsx`
-```
-
+- [ ] (Issue) **Initial UI flicker (5 → 20) on first paint**: Redux initial state renders `count: 5` first, then updates after mount.
+- [ ] (Issue) **Counter resets to server value on remount**: Fixed with `isReady` guard.
+- [ ] (Issue) **Initialization depends on effect timing**: First render uses Redux default.
+- [ ] (Issue) **Reducer mutates `action.payload` in `resetCount`**: Mutating action payloads is an anti-pattern.
+- [ ] (Issue) **Spelling: `substractOne`**: Correct spelling is `subtractOne`.
+- [ ] (UX) Avoid first-paint flicker by ensuring the first rendered value matches the server value.
+- [ ] (Code quality) Refactor `resetCount` to avoid mutating `action.payload`.
+- [ ] (Consistency) Decide whether `resetCount` should also update `isReady`.
+- [ ] (Naming) Rename `substractOne` → `subtractOne` and update all imports/usages.
 
 <br>
 
-## 📚 07. Lesson 085 - *Task - Store, Props & Links*
+### 📚 Lecture 085: Task - Store, Props & Links
 
+- [📚 Lecture 085: Task - Store, Props & Links](#-lecture-085-task---store-props--links)
+    - [085.1 Context](#-0851-context)
+    - [085.2 Updating code according the context](#-0852-updating-code-according-the-context)
+        - [085.2.1 Restructuring the project](#-08521-restructuring-the-project)
+        - [085.2.2 Turning SimpleWidget as use client mode](#-08522-turning-simplewidget-as-use-client-mode)
+    - [085.3 Pending Fixes (TODO)](#-0853-pending-fixes-todo)
 
-### 🧠 07.1 Context:
+### 🧠 085.1 Context
 
 This lesson connects three fundamentals you’ll use constantly in a Next.js (App Router) dashboard:
 
@@ -7609,10 +6941,10 @@ This lesson connects three fundamentals you’ll use constantly in a Next.js (Ap
   - **Alternatives**: programmatic navigation (`useRouter().push`) for imperative flows, but prefer `Link` for standard navigation.
 
 
-### ⚙️ 07.2 Updating code according the context:
+### ⚙️ 085.2 Updating code according the context
 
 
-#### 07.2.1 Restructuring the project:
+#### 085.2.1 Restructuring the project:
 
 ```
 02-my-dashboard/
@@ -7708,7 +7040,7 @@ This lesson connects three fundamentals you’ll use constantly in a Next.js (Ap
             └── 📄 counterSlice.ts        # Counter Redux slice
 ```
 
-#### 07.2.2 Turning SimpleWidget as `use client` mode:
+#### 085.2.2 Turning SimpleWidget as `use client` mode:
 
 1. Create `WidgetGrid.tsx` component:
 
@@ -7772,7 +7104,7 @@ export { SimpleWidget } from "./dashboard/SimpleWidget";
 export { WidgetsGrid } from "./dashboard/WidgetsGrid";  // 👈🏽 ✅
 ```
 
-#### 07.2.3 Parameterize the `SimpleWidget.tsx` component:
+#### 085.2.3 Parameterize the `SimpleWidget.tsx` component:
 ```tsx
 /* src/components/dashboard/SimpleWidget.tsx */
 import Link from "next/link";
@@ -7813,44 +7145,33 @@ export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
 };
 ```
 
-### 🐞 07.3 Issues:
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Active link highlight fails on nested/dynamic routes** | ⚠️ Identified | `SidebarMenuItem` checks `currentPath === path` (`src/components/sidebar/SidebarMenuItem.tsx:18-20`). This won’t mark `/dashboard/pokemons/pikachu` as active for the base `/dashboard/pokemons` item. Consider `startsWith`, route groups, or a dedicated matcher. |
-| **Missing `aria-current` for active navigation item** | ⚠️ Identified | The active sidebar link is styled visually but does not expose active state to assistive tech. Add `aria-current="page"` when active (`src/components/sidebar/SidebarMenuItem.tsx:16-27`). |
-| **Profile “link” is a dead `href="#"` anchor** | ⚠️ Identified | `Sidebar` uses `<a href="#">` around the profile (`src/components/sidebar/Sidebar.tsx:49-60`), which can jump to top and is not meaningful navigation. Replace with a real route (`Link`) or a `<button>` if it triggers an action. |
-| **Redundant and dead code in `WidgetsGrid`** | ℹ️ Low Priority | `counter.toString() || "0"` is redundant because `"0"` is truthy, and there is a large commented-out block at the bottom (`src/components/dashboard/WidgetsGrid.tsx:11-31`). |
-| **`SimpleWidget` renders headings even when optional props are missing** | ℹ️ Low Priority | `label` is optional but always rendered inside `<h2>` (`src/components/dashboard/SimpleWidget.tsx:3-17`). It works (renders nothing for `undefined`) but may produce empty headings and inconsistent semantics. Decide whether `label` should be required or conditionally render it. |
+### 🧱 085.3 Pending Fixes (TODO)
 
-### 🧱 07.4 Pending Fixes (TODO)
-
-```md
+- [ ] (Issue) **Active link highlight fails on nested/dynamic routes**: `SidebarMenuItem` check is too simple.
+- [ ] (Issue) **Missing `aria-current` for active navigation item**: Lack of accessibility state.
+- [ ] (Issue) **Profile “link” is a dead `href="#"` anchor**: Not meaningful navigation.
+- [ ] (Issue) **Redundant and dead code in `WidgetsGrid`**: Redundant logic and commented code.
+- [ ] (Issue) **`SimpleWidget` renders headings even when optional props are missing**: Potential empty headings.
 - [ ] (P1 - Navigation) Improve active route matching for sidebar items to support nested/dynamic routes.
-  - Update the equality check to a safer matcher (e.g. `startsWith`) or a dedicated route matcher.
-  - File: `src/components/sidebar/SidebarMenuItem.tsx:14-27`
-
 - [ ] (P1 - Accessibility) Add `aria-current="page"` to the active sidebar link and ensure focus styles are visible.
-  - File: `src/components/sidebar/SidebarMenuItem.tsx`
-
-- [ ] (P2 - UX/Correctness) Replace the profile `<a href="#">` with a real `Link` to a profile page or a `<button>` (if it triggers an action).
-  - Add an accessible label if needed.
-  - File: `src/components/sidebar/Sidebar.tsx:49-60`
-
+- [ ] (P2 - UX/Correctness) Replace the profile `<a href="#">` with a real `Link` or a `<button>`.
 - [ ] (P3 - Cleanup) Remove the commented-out block and simplify redundant `counter.toString() || "0"` logic.
-  - File: `src/components/dashboard/WidgetsGrid.tsx:10-31`
-
-- [ ] (P3 - Component API) Decide whether `SimpleWidget.label` should be required or conditionally rendered to avoid empty headings.
-  - File: `src/components/dashboard/SimpleWidget.tsx:3-17`
-```
+- [ ] (P3 - Component API) Decide whether `SimpleWidget.label` should be required or conditionally rendered.
 
 
 
 <br>
 
-## 📚 08. Lesson 086 - *Task solution*
+### 📚 Lecture 086: Task solution
 
+- [📚 Lecture 086: Task solution](#-lecture-086-task-solution)
+    - [086.1 Context](#-0861-context)
+    - [086.2 Updating code according the context](#-0862-updating-code-according-the-context)
+        - [086.2.1 Update WidgetsGrid component](#-08621-update-widgetsgrid-component)
+        - [086.2.2 Refactor SimpleWidget.tsx component](#-08622-refactor-simplewidgettsx-component)
+    - [086.3 Pending Fixes (TODO)](#-0863-pending-fixes-todo)
 
-### 🧠 08.1 Context:
+### 🧠 086.1 Context
 
 This lesson serves as the solution for the previously assigned task: building a dynamic dashboard overview using information from the Redux store. It demonstrates the implementation of a reusable `SimpleWidget` component and a `WidgetsGrid` container that subscribes to the global state.
 
@@ -7882,10 +7203,10 @@ The task involved creating a modular UI where individual "widgets" can display d
 The lesson shows how to bridge the gap between "dumb" presentational components and "smart" container components that are connected to the Redux store, following best practices for state management in React.
 
 
-### ⚙️ 08.2 Updating code according the context:
+### ⚙️ 086.2 Updating code according the context
 
 
-#### 08.2.1 Update `WidgetsGrid` component:
+#### 086.2.1 Update `WidgetsGrid` component:
 ```tsx
 /* src/components/dashboard/WidgetsGrid.tsx */
 "use client";
@@ -7909,7 +7230,7 @@ export const WidgetsGrid = () => {
 };
 ```
 
-#### 08.2.2 Considering those optionnal props:
+#### 086.2.2 Considering those optionnal props:
 ```tsx
 /* src/components/dashboard/SimpleWidget.tsx */
 import Link from "next/link";
@@ -7946,26 +7267,27 @@ export const SimpleWidget = ({ title, subtitle, label, icon, href }: Props) => {
   );
 };
 ```
-### 🐞 08.3 Issues:
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Hardcoded Link Text** | ⚠️ Identified | The `SimpleWidget` component has a hardcoded string "Counter page" in its link, limiting its reuse for other types of widgets. |
-| **Dead Code in WidgetsGrid** | ⚠️ Identified | `src/components/dashboard/WidgetsGrid.tsx` contains commented-out code outside the component body (lines 20-30). |
-| **Invalid Tailwind Class** | ⚠️ Identified | `SimpleWidget.tsx` uses `border-1`, which is not a standard Tailwind class (standard is `border` or `border-2`). |
+### 🧱 086.3 Pending Fixes (TODO)
 
-### 🧱 08.4 Pending Fixes (TODO)
-
-- [ ] Refactor `SimpleWidget` to accept a `labelLink` prop to remove hardcoded "Counter page" text. (src/components/dashboard/SimpleWidget.tsx:28)
-- [ ] Remove unused commented code in `src/components/dashboard/WidgetsGrid.tsx`. (lines 20-30)
-- [ ] Correct the CSS class `border-1` to `border` in `SimpleWidget.tsx`. (line 13)
-
+- [ ] (Issue) **Hardcoded Link Text**: `SimpleWidget` has a hardcoded string "Counter page".
+- [ ] (Issue) **Dead Code in WidgetsGrid**: Commented-out code in `WidgetsGrid.tsx`.
+- [ ] (Issue) **Invalid Tailwind Class**: `border-1` is not a standard Tailwind class.
+- [ ] Refactor `SimpleWidget` to accept a `labelLink` prop to remove hardcoded "Counter page" text.
+- [ ] Remove unused commented code in `src/components/dashboard/WidgetsGrid.tsx`.
+- [ ] Correct the CSS class `border-1` to `border` in `SimpleWidget.tsx`.
 
 <br>
 
-## 📚 09. Lesson 087 - *RESTful Api - Get Counter*
+### 📚 Lecture 087: RESTful Api - Get Counter
 
+- [📚 Lecture 087: RESTful Api - Get Counter](#-lecture-087-restful-api---get-counter)
+    - [087.1 Context](#-0871-context)
+    - [087.2 Updating code according the context](#-0872-updating-code-according-the-context)
+        - [087.2.1 Verify the api](#-08721-verify-the-api)
+        - [087.2.2 Add/create route.ts file](#-08722-addcreate-routets-file)
+    - [087.3 Pending Fixes (TODO)](#-0873-pending-fixes-todo)
 
-### 🧠 09.1 Context:
+### 🧠 087.1 Context
 RESTful APIs in Next.js are implemented using **Route Handlers**, which allow you to create custom request handlers for a given route using the Web [Request](https://developer.mozilla.org/docs/Web/API/Request) and [Response](https://developer.mozilla.org/docs/Web/API/Response) APIs. They are the successor to API Routes from the Pages Router and provide a powerful way to handle various HTTP methods (GET, POST, PUT, DELETE, etc.) within the App Router directory structure.
 
 **When to use Route Handlers:**
@@ -7991,9 +7313,9 @@ RESTful APIs in Next.js are implemented using **Route Handlers**, which allow yo
 - **Server Components**: For data fetching that doesn't need to be exposed as an endpoint.
 
 
-### ⚙️ 09.2 Updating code according the context:
+### ⚙️ 087.2 Updating code according the context
 
-#### 09.2.1 Verify the api:
+#### 087.2.1 Verify the api:
 1. Run the app
 ```bash
 $ npm run dev
@@ -8012,7 +7334,7 @@ $ npm run dev
     ```
 
 
-#### 09.2.2 Add/create `route.ts` file:
+#### 087.2.2 Add/create `route.ts` file:
 
 ```tsx
 /* src/app/api/counter/route.ts */
@@ -8053,7 +7375,7 @@ export async function PATCH(request: Request) {
 }
 ```
 
-#### 08.2.3 Structure Project (Visual)
+#### 087.2.3 Structure Project (Visual)
 ```
 02-my-dashboard/
 │
@@ -8154,26 +7476,28 @@ export async function PATCH(request: Request) {
 ```
 
 
-### 🐞 09.3 Issues:
-| Issue | Status | Log/Error |
-|---|---|---|
-| **Hardcoded API Response** | ⚠️ Identified | The `GET` method in `src/app/api/counter/route.ts` returns a static object `{ count: 100 }` instead of dynamic data. |
-| **Lack of Request Validation** | ⚠️ Identified | POST, PUT, and PATCH methods do not validate the incoming request body, which could lead to errors if data is missing or malformed. |
-| **Missing Error Handling** | ⚠️ Identified | There are no `try-catch` blocks or conditional status codes to handle potential server-side failures in the API route. |
+### 🧱 087.3 Pending Fixes (TODO)
 
-### 🧱 09.4 Pending Fixes (TODO)
-
+- [ ] (Issue) **Hardcoded API Response**: `GET` method returns a static object `{ count: 100 }`.
+- [ ] (Issue) **Lack of Request Validation**: POST, PUT, and PATCH methods do not validate the incoming request body.
+- [ ] (Issue) **Missing Error Handling**: No `try-catch` blocks or conditional status codes.
 - [ ] Implement dynamic data fetching for the counter instead of hardcoded 100 in `src/app/api/counter/route.ts`.
 - [ ] Add validation logic for incoming request bodies in POST/PUT/PATCH methods.
-- [ ] Implement robust error handling with appropriate HTTP status codes (e.g., 201 for success, 400 for bad requests, 500 for server errors).
-
+- [ ] Implement robust error handling with appropriate HTTP status codes.
 
 <br>
 
-## 📚 10. Lesson 088 - *counter value from an API*
+### 📚 Lecture 088: counter value from an API
 
+- [📚 Lecture 088: counter value from an API](#-lecture-088-counter-value-from-an-api)
+    - [088.1 Context](#-0881-context)
+    - [088.2 Updating code according the context](#-0882-updating-code-according-the-context)
+        - [088.2.1 Create CounterResponse interface](#-08821-create-counterresponse-interface)
+        - [088.2.2 Create getApiCounter function](#-08822-create-getapicounter-function)
+        - [088.2.3 Using getApiCounter inside useEffect](#-08823-using-getapicounter-inside-useeffect)
+    - [088.3 Pending Fixes (TODO)](#-0883-pending-fixes-todo)
 
-### 🧠 10.1 Context:
+### 🧠 088.1 Context
 In Next.js, Route Handlers (API Routes) allow you to create custom request handlers for a given route using the Web Request and Response APIs. This lesson focuses on fetching dynamic data from an internal API endpoint (`/api/counter`) to initialize the global state in a Redux store. 
 
 Instead of relying on static props passed from a parent component, the `CartCounter` component now independently fetches its initial state upon mounting. This is achieved using the `useEffect` hook, which triggers an asynchronous call to the API and then dispatches the retrieved value to the Redux store via `initCounterState`.
@@ -8195,10 +7519,10 @@ Instead of relying on static props passed from a parent component, the `CartCoun
 - **Server Actions**: For mutations or more direct server-side interactions in Next.js.
 - **React Query/SWR**: For more advanced data fetching features like caching, revalidation, and automatic loading/error states.
 
-### ⚙️ 10.2 Updating code according the context:
+### ⚙️ 088.2 Updating code according the context
 
 
-#### 10.2.1 Create in `CartCunter.tsx` the `CounterResponse` interface:
+#### 088.2.1 Create in `CartCunter.tsx` the `CounterResponse` interface:
 ```tsx
 /* src/shopping-cart/components/CartCounter.tsx */
 "use client";
@@ -8244,7 +7568,7 @@ const CartCounter = ({ value = 0 }: Props) => {
 export default CartCounter;
 ```
 
-#### 10.2.2 Create a new function in order to read from the API:
+#### 088.2.2 Create a new function in order to read from the API:
 ```tsx
 /* src/shopping-cart/components/CartCounter.tsx */
 "use client";
@@ -8298,7 +7622,7 @@ const CartCounter = ({ value = 0 }: Props) => {
 export default CartCounter;
 ```
 
-#### 10.2.3 Using the `getApiCounter` function inside a new `useEffect` hook definition:
+#### 088.2.3 Using the `getApiCounter` function inside a new `useEffect` hook definition:
 ```tsx
 /* src/shopping-cart/components/CartCounter.tsx */
 "use client";
@@ -8361,19 +7685,204 @@ export default CartCounter;
 ```
 ![](../img/section07-lecture088-001.png)
 
-### 🐞 10.3 Issues:
+### 🧱 088.3 Pending Fixes (TODO)
+
+- [x] (Issue) **Stability of `dispatch` in `useEffect`**: `dispatch` is a stable function provided by Redux.
+- [x] (Issue) **Missing error handling in `getApiCounter`**: If the fetch fails, the error is not caught.
+- [x] (Issue) **Lack of loading state in UI**: No visual feedback while the API request is pending.
+- [x] Add `try-catch` error handling to the `getApiCounter` function in `src/shopping-cart/components/CartCounter.tsx`.
+- [x] Implement a loading indicator (e.g., a spinner or skeleton) in `CartCounter` while `getApiCounter` is fetching.
+- [x] Move `CounterResponse` and `getApiCounter` to a separate utility or service file.
+
+
+<br>
+
+## 📚 93. Lesson 093 - *PokemonsSlice*
+
+
+### 🧠 93.1 Context:
+
+The `createSlice` function from Redux Toolkit is used to define the state logic for a specific feature, in this case, the `pokemons` favorites. 
+
+- **What it is**: A slice is a collection of Redux reducer logic and actions for a single feature.
+- **When it is used**: It is used when you want to manage a specific part of the global state (like a list of favorites) in a structured and scalable way.
+- **Examples in the project**: We use it for the `counter` (in `counterSlice.ts`) and now for `pokemons` (in `pokemonsSlice.ts`).
+- **Advantages**:
+  - Automatically generates action creators.
+  - Simplifies reducer logic by using Immer (allowing "mutative" syntax that is actually immutable).
+  - Reduces boilerplate compared to traditional Redux.
+- **Disadvantages**: Can be overkill for very simple state that doesn't need to be global.
+- **Alternatives**: React Context API or simpler state management libraries like Zustand for smaller projects.
+
+This lesson focuses on setting up the initial structure for managing favorite pokemons using an object-based state for efficient lookup.
+
+
+### ⚙️ 93.2 Updating code according the context:
+
+#### 93.2.0 Summary of Existing Code:
+The implementation establishes a new Redux slice called `pokemons` designed to store a dictionary of favorite pokemons. It defines a `PokemonState` interface using a string index signature to allow fast O(1) lookups by pokemon ID. The slice is initialized with some test data and integrated into the global store, which also exposes typed hooks (`useAppDispatch`, `useAppSelector`) for better developer experience in TypeScript.
+
+#### 93.2.1 Creating `PokemonsSlice`:
+```tsx
+/* src/store/pokemons/pokemonsSlice.ts */
+import { createSlice } from "@reduxjs/toolkit";
+import { SimplePokemon } from "@/pokemons";
+/*
+  { '1': {id: '1', name 'bulbasaur'},... }
+*/
+interface PokemonState {    // 👈🏽 ✅
+  [key: string]: SimplePokemon;
+}
+const initialState: PokemonState = {    // 👈🏽 ✅
+  "1": { id: "1", name: "bulbasaur" },
+};
+const pokemonsSlice = createSlice({   // 👈🏽 ✅
+  name: "pokemons",
+  initialState,
+  reducers: {},
+});
+export const {} = pokemonsSlice.actions;
+export default pokemonsSlice.reducer;
+```
+
+#### 93.2.2 Add `PokemonsSlice` to the `Store`:
+```tsx
+/* src/store/index.ts */
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "./counter/counterSlice";
+import { useDispatch, useSelector } from "react-redux";
+import pokemonsReducer from "./pokemons/pokemonsSlice";   // 👈🏽 ✅
+export const store = configureStore({
+  reducer: {
+    counter: counterReducer,
+    pokemons: pokemonsReducer,    // 👈🏽 ✅
+  },
+});
+// Infer the `RootState` and `AppDispatch` types from the store itself.
+export type RootState = ReturnType<typeof store.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsStaate, users: UsersState}
+export type AppDispatch = typeof store.dispatch;
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+
+#### 93.2.3 Project tree:
+```
+02-my-dashboard/
+│
+├── 📄 package.json                       # Dependencies and scripts configuration
+├── 📄 package-lock.json                  # Dependencies lock file
+├── 📄 tsconfig.json                      # TypeScript configuration
+├── 📄 next.config.ts                     # Next.js configuration
+├── 📄 next-env.d.ts                      # Next.js types
+├── 📄 eslint.config.mjs                  # ESLint configuration
+├── 📄 postcss.config.mjs                 # PostCSS configuration
+├── 📄 README.md                          # Project documentation
+│
+├── 📁 docs/                              # Course documentation
+│   └── 📄 LECTURE_STEPS.md
+│
+├── 📁 img/                               # Course reference images
+│   └── 📄 ....
+│
+├── 📁 public/                            # Public static files
+│   ├── 📄 file.svg
+│   ├── 📄 globe.svg
+│   ├── 📄 next.svg
+│   ├── 📄 vercel.svg
+│   └── 📄 window.svg
+│
+├── 📁 node_modules/                      # Installed dependencies (ignored)
+│
+└── 📁 src/                               # Main source code
+    │
+    ├── 📁 app/                           # Next.js App Router
+    │   ├── 📄 layout.tsx                 # Root layout
+    │   ├── 📄 page.tsx                   # Home page
+    │   ├── 📄 not-found.tsx              # Global not found page
+    │   ├── 📄 globals.css                # Global styles
+    │   ├── 📄 favicon.ico                # Site favicon
+    │   │
+    │   ├── 📁 api/                       # API Routes (Route Handlers)
+    │   │   └── 📁 counter/
+    │   │       └── 📄 route.ts           # Counter API endpoint
+    │   │
+    │   └── 📁 dashboard/                 # Dashboard routes
+    │       ├── 📄 layout.tsx             # Dashboard layout
+    │       │
+    │       ├── 📁 main/                  # Main dashboard page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 counter/               # Counter page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 favourites/            # Favorites page
+    │       │   └── 📄 page.tsx
+    │       │
+    │       ├── 📁 pokemon/               # Pokemon detail by ID
+    │       │   └── 📁 [id]/              # Dynamic route
+    │       │       ├── 📄 page.tsx
+    │       │       └── 📄 not-found.tsx
+    │       │
+    │       └── 📁 pokemons/              # Pokemons list
+    │           ├── 📄 page.tsx
+    │           ├── 📄 error.tsx          # Error boundary
+    │           └── 📁 [name]/            # Dynamic route by name
+    │               ├── 📄 page.tsx
+    │               └── 📄 not-found.tsx
+    │
+    ├── 📁 components/                    # Shared components
+    │   ├── 📄 index.ts                   # Central export file (Barrel)
+    │   ├── 📁 dashboard/                 # Dashboard specific components
+    │   │   ├── 📄 SimpleWidget.tsx       # Simple widget component
+    │   │   └── 📄 WidgetsGrid.tsx        # Grid for organizing widgets
+    │   └── 📁 sidebar/                   # Sidebar components
+    │       ├── 📄 Sidebar.tsx            # Main Sidebar component
+    │       └── 📄 SidebarMenuItem.tsx    # Individual menu item
+    │
+    ├── 📁 pokemons/                      # Pokemon feature module
+    │   ├── 📄 index.ts                   # Module central export
+    │   │
+    │   ├── 📁 components/                # Pokemon-specific components
+    │   │   ├── 📄 PokemonCard.tsx        # Pokemon card component
+    │   │   └── 📄 PokemonGrid.tsx        # Pokemon grid component
+    │   │
+    │   └── 📁 interfaces/                # TypeScript interfaces
+    │       ├── 📄 pokemon.ts             # Detailed Pokemon interface
+    │       ├── 📄 simple-pokemon.ts      # Simplified Pokemon interface
+    │       └── 📄 pokemon-response.ts    # Pokemon API response interface
+    │
+    ├── 📁 shopping-cart/                 # Shopping cart feature module
+    │   ├── 📄 index.ts                   # Central export
+    │   │
+    │   └── 📁 components/                # Shopping cart components
+    │       └── 📄 CartCounter.tsx        # Cart counter component (Client Component)
+    │
+    └── 📁 store/                         # State management with Redux (RTK)
+        ├── 📄 index.ts                   # ✅ 👈🏽 Store configuration
+        ├── 📄 Providers.tsx              # Store provider wrapper
+        │
+        ├── 📁 counter/                   # Counter slice
+        │   └── 📄 counterSlice.ts        # Redux logic for the pokemons
+        └── 📁 pokemons/                  # ✅ 👈🏽 pokemons slice
+            └── 📄 pokemonsSlice.ts       # ✅ 👈🏽 Redux logic for the pokemons
+```
+
+
+### 🐞 93.3 Issues:
 | Issue | Status | Log/Error |
 |---|---|---|
-| Stability of `dispatch` in `useEffect` | ✅ Answered | `dispatch` is a stable function provided by Redux. It does not change between renders, so including it in the dependency array ensures the effect runs only once on mount. |
-| Missing error handling in `getApiCounter` | ⚠️ Identified | If the fetch to `/api/counter` fails, the error is not caught, which could crash the component or leave it in an undefined state. |
-| Lack of loading state in UI | ⚠️ Identified | There is no visual feedback to the user while the API request is pending, leading to a potentially confusing UX. |
+| **Empty Reducers** | ⚠️ Identified | The `reducers` object in `pokemonsSlice.ts` is currently empty, so no actions are available to modify the favorites state. |
+| **Hardcoded Initial State** | ⚠️ Identified | The `initialState` in `pokemonsSlice.ts` contains hardcoded test data ("bulbasaur", "Ivysaur") which should be removed or handled dynamically. |
+| **Comment Typo** | ⚠️ Identified | In `pokemonsSlice.ts`, line 6 has a typo in the comment: `{id: 1, name 'bulbasaur'}`. The ID is shown as a number instead of a string, and a colon is missing after `name`. |
 
-### 🧱 10.4 Pending Fixes (TODO)
+### 🧱 93.4 Pending Fixes (TODO)
 
-- [ ] Add `try-catch` error handling to the `getApiCounter` function in `src/shopping-cart/components/CartCounter.tsx`.
-- [ ] Implement a loading indicator (e.g., a spinner or skeleton) in `CartCounter` while `getApiCounter` is fetching.
-- [ ] Move `CounterResponse` and `getApiCounter` to a separate utility or service file to improve maintainability.
-
+- [ ] Add the `toggleFavorite` action to the `pokemonsSlice` reducers in `src/store/pokemons/pokemonsSlice.ts`.
+- [ ] Remove hardcoded test data from `initialState` in `src/store/pokemons/pokemonsSlice.ts`.
+- [ ] Fix the documentation comment typo in `src/store/pokemons/pokemonsSlice.ts` on line 6.
+- [ ] Implement the logic to persist favorite pokemons (e.g., in LocalStorage) in future lessons.
 
 
 
