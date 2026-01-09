@@ -7755,7 +7755,7 @@ import pokemonsReducer from "./pokemons/pokemonsSlice";   // 👈🏽 ✅
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    pokemons: pokemonsReducer,    // 👈🏽 ✅
+    pokemonFavorites: pokemonsReducer,    // 👈🏽 ✅
   },
 });
 // Infer the `RootState` and `AppDispatch` types from the store itself.
@@ -7884,6 +7884,314 @@ export const useAppSelector = useSelector.withTypes<RootState>();
 - [ ] Fix the documentation comment typo in `src/store/pokemons/pokemonsSlice.ts` on line 6.
 - [ ] Implement the logic to persist favorite pokemons (e.g., in LocalStorage) in future lessons.
 
+
+<br>
+
+## 📚 94. Lesson 094 - *Showing changes in Favourites UI*
+
+
+### 🧠 94.1 Context:
+
+Conditional UI rendering is a fundamental concept in React where the user interface changes dynamically based on certain conditions or state values. In this lesson, we apply this to show whether a Pokemon is part of the user's favorites.
+
+When a user interacts with an application, they expect immediate visual feedback. By connecting the `PokemonCard` component to the Redux store using `useAppSelector`, we can determine the "favorited" status of a specific Pokemon and update the UI accordingly.
+
+**Advantages:**
+- **Synchronized UI**: All components reflecting the same data will stay in sync.
+- **Improved UX**: Clear visual indicators (icons, colors, text) help users understand the current state.
+- **Single Source of Truth**: Redux manages the favorites state, making it predictable.
+
+**Disadvantages:**
+- **Coupling**: The component becomes dependent on the Redux store structure.
+- **Complexity**: Adds boilerplate compared to simple local state.
+
+**When to consider alternatives:**
+- If the state is only needed within a single component, use `useState`.
+- For simpler prop sharing without full state management, use the `Context API`.
+
+### ⚙️ 94.2 Updating code according the context:
+
+#### Summary of Existing Code & Examples
+The implementation focuses on reflecting the Redux state in the `PokemonCard` component. It uses `useAppSelector` to access the `pokemonFavorites` slice and checks if the current Pokemon's ID exists as a key. A boolean `isFav` is derived (using double negation `!!` or explicit comparison with `undefined` for type safety), which then drives the conditional rendering of icons (`IoHeart` vs `IoHeartOutline`), text labels, and CSS classes to provide clear visual distinction between favorite and non-favorite states.
+
+
+#### 94.2.1 Remembering those initialState for Pokemon store:
+```tsx
+/* src/store/pokemons/pokemonsSlice.ts */
+import { createSlice } from "@reduxjs/toolkit";
+import { SimplePokemon } from "@/pokemons";
+/*{'1': {id: 1, name 'bulbasaur'},...}*/
+interface PokemonState {
+  [key: string]: SimplePokemon;
+}
+const initialState: PokemonState = {
+  "1": { id: "1", name: "bulbasaur" },    // 👈🏽 ✅
+  "2": { id: "2", name: "Ivysaur" },      // 👈🏽 ✅
+};
+const pokemonsSlice = createSlice({
+  name: "pokemons",
+  initialState,
+  reducers: {},
+});
+export const {} = pokemonsSlice.actions;
+export default pokemonsSlice.reducer;
+```
+
+![initialState in Pokemon Store/slice](../img/section08-lecture094-001.png)
+
+#### 94.2.2 Verify those icons working with 
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">
+              <IoHeart size={20} />           {/* 👈🏽 ✅ */}
+              <IoHeartOutline size={20} />    {/* 👈🏽 ✅ */}
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">
+                It's favourite"
+              </p>
+              <p className="text-xs text-gray-500">Click to remove from favorites</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default PokemonCard;
+```
+
+#### 94.2.3 Adding the Pokemon store
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
+import { useAppSelector } from "@/store";     // 👈🏽 ✅
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+  const isFav = useAppSelector((state) => state.pokemonFavorites);      // 👈🏽 ✅
+  console.log({ isFav });     // 👈🏽 ✅
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">
+              <IoHeart size={20} />           {/* 👈🏽 ✅ */}
+              <IoHeartOutline size={20} />    {/* 👈🏽 ✅ */}
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">
+                It's favourite"
+              </p>
+              <p className="text-xs text-gray-500">Click to remove from favorites</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default PokemonCard;
+```
+![use client missing](../img/section08-lecture094-002.png)
+
+Fixing:
+* Adding "use client"
+
+#### 94.2.4 working with each pokemon ID:
+
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
+import { useAppSelector } from "@/store";     // 👈🏽 ✅
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+  const isFav = useAppSelector((state) => state.pokemonFavorites[id]);      // 👈🏽 ✅
+  console.log({ isFav });  
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">
+              <IoHeart size={20} />           
+              <IoHeartOutline size={20} />    
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">
+                It's favourite"
+              </p>
+              <p className="text-xs text-gray-500">Click to remove from favorites</p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default PokemonCard;
+```
+
+![working with pokemon IDs](../img/section08-lecture094-003.png)
+
+Note:
+* Add doble negation in cast to boolean value:
+```tsx
+....
+  const isFav = useAppSelector((state) => !!state.pokemonFavorites[id]);  // 👈🏽 ✅
+  console.log({ isFav });
+....
+```
+
+or another way:
+```tsx
+....
+  const isFav = useAppSelector((state) => state.pokemonFavorites[id] !== undefined);  // 👈🏽 ✅
+  console.log({ isFav });
+....
+```
+
+![boolean result from each pokemon ID](../img/section08-lecture094-004.png)
+
+
+#### 94.2.5 Adding visual changes due to isFav boolean value:
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
+import { useAppSelector } from "@/store";
+interface Props {
+  pokemon: SimplePokemon;
+}
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+  const isFav = useAppSelector((state) => !!state.pokemonFavorites[id]);
+  console.log({ isFav });
+  if (!id) return null;
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+  const action = isFav
+    ? { text: "remove", className: "font-bold text-red-500", suffix: " from favourite" }    // 👈🏽 ✅
+    : { text: "add", className: "font-bold text-blue-500 italic text-sm", suffix: " to favourite" };    // 👈🏽 ✅
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+            <div className="text-red-600">{isFav ? <IoHeart size={20} /> : <IoHeartOutline size={20} />}</div>  {/* 👈🏽 ✅ */}
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">
+                {isFav ? "It's favourite" : "It's not favourite"}  {/* 👈🏽 ✅ */}
+              </p>
+              <p className="text-xs text-gray-500">
+                Click to <span className={action.className}>{action.text}</span>  {/* 👈🏽 ✅ */}
+                {action.suffix} {/* 👈🏽 ✅ */}
+              </p>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default PokemonCard;
+```
+
+![Visual changes ddue to isFav boolean value](../img/section08-lecture094-005.png)
+
+
+### 🐞 94.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
+| **Hardcoded Initial State** | ⚠️ Identified | The `pokemonsSlice.ts` has "1" and "2" hardcoded in `initialState`. |
+| **Missing Toggle Interaction** | ⚠️ Identified | The favorite section in `PokemonCard.tsx` uses a `Link` to `/dashboard/main` instead of an action to toggle favorites. |
+| **Typo in UI Text** | ⚠️ Identified | In `PokemonCard.tsx`, there is a trailing quote in "It's favourite\"" (line 8068/8144 in snippets) and inconsistent spelling of "favourite" (UK) vs "favorite" (US). |
+
+### 🧱 94.4 Pending Fixes (TODO)
+
+- [ ] Implement `toggleFavorite` action in `src/store/pokemons/pokemonsSlice.ts`.
+- [ ] Update `PokemonCard.tsx` to use a button and dispatch the toggle action instead of a `Link`.
+- [ ] Clear hardcoded `initialState` in `src/store/pokemons/pokemonsSlice.ts` for a clean start.
+- [ ] Fix the trailing quote and normalize "favorite" spelling in `src/pokemons/components/PokemonCard.tsx`.
 
 
 

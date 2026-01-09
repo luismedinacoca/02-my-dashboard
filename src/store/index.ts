@@ -6,7 +6,7 @@ import pokemonsReducer from "./pokemons/pokemonsSlice";
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    pokemons: pokemonsReducer,
+    pokemonFavorites: pokemonsReducer,
   },
 });
 
