@@ -3,3 +3,4 @@ export type { SimplePokemon } from "./interfaces/simple-pokemon";
 export type { Pokemon } from "./interfaces/pokemon";
 
 export { default as PokemonGrid } from "./components/PokemonGrid";
+export { default as FavouritePokemons } from "./components/FavouritePokemons";

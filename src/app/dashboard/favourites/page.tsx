@@ -1,3 +1,4 @@
+import { FavouritePokemons } from "@/pokemons";
 import PokemonGrid from "../../../pokemons/components/PokemonGrid";
 
 export const metadata = {
@@ -12,7 +13,8 @@ export default async function PokemonsPage() {
         Favourites Pokémons & <span className="text-blue-500">Global State</span>
       </span>
 
-      <PokemonGrid pokemons={[]} />
+      {/* <PokemonGrid pokemons={[]} /> */}
+      <FavouritePokemons />
     </div>
   );
 }

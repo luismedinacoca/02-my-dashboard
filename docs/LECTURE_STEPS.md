@@ -5241,6 +5241,7 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
     - [📚 Lecture 093: PokemonsSlice](#-lecture-093-pokemonsslice)
     - [📚 Lecture 094: Showing changes in Favourites UI](#-lecture-094-showing-changes-in-favourites-ui)
     - [📚 Lecture 095: Favourite Toggle](#-lecture-095-favourite-toggle)
+    - [📚 Lecture 096: Favourite page](#-lecture-096-favourite-page)
 
 ---
 
@@ -8378,7 +8379,146 @@ export default PokemonCard;
 - [ ] Add a confirmation toast or notification when a Pokemon is added/removed from favorites.
 - [ ] Optimize the `PokemonCard` component to prevent unnecessary re-renders when other cards are toggled.
 
+<br>
 
+## 📚 Lecture 096: Favourite page
+
+- [Lecture 096: Favourite page](#-lecture-096-favourite-page)
+    - [96.1 Context](#-961-context)
+    - [96.2 Updating code according the context](#-962-updating-code-according-the-context)
+        - [96.2.1 Exporting the component from the barrel file](#-9621-exporting-the-component-from-the-barrel-file)
+        - [96.2.2 Updating the Favourites Page](#-9622-updating-the-favourites-page)
+        - [96.2.3 Implementing the FavouritePokemons component](#-9623-implementing-the-favouritepokemons-component)
+    - [96.3 Pending Fixes (TODO)](#-963-pending-fixes-todo)
+
+### 🧠 96.1 Context
+
+In previous lessons, we implemented the global state for favorite Pokemons using Redux Toolkit. However, the favorites page (`/dashboard/favourites`) was still using an empty array, resulting in no Pokemons being displayed even when they were added to the global state.
+
+![favourtie pokemons is not displayed](../img/section08-lecture096-001.png)
+
+This lesson focuses on connecting the UI to the global state. Since the Redux store is only accessible via Client Components, we create a new component `FavouritePokemons` that uses `useAppSelector` to fetch the data from the store and pass it to the existing `PokemonGrid` component.
+
+**Key concepts covered:**
+- Converting a Server Page into a Client-aware page using a wrapper component.
+- Transforming an object-based state (dictionary) into an array for rendering.
+- Reusing existing grid components with dynamic data.
+
+### ⚙️ 96.2 Updating code according the context
+
+#### 96.2.1 Exporting the component from the barrel file:
+
+We add the `FavouritePokemons` component to our barrel file to make it easily accessible from other parts of the application.
+
+```tsx
+/* src/pokemons/index.ts */
+export type { PokemonsResponse } from "./interfaces/pokemon-response";
+export type { SimplePokemon } from "./interfaces/simple-pokemon";
+export type { Pokemon } from "./interfaces/pokemon";
+
+export { default as PokemonGrid } from "./components/PokemonGrid";
+export { default as FavouritePokemons } from "./components/FavouritePokemons"; // 👈🏽 ✅ (1)
+```
+
+#### 96.2.2 Updating the Favourites Page:
+
+We update the `Favourites` page to use the `FavouritePokemons` component. Note that the page itself remains a Server Component (allowing for metadata), but it now renders a Client Component that handles the state connection.
+
+```tsx
+/* src/app/dashboard/favourites/page.tsx */
+import { FavouritePokemons } from "@/pokemons"; // 👈🏽 ✅ (1)
+
+export const metadata = {
+  title: "Favourites",
+  description: "lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.",
+};
+
+export default async function PokemonsPage() {
+  return (
+    <div className="flex flex-col">
+      <span className="text-5xl my-2 text-center">
+        Favourites Pokémons & <span className="text-blue-500">Global State</span>
+      </span>
+
+      <FavouritePokemons /> {/* 👈🏽 ✅ (2) */}
+    </div>
+  );
+}
+```
+
+#### 96.2.3 Implementing the `FavouritePokemons` component:
+
+This component is marked with `"use client"` to access the Redux store. It extracts the favorites from the state. We use `Object.values` because the store holds favorites as an object (for $O(1)$ lookups), but the `PokemonGrid` expects an array.
+
+```tsx
+/* src/pokemons/components/FavouritePokemons.tsx */
+"use client"; // 👈🏽 ✅ (1)
+
+import { useAppSelector } from "@/store"; // 👈🏽 ✅ (2)
+import PokemonGrid from "./PokemonGrid";
+
+const FavouritePokemons = () => {
+  // Extracting favorites and converting to array
+  const favouritePokemons = useAppSelector((state) => Object.values(state.pokemonFavorites)); // 👈🏽 ✅ (3)
+
+  return (
+    <div>
+      <PokemonGrid pokemons={favouritePokemons} /> {/* 👈🏽 ✅ (4) */}
+    </div>
+  );
+};
+
+export default FavouritePokemons;
+```
+
+![object vs array](../img/section08-lecture096-002.png)
+
+The result is a fully functional favorites page that updates in real-time when Pokemons are toggled.
+
+![](../img/section08-lecture096-003.png)
+
+### 🧱 96.3 Pending Fixes (TODO)
+
+- [ ] Implement a "No favorites found" state with a friendly message and a link back to the main list.
+- [ ] Fix potential accessibility issues when clicking on the favorite container by error.
+- [ ] Investigate if converting the entire object to an array on every render has performance implications for very large lists.
+
+
+---
+
+## 🔥 🔥 🔥
+
+---
+
+[TEMPLATE]
+
+
+<br>
+
+## 📚 XX. Lesson YYY - *{{TITLE_NAME}}*
+
+
+### 🧠 XX.1 Context:
+
+
+### ⚙️ XX.2 Updating code according the context:
+
+
+#### XX.2.1
+```tsx
+/*  */
+
+```
+
+#### XX.2.2
+```tsx
+/*  */
+
+```
+
+### 🐞 XX.3 Issues:
+| Issue | Status | Log/Error |
+|---|---|---|
 
 
 
