@@ -5238,6 +5238,9 @@ const getPokemon = async (id: string): Promise<Pokemon> => {
     - [📚 Lecture 086: Task solution](#-lecture-086-task-solution)
     - [📚 Lecture 087: RESTful Api - Get Counter](#-lecture-087-restful-api---get-counter)
     - [📚 Lecture 088: counter value from an API](#-lecture-088-counter-value-from-an-api)
+    - [📚 Lecture 093: PokemonsSlice](#-lecture-093-pokemonsslice)
+    - [📚 Lecture 094: Showing changes in Favourites UI](#-lecture-094-showing-changes-in-favourites-ui)
+    - [📚 Lecture 095: Favourite Toggle](#-lecture-095-favourite-toggle)
 
 ---
 
@@ -7887,53 +7890,66 @@ export const useAppSelector = useSelector.withTypes<RootState>();
 
 <br>
 
-## 📚 94. Lesson 094 - *Showing changes in Favourites UI*
+## 📚 Lecture 094: Showing changes in Favourites UI
 
+- [Lecture 094: Showing changes in Favourites UI](#-lecture-094-showing-changes-in-favourites-ui)
+    - [94.1 Context](#-941-context)
+    - [94.2 Updating code according the context](#-942-updating-code-according-the-context)
+        - [94.2.1 Initial State in PokemonsSlice](#-9421-initial-state-in-pokemonsslice)
+        - [94.2.2 Conditional Rendering in PokemonCard](#-9422-conditional-rendering-in-pokemoncard)
+    - [94.3 Pending Fixes (TODO)](#-943-pending-fixes-todo)
 
-### 🧠 94.1 Context:
+### 🧠 94.1 Context
 
 Conditional UI rendering is a fundamental concept in React where the user interface changes dynamically based on certain conditions or state values. In this lesson, we apply this to show whether a Pokemon is part of the user's favorites.
 
 When a user interacts with an application, they expect immediate visual feedback. By connecting the `PokemonCard` component to the Redux store using `useAppSelector`, we can determine the "favorited" status of a specific Pokemon and update the UI accordingly.
 
-**Advantages:**
-- **Synchronized UI**: All components reflecting the same data will stay in sync.
-- **Improved UX**: Clear visual indicators (icons, colors, text) help users understand the current state.
-- **Single Source of Truth**: Redux manages the favorites state, making it predictable.
+**What this lesson covers:**
+- Reading the `pokemonFavorites` state from the Redux store using `useAppSelector`.
+- Deriving a boolean `isFav` status for the specific Pokemon ID.
+- Implementing conditional rendering for icons (`IoHeart` vs `IoHeartOutline`).
+- Adapting text labels and CSS classes based on the favorite status.
 
-**Disadvantages:**
-- **Coupling**: The component becomes dependent on the Redux store structure.
-- **Complexity**: Adds boilerplate compared to simple local state.
-
-**When to consider alternatives:**
-- If the state is only needed within a single component, use `useState`.
-- For simpler prop sharing without full state management, use the `Context API`.
+**Why it's important:**
+- **Reactive UI**: The UI automatically updates whenever the underlying state changes.
+- **Visual Clarity**: Users get immediate information about which items they have already saved.
+- **Lookup Optimization**: By using the Pokemon ID as a key in the state object, we can perform an $O(1)$ lookup to check the favorite status.
 
 ### ⚙️ 94.2 Updating code according the context:
 
-#### Summary of Existing Code & Examples
-The implementation focuses on reflecting the Redux state in the `PokemonCard` component. It uses `useAppSelector` to access the `pokemonFavorites` slice and checks if the current Pokemon's ID exists as a key. A boolean `isFav` is derived (using double negation `!!` or explicit comparison with `undefined` for type safety), which then drives the conditional rendering of icons (`IoHeart` vs `IoHeartOutline`), text labels, and CSS classes to provide clear visual distinction between favorite and non-favorite states.
+#### 94.2.1 Initial State in `PokemonsSlice`:
 
+Before we can show favorites, we ensure our initial state has some data for testing purposes. We use an object structure where keys are Pokemon IDs.
 
-#### 94.2.1 Remembering those initialState for Pokemon store:
 ```tsx
 /* src/store/pokemons/pokemonsSlice.ts */
 import { createSlice } from "@reduxjs/toolkit";
 import { SimplePokemon } from "@/pokemons";
-/*{'1': {id: 1, name 'bulbasaur'},...}*/
+
+/*
+  {
+    '1': {id: 1, name 'bulbasaur'},...
+  }
+*/
+
 interface PokemonState {
   [key: string]: SimplePokemon;
 }
-const initialState: PokemonState = {
-  "1": { id: "1", name: "bulbasaur" },    // 👈🏽 ✅
-  "2": { id: "2", name: "Ivysaur" },      // 👈🏽 ✅
+
+const initialState: PokemonState = { // 👈🏽 ✅ (1)
+  "1": { id: "1", name: "bulbasaur" },
+  "2": { id: "2", name: "Ivysaur" },
 };
+
 const pokemonsSlice = createSlice({
   name: "pokemons",
   initialState,
-  reducers: {},
+  reducers: {
+    // Reducers will be added in next lesson
+  },
 });
-export const {} = pokemonsSlice.actions;
+
 export default pokemonsSlice.reducer;
 ```
 
@@ -8194,6 +8210,173 @@ export default PokemonCard;
 - [ ] Fix the trailing quote and normalize "favorite" spelling in `src/pokemons/components/PokemonCard.tsx`.
 
 
+
+<br>
+
+## 📚 Lecture 095: Favourite Toggle
+
+- [Lecture 095: Favourite Toggle](#-lecture-095-favourite-toggle)
+    - [95.1 Context](#-951-context)
+    - [95.2 Updating code according the context](#-952-updating-code-according-the-context)
+        - [95.2.1 Adding the toggleFavourite in PokemonsSlice](#-9521-adding-the-togglefavourite-in-pokemonsslice)
+        - [95.2.2 Adding toggle function in PokemonCard](#-9522-adding-toggle-function-in-pokemoncard)
+    - [95.3 Pending Fixes (TODO)](#-953-pending-fixes-todo)
+
+### 🧠 95.1 Context
+
+This lesson focuses on implementing the "toggle favorite" functionality using Redux Toolkit. The goal is to allow users to add or remove Pokemons from their favorites list by clicking a heart icon on the Pokemon card. This demonstrates how to handle complex state updates (adding/removing from an object) and how to dispatch actions from client components.
+
+**What this lesson covers:**
+- Implementing a `toggleFavourite` reducer in the `pokemonsSlice`.
+- Using `PayloadAction` to pass the entire Pokemon object to the reducer.
+- Dispatching the `toggleFavourite` action from the `PokemonCard` component.
+- Updating the UI to reflect the favorite status (changing icons and text).
+
+**Why it's important:**
+- **State Efficiency**: Using an object (lookup table) for favorites allows for $O(1)$ time complexity when checking if a Pokemon is a favorite, which is much better than searching through an array.
+- **Client Interactivity**: Shows how to use `useAppDispatch` to trigger state changes from the UI.
+- **Conditional Rendering**: Demonstrates how to change the look and feel of a component based on the global state.
+
+### ⚙️ 95.2 Updating code according the context
+
+#### 95.2.1 Adding the `toggleFavourite` in `PokemonsSlice`:
+
+We update the `pokemonsSlice` to include the `toggleFavourite` reducer. This reducer checks if the Pokemon ID already exists in the state. If it does, it deletes it; otherwise, it adds the Pokemon to the state.
+
+```tsx
+/* src/store/pokemons/pokemonsSlice.ts */
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { SimplePokemon } from "@/pokemons";
+
+/*
+  {
+    '1': {id: 1, name 'bulbasaur'},...
+  }
+*/
+
+interface PokemonState {
+  [key: string]: SimplePokemon;
+}
+
+const initialState: PokemonState = {
+  "1": { id: "1", name: "bulbasaur" },
+  "2": { id: "2", name: "Ivysaur" },
+};
+
+const pokemonsSlice = createSlice({
+  name: "pokemons",
+  initialState,
+  reducers: {
+    toggleFavourite(state, action: PayloadAction<SimplePokemon>) { // 👈🏽 ✅ (1)
+      const pokemon = action.payload;
+      const { id } = pokemon;
+
+      if (!!state[id]) { // 👈🏽 ✅ (2)
+        delete state[id];
+        return;
+      }
+
+      state[id] = pokemon; // 👈🏽 ✅ (3)
+    },
+  },
+});
+
+export const { toggleFavourite } = pokemonsSlice.actions; // 👈🏽 ✅ (4)
+
+export default pokemonsSlice.reducer;
+```
+
+#### 95.2.2 Adding `toggle` function in `PokemonCard`:
+
+We update the `PokemonCard` component to dispatch the `toggleFavourite` action when the favorite container is clicked. We also update the UI to show different icons and text depending on whether the Pokemon is a favorite.
+
+```tsx
+/* src/pokemons/components/PokemonCard.tsx */
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { SimplePokemon } from "../interfaces/simple-pokemon";
+import { IoHeart, IoHeartOutline } from "react-icons/io5";
+import { useAppDispatch, useAppSelector } from "@/store"; // 👈🏽 ✅ (1)
+import { toggleFavourite } from "@/store/pokemons/pokemonsSlice"; // 👈🏽 ✅ (2)
+
+interface Props {
+  pokemon: SimplePokemon;
+}
+
+const PokemonCard = ({ pokemon }: Props) => {
+  const { id, name } = pokemon;
+
+  const isFav = useAppSelector((state) => !!state.pokemonFavorites[id]); // 👈🏽 ✅ (3)
+  const dispatch = useAppDispatch(); // 👈🏽 ✅ (4)
+
+  const handleToggle = () => { // 👈🏽 ✅ (5)
+    dispatch(toggleFavourite(pokemon));
+  };
+
+  if (!id) return null;
+  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
+
+  const action = isFav
+    ? { text: "remove", className: "font-bold text-red-500", suffix: " from favourite" }
+    : { text: "add", className: "font-bold text-blue-500 italic text-sm", suffix: " to favourite" };
+
+  return (
+    <div className="mx-auto right-0 mt-2 w-60">
+      <div className="flex flex-col bg-white rounded rounded-lg overflow-hidden shadow-lg">
+        <div className="flex flex-col items-center justify-center text-center p-6 bg-gray-800 border-b">
+          <Image key={id} src={imageUrl} width={100} height={100} alt={name} priority={false} />
+          <p className="pt-2 text-lg font-semibold text-gray-50 capitalize">{name}</p>
+          <div className="mt-5">
+            <Link
+              href={`/dashboard/pokemons/${name}`}
+              className="border rounded-full py-2 px-4 text-xs font-semibold text-gray-100"
+            >
+              More Info
+            </Link>
+          </div>
+        </div>
+        <div className="border-b">
+          <div 
+            role="button"
+            tabIndex={0}
+            aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+            className="px-4 py-2 hover:bg-gray-100 flex items-center cursor-pointer" 
+            onClick={handleToggle} // 👈🏽 ✅ (6)
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleToggle();
+              }
+            }}
+          >
+            <div className="text-red-600">
+              {isFav ? <IoHeart size={20} /> : <IoHeartOutline size={20} />}
+            </div>
+            <div className="pl-3">
+              <p className="text-sm font-medium text-gray-800 leading-none">
+                {isFav ? "It's favourite" : "It's not favourite"}
+              </p>
+              <p className="text-xs text-gray-500">
+                Click to <span className={action.className}>{action.text}</span>
+                {action.suffix}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PokemonCard;
+```
+
+### 🧱 95.3 Pending Fixes (TODO)
+
+- [ ] Implement persistence for favorites using LocalStorage so they survive page reloads.
+- [ ] Add a confirmation toast or notification when a Pokemon is added/removed from favorites.
+- [ ] Optimize the `PokemonCard` component to prevent unnecessary re-renders when other cards are toggled.
 
 
 

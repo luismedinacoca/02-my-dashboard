@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { SimplePokemon } from "@/pokemons";
 
 /*
@@ -19,9 +19,22 @@ const initialState: PokemonState = {
 const pokemonsSlice = createSlice({
   name: "pokemons",
   initialState,
-  reducers: {},
+  reducers: {
+    toggleFavourite(state, action: PayloadAction<SimplePokemon>) {
+      const pokemon = action.payload;
+      const { id } = pokemon;
+      // if pokemon ID is in the state, delete it
+      if (!!state[id]) {
+        // state[id] !== undefined
+        delete state[id];
+        return;
+      }
+
+      state[id] = pokemon;
+    },
+  },
 });
 
-export const {} = pokemonsSlice.actions;
+export const { toggleFavourite } = pokemonsSlice.actions;
 
 export default pokemonsSlice.reducer;

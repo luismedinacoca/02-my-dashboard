@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { SimplePokemon } from "../interfaces/simple-pokemon";
 import { IoHeart, IoHeartOutline } from "react-icons/io5";
-import { useAppSelector } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { toggleFavourite } from "@/store/pokemons/pokemonsSlice";
 
 interface Props {
   pokemon: SimplePokemon;
@@ -13,8 +14,13 @@ const PokemonCard = ({ pokemon }: Props) => {
   const { id, name } = pokemon;
 
   const isFav = useAppSelector((state) => !!state.pokemonFavorites[id]);
-  console.log({ isFav });
+  //console.log({ isFav });
 
+  const dispatch = useAppDispatch();
+  const handleToggle = () => {
+    console.log("click", pokemon);
+    dispatch(toggleFavourite(pokemon));
+  };
   if (!id) return null;
   const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/${id}.svg`;
 
@@ -38,7 +44,18 @@ const PokemonCard = ({ pokemon }: Props) => {
           </div>
         </div>
         <div className="border-b">
-          <Link href="/dashboard/main" className="px-4 py-2 hover:bg-gray-100 flex items-center">
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+            className="px-4 py-2 hover:bg-gray-100 flex items-center cursor-pointer"
+            onClick={handleToggle}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleToggle();
+              }
+            }}
+          >
             <div className="text-red-600">{isFav ? <IoHeart size={20} /> : <IoHeartOutline size={20} />}</div>
             <div className="pl-3">
               <p className="text-sm font-medium text-gray-800 leading-none">
@@ -49,7 +66,7 @@ const PokemonCard = ({ pokemon }: Props) => {
                 {action.suffix}
               </p>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
     </div>
